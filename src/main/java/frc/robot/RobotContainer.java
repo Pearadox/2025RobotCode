@@ -20,7 +20,6 @@ import static frc.robot.subsystems.vision.VisionConstants.robotToCamera1;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -28,13 +27,14 @@ import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.commands.DriveCommands;
+import frc.robot.commands.ElevatorCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.*;
+import frc.robot.subsystems.elevator.ElevatorIOTalonFX;
+import frc.robot.subsystems.elevator.ElevatorSubsystem;
 import frc.robot.subsystems.vision.*;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
-import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
-import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.networktables.LoggedDashboardChooser;
 
 /**
@@ -49,13 +49,18 @@ public class RobotContainer {
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
-    private final CommandXboxController controller = new CommandXboxController(0);
+    private final CommandXboxController driverController = new CommandXboxController(0);
+    private final CommandXboxController operatorController = new CommandXboxController(1);
+    private final ElevatorSubsystem elevator;
 
     // Dashboard inputs
     private final LoggedDashboardChooser<Command> autoChooser;
 
     /** The container for the robot. Contains subsystems, OI devices, and commands. */
     public RobotContainer() {
+
+        elevator = new ElevatorSubsystem(new ElevatorIOTalonFX());
+
         switch (Constants.currentMode) {
             case REAL:
                 // Real robot, instantiate hardware IO implementations
@@ -130,47 +135,36 @@ public class RobotContainer {
     private void configureButtonBindings() {
         // Default command, normal field-relative drive
         drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> -controller.getRightX()));
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX()));
+
+        elevator.setDefaultCommand(ElevatorCommands.setElevatorStowedMode(elevator));
 
         // Lock to 0° when A button is held
-        controller
+        driverController
                 .a()
                 .whileTrue(DriveCommands.joystickDriveAtAngle(
-                        drive, () -> -controller.getLeftY(), () -> -controller.getLeftX(), () -> new Rotation2d()));
+                        drive,
+                        () -> -driverController.getLeftY(),
+                        () -> -driverController.getLeftX(),
+                        () -> new Rotation2d()));
 
         // Switch to X pattern when X button is pressed
-        controller.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
+        driverController.x().onTrue(Commands.runOnce(drive::stopWithX, drive));
 
-        // Reset gyro / odometry
+        operatorController.start().onTrue(ElevatorCommands.setElevatorStowedMode(elevator));
+        operatorController.x().onTrue(ElevatorCommands.setElevatorStationMode(elevator));
+        operatorController.y().onTrue(ElevatorCommands.setElevatorLevelTwoMode(elevator));
+        operatorController.b().onTrue(ElevatorCommands.setElevatorLevelThreeMode(elevator));
+        operatorController.a().onTrue(ElevatorCommands.setElevatorLevelFourMode(elevator));
+
+        // Reset gyro odometry
         final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
                 : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-        controller.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
-
-        // Example Coral Placement Code
-        // TODO: delete these code for your own project
-        if (Constants.currentMode == Constants.Mode.SIM) {
-            // L4 placement
-            controller.y().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
-                    .addGamePieceProjectile(new ReefscapeCoralOnFly(
-                            driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            new Translation2d(0.4, 0),
-                            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Meters.of(2),
-                            MetersPerSecond.of(1.5),
-                            Degrees.of(-80)))));
-            // L3 placement
-            controller.b().onTrue(Commands.runOnce(() -> SimulatedArena.getInstance()
-                    .addGamePieceProjectile(new ReefscapeCoralOnFly(
-                            driveSimulation.getSimulatedDriveTrainPose().getTranslation(),
-                            new Translation2d(0.4, 0),
-                            driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
-                            driveSimulation.getSimulatedDriveTrainPose().getRotation(),
-                            Meters.of(1.35),
-                            MetersPerSecond.of(1.5),
-                            Degrees.of(-60)))));
-        }
+        driverController.start().onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
     }
 
     /**
@@ -182,21 +176,21 @@ public class RobotContainer {
         return autoChooser.get();
     }
 
-    public void resetSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+    //     public void resetSimulation() {
+    //         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
-        SimulatedArena.getInstance().resetFieldForAuto();
-    }
+    //         drive.resetOdometry(new Pose2d(3, 3, new Rotation2d()));
+    //         SimulatedArena.getInstance().resetFieldForAuto();
+    //     }
 
-    public void updateSimulation() {
-        if (Constants.currentMode != Constants.Mode.SIM) return;
+    //     public void updateSimulation() {
+    //         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        SimulatedArena.getInstance().simulationPeriodic();
-        Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
-        Logger.recordOutput(
-                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
-        Logger.recordOutput(
-                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
-    }
+    //         SimulatedArena.getInstance().simulationPeriodic();
+    //         Logger.recordOutput("FieldSimulation/RobotPosition", driveSimulation.getSimulatedDriveTrainPose());
+    //         Logger.recordOutput(
+    //                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+    //         Logger.recordOutput(
+    //                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+    //     }
 }

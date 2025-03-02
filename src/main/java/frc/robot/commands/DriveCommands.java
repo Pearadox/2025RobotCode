@@ -191,7 +191,7 @@ public class DriveCommands {
                         }));
     }
 
-    /** Measures the robot's wheel radius by spinning in a circle. */
+    // Measures the robot's wheel radius by spinning in a circle. *
     public static Command wheelRadiusCharacterization(Drive drive) {
         SlewRateLimiter limiter = new SlewRateLimiter(WHEEL_RADIUS_RAMP_RATE);
         WheelRadiusCharacterizationState state = new WheelRadiusCharacterizationState();
