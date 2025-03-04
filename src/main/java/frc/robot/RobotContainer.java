@@ -13,13 +13,17 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
+import frc.robot.Commands.ElevatorCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
+import frc.robot.subsystems.Elevator;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
     private double MaxAngularRate =
             RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+    private Elevator elevator = new Elevator();
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -32,6 +36,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private final CommandXboxController joystick = new CommandXboxController(0);
+    private final CommandXboxController operatorController = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -52,6 +57,8 @@ public class RobotContainer {
                                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
                         ));
 
+        elevator.setDefaultCommand(ElevatorCommands.setElevatorStowedMode(elevator));
+
         joystick.a().whileTrue(drivetrain.applyRequest(() -> brake));
         joystick.b()
                 .whileTrue(drivetrain.applyRequest(
@@ -63,6 +70,12 @@ public class RobotContainer {
         joystick.back().and(joystick.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
         joystick.start().and(joystick.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         joystick.start().and(joystick.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+
+        operatorController.start().onTrue(ElevatorCommands.setElevatorStowedMode(elevator));
+        operatorController.x().onTrue(ElevatorCommands.setElevatorStationMode(elevator));
+        operatorController.y().onTrue(ElevatorCommands.setElevatorLevelTwoMode(elevator));
+        operatorController.b().onTrue(ElevatorCommands.setElevatorLevelThreeMode(elevator));
+        operatorController.a().onTrue(ElevatorCommands.setElevatorLevelFourMode(elevator));
 
         // reset the field-centric heading on left bumper press
         joystick.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
