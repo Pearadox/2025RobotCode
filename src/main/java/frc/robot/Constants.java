@@ -52,5 +52,42 @@ public class Constants {
         public static final double kI = 0.00; // 0
         public static final double kD = 0.000; // 0
     }
-    
+
+    public static final class EndEffectorConstants {
+
+        public static final int END_EFFECTOR_ID = 23;
+
+        public static final double PULL_SPEED = -1;
+        public static final double PUSH_SPEED = 0.5;
+
+        public static final int END_SENSOR_CHANNEL = 0;
+    }
+
+    public static final class ArmConstants {
+        // TODO: Update all constants for arm
+        public static final int ARM_KRAKEN_ID = 22;
+        public static final int CURRENT_LIMIT = 40;
+
+        public static final double ARM_GEAR_RATIO = 60; // TODO?
+
+        public static final double ARM_LEVEL_4_ROT = Units.degreesToRotations(-165); // -170 //-180 //0155.94 //-161
+        public static final double ARM_LEVEL_3_ROT = Units.degreesToRotations(-69.5); // was -78 //79.08 // -66
+        public static final double ARM_LEVEL_2_ROT =
+                Units.degreesToRotations(-66); // was -85, then -74.455078125[\] //79.08
+        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-307); //  was 61 //-299 // -311
+        public static final double ARM_STOWED_ROT = Units.degreesToRotations(0); // should be 0
+
+        public static final double ARM_ADJUST_INCREMENT = 0.075;
+
+        public static final double UPDATE_FREQ = 50;
+
+        // TODO: tune pid
+        public static final double kG = 0.0; // 0.15
+        public static final double kS = 0.0;
+        public static final double kV = 0.0; // 0.1
+        public static final double kA = 0.0;
+        public static final double kP = 0.25; // 0.2
+        public static final double kI = 0.0; // 0.05
+        public static final double kD = 0.04;
+    }
 }
