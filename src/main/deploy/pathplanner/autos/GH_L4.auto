@@ -7,7 +7,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "Example Path"
+            "pathName": "GH"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLevelTwo"
           }
         }
       ]
