@@ -85,7 +85,6 @@ public class Arm extends SubsystemBase {
                 "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
         SmartDashboard.putString("Arm/Mode", armMode.toString());
 
-        armHold();
     }
 
     public void armHold() {

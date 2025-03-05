@@ -17,7 +17,8 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
-import frc.robot.Commands.ElevatorCommands;
+import frc.robot.commands.ArmHold;
+import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
@@ -53,6 +54,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
         registerNamedCommands();
         configureBindings();
+        setDefaultCommands();
     }
 
     private void configureBindings() {
@@ -84,11 +86,11 @@ public class RobotContainer {
         driverController.start().and(driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
         driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
 
-        operatorController.start().onTrue(ElevatorCommands.setElevatorStowedMode(elevator));
-        operatorController.x().onTrue(ElevatorCommands.setElevatorStationMode(elevator));
-        operatorController.y().onTrue(ElevatorCommands.setElevatorLevelTwoMode(elevator));
-        operatorController.b().onTrue(ElevatorCommands.setElevatorLevelThreeMode(elevator));
-        operatorController.a().onTrue(ElevatorCommands.setElevatorLevelFourMode(elevator));
+        operatorController.start().onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode()));
+        operatorController.x().onTrue(new InstantCommand(() -> elevator.setElevatorStationMode()));
+        operatorController.y().onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode()));
+        operatorController.b().onTrue(new InstantCommand(() -> elevator.setElevatorLevelThreeMode()));
+        operatorController.a().onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode()));
 
         // reset the field-centric heading on left bumper press
         driverController.leftBumper().onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
@@ -109,5 +111,10 @@ public class RobotContainer {
                 "ElevatorLevelThree", new InstantCommand(() -> elevator.setElevatorLevelThreeMode()));
         NamedCommands.registerCommand(
                 "ElevatorLevelFour", new InstantCommand(() -> elevator.setElevatorLevelFourMode()));
+    }
+
+    public void setDefaultCommands() {
+        elevator.setDefaultCommand(new ElevatorHold());
+        arm.setDefaultCommand(new ArmHold());
     }
 }
