@@ -105,6 +105,8 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber(
                 "Elevator/Voltage V", elevator.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Elevator/Offset", elevatorOffset);
+
+        setElevatorPosition();
     }
 
     public void setElevatorPosition() {

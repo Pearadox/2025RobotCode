@@ -7,7 +7,7 @@ import frc.robot.subsystems.Elevator;
 public class ElevatorCommands {
 
     public static Command setElevatorStowedMode(Elevator elevator) {
-        return Commands.run(
+        return Commands.runOnce(
                 () -> {
                     elevator.setElevatorStowedMode();
                 },
@@ -15,7 +15,7 @@ public class ElevatorCommands {
     }
 
     public static Command setElevatorStationMode(Elevator elevator) {
-        return Commands.run(
+        return Commands.runOnce(
                 () -> {
                     elevator.setElevatorStationMode();
                 },
@@ -23,7 +23,7 @@ public class ElevatorCommands {
     }
 
     public static Command setElevatorLevelTwoMode(Elevator elevator) {
-        return Commands.run(
+        return Commands.runOnce(
                 () -> {
                     elevator.setElevatorLevelTwoMode();
                 },
@@ -31,7 +31,7 @@ public class ElevatorCommands {
     }
 
     public static Command setElevatorLevelThreeMode(Elevator elevator) {
-        return Commands.run(
+        return Commands.runOnce(
                 () -> {
                     elevator.setElevatorLevelThreeMode();
                 },
@@ -39,7 +39,7 @@ public class ElevatorCommands {
     }
 
     public static Command setElevatorLevelFourMode(Elevator elevator) {
-        return Commands.run(
+        return Commands.runOnce(
                 () -> {
                     elevator.setElevatorLevelFourMode();
                 },
