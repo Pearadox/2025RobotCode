@@ -9,6 +9,12 @@
           "data": {
             "pathName": "GH"
           }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "ElevatorLevelTwo"
+          }
         }
       ]
     }
