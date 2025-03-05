@@ -15,6 +15,7 @@ import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine.Direction;
 import frc.robot.Commands.ElevatorCommands;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 
@@ -23,7 +24,8 @@ public class RobotContainer {
     private double MaxAngularRate =
             RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
 
-    private Elevator elevator = new Elevator();
+    private Elevator elevator = Elevator.getInstance();
+    private Arm arm = Arm.getInstance();
 
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
@@ -35,8 +37,8 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private final CommandXboxController driverController = new CommandXboxController(0);
-    private final CommandXboxController operatorController = new CommandXboxController(1);
+    public static final CommandXboxController driverController = new CommandXboxController(0);
+    public static final CommandXboxController operatorController = new CommandXboxController(1);
 
     public final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -50,19 +52,21 @@ public class RobotContainer {
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
-                        () -> drive.withVelocityX(
-                                        -driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(-driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                        () -> drive.withVelocityX(-driverController.getLeftY()
+                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(
+                                        -driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                                 .withRotationalRate(-driverController.getRightX()
                                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
                         ));
 
-        elevator.setDefaultCommand(ElevatorCommands.setElevatorStowedMode(elevator));
+        // elevator.setDefaultCommand(ElevatorCommands.setElevatorStowedMode(elevator));
 
         driverController.a().whileTrue(drivetrain.applyRequest(() -> brake));
-        driverController.b()
-                .whileTrue(drivetrain.applyRequest(
-                        () -> point.withModuleDirection(new Rotation2d(-driverController.getLeftY(), -driverController.getLeftX()))));
+        driverController
+                .b()
+                .whileTrue(drivetrain.applyRequest(() -> point.withModuleDirection(
+                        new Rotation2d(-driverController.getLeftY(), -driverController.getLeftX()))));
 
         // Run SysId routines when holding back/start and X/Y.
         // Note that each routine should be run exactly once in a single log.
