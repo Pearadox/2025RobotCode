@@ -11,12 +11,11 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
-import frc.util.PearadoxTalonFX;
 
 public class Arm extends SubsystemBase {
     private PearadoxTalonFX pivot;
-    private PearadoxTalonFX motor41;
 
     private ArmMode armMode = ArmMode.Stowed;
 
@@ -26,6 +25,9 @@ public class Arm extends SubsystemBase {
         L3,
         L4,
         Stowed,
+        ALGAE_LOW,
+        ALGAE_HIGH,
+        BARGE,
         Unpowered
     }
 
@@ -40,7 +42,6 @@ public class Arm extends SubsystemBase {
     public Arm() {
         pivot = new PearadoxTalonFX(
                 ArmConstants.ARM_KRAKEN_ID, NeutralModeValue.Brake, ArmConstants.CURRENT_LIMIT, true);
-        motor41 = new PearadoxTalonFX(40, NeutralModeValue.Brake, 40, false);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -84,7 +85,6 @@ public class Arm extends SubsystemBase {
         SmartDashboard.putNumber(
                 "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
         SmartDashboard.putString("Arm/Mode", armMode.toString());
-
     }
 
     public void armHold() {
@@ -102,6 +102,12 @@ public class Arm extends SubsystemBase {
             setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else if (armMode == ArmMode.L4) {
             setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        } else if (armMode == ArmMode.ALGAE_LOW) {
+            setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        } else if (armMode == ArmMode.ALGAE_HIGH) {
+            setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        } else if (armMode == ArmMode.BARGE) {
+            setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else {
             setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         }
@@ -123,6 +129,18 @@ public class Arm extends SubsystemBase {
 
     public void setArmL4() {
         armMode = ArmMode.L4;
+    }
+
+    public void setAlgaeLow() {
+        armMode = ArmMode.ALGAE_LOW;
+    }
+
+    public void setAlgaeHigh() {
+        armMode = ArmMode.ALGAE_HIGH;
+    }
+
+    public void setBarge() {
+        armMode = ArmMode.BARGE;
     }
 
     public void setStowed() {

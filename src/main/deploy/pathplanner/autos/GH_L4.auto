@@ -5,15 +5,27 @@
     "data": {
       "commands": [
         {
+          "type": "named",
+          "data": {
+            "name": "LevelFour"
+          }
+        },
+        {
           "type": "path",
           "data": {
-            "pathName": "GH"
+            "pathName": "JI"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "ElevatorLevelTwo"
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 3.0
           }
         }
       ]

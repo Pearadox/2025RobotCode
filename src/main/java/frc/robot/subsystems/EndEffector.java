@@ -11,10 +11,10 @@ import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.RobotContainer;
-import frc.util.PearadoxTalonFX;
 
 public class EndEffector extends SubsystemBase {
 
@@ -29,11 +29,12 @@ public class EndEffector extends SubsystemBase {
     private Debouncer debouncer;
 
     private boolean rumbled = false;
-    private boolean isExtended = false; // TODO: integrate with arm
+    private boolean isIntaking = false;
+    private boolean isCoral = true; // TODO: integrate with arm
     private boolean isHolding = false;
 
     public EndEffector() {
-        endEffector = new PearadoxTalonFX(EndEffectorConstants.END_EFFECTOR_ID, NeutralModeValue.Brake, 50, false);
+        endEffector = new PearadoxTalonFX(EndEffectorConstants.END_EFFECTOR_ID, NeutralModeValue.Brake, 60, false);
         endSensor = new DigitalInput(EndEffectorConstants.END_SENSOR_CHANNEL);
         debouncer = new Debouncer(0.2, DebounceType.kFalling);
 
@@ -46,13 +47,15 @@ public class EndEffector extends SubsystemBase {
                 endEffector.getTorqueCurrent(),
                 endEffector.getSupplyCurrent(),
                 endEffector.getStatorCurrent());
+        SmartDashboard.putNumber("EE Speed", isCoral ? -0.15 : 0.1);
     }
 
     @Override
     public void periodic() {
         collectCoral();
 
-        SmartDashboard.putBoolean("End Sensor", hasCoral());
+        SmartDashboard.putBoolean("End Sensor", isHolding);
+        SmartDashboard.putBoolean("Has Coral", hasCoral());
 
         SmartDashboard.putNumber(
                 "EE Stator Current", endEffector.getStatorCurrent().getValueAsDouble());
@@ -64,39 +67,40 @@ public class EndEffector extends SubsystemBase {
     }
 
     public void collectCoral() {
-        if (RobotContainer.operatorController.getRightTriggerAxis() >= 0.25) {
+        if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
             coralIn();
-        } else if (RobotContainer.operatorController.getLeftTriggerAxis()
+            isHolding = false;
+        } else if (RobotContainer.opController.getLeftTriggerAxis()
                 >= 0.25) { // warning - this left trigger is being used for ground intake too - oops
             coralOut();
+            isHolding = false;
+        } else if (hasCoral() && isCoral) {
+            stop();
         } else {
-            slowEndEffector();
+            holdCoral();
         }
     }
 
     public void coralIn() {
-        endEffector.set(EndEffectorConstants.PULL_SPEED * RobotContainer.operatorController.getRightTriggerAxis());
+        endEffector.set(EndEffectorConstants.PULL_SPEED);
     }
 
     public void coralOut() {
-        endEffector.set(EndEffectorConstants.PUSH_SPEED * RobotContainer.operatorController.getLeftTriggerAxis());
+        endEffector.set(EndEffectorConstants.PUSH_SPEED);
     }
 
     public void holdCoral() {
-        endEffector.set(-0.05);
+        endEffector.set(SmartDashboard.getNumber("EE Speed", isCoral ? -0.15 : 0.1));
     }
 
-    public void slowEndEffector() {
-        endEffector.set(0.1);
-    }
-
-    public void stopEndEffector() {
+    public void stop() {
         endEffector.set(0);
+        isHolding = true;
     }
 
     public boolean hasCoral() {
-        return endEffector.getStatorCurrent().getValueAsDouble() > 15;
-        // return debouncer.calculate(!endSensor.get());
+        return debouncer.calculate(
+                debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 35));
     }
 
     public boolean getHolding() {

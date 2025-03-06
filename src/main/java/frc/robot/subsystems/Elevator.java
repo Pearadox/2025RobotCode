@@ -10,8 +10,9 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.util.PearadoxTalonFX;
 
 public class Elevator extends SubsystemBase {
 
@@ -26,7 +27,10 @@ public class Elevator extends SubsystemBase {
         STATION,
         LEVEL_TWO,
         LEVEL_THREE,
-        LEVEL_FOUR;
+        LEVEL_FOUR,
+        ALGAE_LOW,
+        ALGAE_HIGH,
+        BARGE
     }
 
     private ElevatorMode elevatorMode = ElevatorMode.STOWED;
@@ -53,22 +57,36 @@ public class Elevator extends SubsystemBase {
                 ElevatorConstants.IS_INVERTED);
 
         var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kG = ElevatorConstants.kG;
-        slot0Configs.kS = ElevatorConstants.kS;
-        slot0Configs.kV = ElevatorConstants.kV;
-        slot0Configs.kA = ElevatorConstants.kA;
-        slot0Configs.kP = ElevatorConstants.kP;
-        slot0Configs.kI = ElevatorConstants.kI;
-        slot0Configs.kD = ElevatorConstants.kD;
+        slot0Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
+        slot0Configs.kS = ElevatorConstants.kS; // Add 0.1 V output to overcome static friction
+        slot0Configs.kV = ElevatorConstants.kV; // A velocity target of 1 rps results in 0.1 V output
+        slot0Configs.kA = ElevatorConstants.kA; // An acceleration of 1 rps/s requires 0.01 V output
+        slot0Configs.kP = ElevatorConstants.kP; // A position error of 2.5 rotations results in 12 V output, prev 4.8
+        slot0Configs.kI = ElevatorConstants.kI; // no output for integrated error
+        slot0Configs.kD = ElevatorConstants.kD; // A velocity error of 1 rps results in 0.1 V output
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = ElevatorConstants.MM_CRUISE_VELCOCITY;
-        motionMagicConfigs.MotionMagicAcceleration = ElevatorConstants.MM_ACCELERATION;
+        motionMagicConfigs.MotionMagicCruiseVelocity =
+                ElevatorConstants.MM_CRUISE_VELCOCITY; // Target cruise velocity of 80 rps
+        motionMagicConfigs.MotionMagicAcceleration =
+                ElevatorConstants.MM_ACCELERATION; // Target acceleration of 160 rps/s (0.5 seconds)
+        // (not sure if needed - > ) motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1
+        // seconds)
 
         elevator.getConfigurator().apply(talonFXConfigs);
 
+        // elevator.getPosition().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+        // elevator.getVelocity().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+
+        // // These are needed for the follower motor to work
+        // elevator.getDutyCycle().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+        // elevator.getMotorVoltage().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+        // elevator.getTorqueCurrent().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+        // elevator.getSupplyCurrent().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+        // elevator.getStatorCurrent().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
+
         BaseStatusSignal.setUpdateFrequencyForAll(
-                ElevatorConstants.UPDATE_FREQ,
+                ArmConstants.UPDATE_FREQ,
                 elevator.getPosition(),
                 elevator.getVelocity(),
                 elevator.getDutyCycle(),
@@ -105,10 +123,11 @@ public class Elevator extends SubsystemBase {
         SmartDashboard.putNumber(
                 "Elevator/Voltage V", elevator.getMotorVoltage().getValueAsDouble());
         SmartDashboard.putNumber("Elevator/Offset", elevatorOffset);
+        SmartDashboard.putString("Elevator Mode", elevatorMode.toString());
     }
 
     public void setElevatorPosition() {
-        double setpoint;
+        double setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
         if (elevatorMode == ElevatorMode.STATION) {
             setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
         } else if (elevatorMode == ElevatorMode.LEVEL_TWO) {
@@ -117,9 +136,25 @@ public class Elevator extends SubsystemBase {
             setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
         } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
             setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
-        } else { // stowed
-            setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset), highest_rot));
+        } else if (elevatorMode == ElevatorMode.ALGAE_LOW) {
+            setpoint = ElevatorConstants.ALGAE_LOW_HEIGHT + elevatorOffset;
+        } else if (elevatorMode == ElevatorMode.ALGAE_HIGH) {
+            setpoint = ElevatorConstants.ALGAE_HIGH_HEIGHT + elevatorOffset;
+        } else if (elevatorMode == ElevatorMode.BARGE) {
+            setpoint = ElevatorConstants.BARGE_HEIGHT + elevatorOffset;
         }
+        // } else { // stowed
+        //   setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset), highest_rot));
+        // }
+
+        // switch (elevatorMode) {
+        //   case LEVEL_FOUR: setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset; break;
+        //   case LEVEL_THREE: setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset; break;
+        //   case LEVEL_TWO: setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset; break;
+        //   case STATION: setpoint = ElevatorConstants.STATION_ROT + elevatorOffset; break;
+        //   default: setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset),
+        // highest_rot));
+        // }
 
         elevator.setControl(motionMagicRequest.withPosition(setpoint));
         SmartDashboard.putNumber("Elevator/Setpoint", setpoint);
@@ -165,6 +200,18 @@ public class Elevator extends SubsystemBase {
         elevatorMode = ElevatorMode.LEVEL_FOUR;
     }
 
+    public void setElevatorAlgaeLow() {
+        elevatorMode = ElevatorMode.ALGAE_LOW;
+    }
+
+    public void setElevatorAlgaeHigh() {
+        elevatorMode = ElevatorMode.ALGAE_HIGH;
+    }
+
+    public void setElevatorBarge() {
+        elevatorMode = ElevatorMode.BARGE;
+    }
+
     public void setPID() {
 
         var slot0Configs = talonFXConfigs.Slot0;
@@ -181,6 +228,8 @@ public class Elevator extends SubsystemBase {
                 ElevatorConstants.MM_CRUISE_VELCOCITY; // Target cruise velocity of 80 rps
         motionMagicConfigs.MotionMagicAcceleration =
                 ElevatorConstants.MM_ACCELERATION; // Target acceleration of 160 rps/s (0.5 seconds)
+        // (not sure if needed - > ) motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1
+        // seconds)
 
         elevator.getConfigurator().refresh(talonFXConfigs);
         elevator.getConfigurator().apply(talonFXConfigs);
