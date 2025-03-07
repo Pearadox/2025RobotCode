@@ -12,6 +12,7 @@ import com.pathplanner.lib.config.PIDConstants;
 import com.pathplanner.lib.config.RobotConfig;
 import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
+import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.numbers.N1;
@@ -100,6 +101,11 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
+
+    public final SlewRateLimiter frontLimiter = new SlewRateLimiter(2);
+    public final SlewRateLimiter sideLimiter = new SlewRateLimiter(2);
+    public final SlewRateLimiter turnLimiter = new SlewRateLimiter(2);
+
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.

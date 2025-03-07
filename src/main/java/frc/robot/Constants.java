@@ -86,7 +86,7 @@ public class Constants {
 
         // the following are in inches
         public static final double STOWED_HEIGHT = 0;
-        public static final double STATION_HEIGHT = 14; // TODO
+        public static final double STATION_HEIGHT = 14.4; // TODO
         public static final double LEVEL_TWO_HEIGHT =
                 8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //TODO
         public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO
@@ -137,7 +137,7 @@ public class Constants {
         public static final double ARM_LEVEL_3_ROT = Units.degreesToRotations(147); // was -78 //79.08 // -66
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(-66); // was -85, then -74.455078125[\] //79.08
-        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-23); //  was 61 //-299 // -311
+        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-23.6); //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0); // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(80);
@@ -150,7 +150,7 @@ public class Constants {
 
         // TODO: tune pid
 
-        public static final double kG = 0.3; // 0.15
+        public static final double kG = 0.4; // 0.15
         public static final double kS = 0.0;
         public static final double kV = 0.2; // 0.1
         public static final double kA = 0.07;
@@ -201,8 +201,8 @@ public class Constants {
     public static final class EndEffectorConstants {
         public static final int END_EFFECTOR_ID = 23;
 
-        public static final double PULL_SPEED = 0.7;
-        public static final double PUSH_SPEED = -0.7;
+        public static final double PULL_SPEED = 0.4;
+        public static final double PUSH_SPEED = -0.4;
 
         public static final int END_SENSOR_CHANNEL = 0;
     }

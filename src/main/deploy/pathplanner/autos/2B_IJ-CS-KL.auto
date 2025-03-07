@@ -5,27 +5,21 @@
     "data": {
       "commands": [
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "LevelFour"
+            "pathName": "2B_IJ"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "JI"
+            "pathName": "IJ-CS"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Outtake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 3.0
+            "pathName": "CS-KL"
           }
         }
       ]

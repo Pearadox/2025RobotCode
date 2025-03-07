@@ -87,14 +87,24 @@ public class RobotContainer {
         // and Y is defined as to the left according to WPILib convention.
         drivetrain.setDefaultCommand(
                 // Drivetrain will execute this command periodically
+                driverController.getLeftBumperButtonPressed() ?
                 drivetrain.applyRequest(
+                        () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(
+                                        drivetrain.sideLimiter.calculate(-driverController.getLeftX()) * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+                                        * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                        ):
+               drivetrain.applyRequest(
                         () -> drive.withVelocityX(-driverController.getLeftY()
                                         * MaxSpeed) // Drive forward with negative Y (forward)
                                 .withVelocityY(
                                         -driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
                                 .withRotationalRate(-driverController.getRightX()
                                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
-                        ));
+                        )
+                );
 
         elevator.setDefaultCommand(new ElevatorHold());
         arm.setDefaultCommand(new ArmHold());
@@ -162,9 +172,14 @@ public class RobotContainer {
 
     public void registerNamedCommands() {
         NamedCommands.registerCommand(
-                "ElevatorStationMode", new InstantCommand(() -> elevator.setElevatorStationMode()));
+                "LevelStation",
+                 new InstantCommand(() -> elevator.setElevatorStationMode())
+                        .andThen(new InstantCommand(() -> arm.setArmIntake())));
         NamedCommands.registerCommand("ElevatorStowedMode", new InstantCommand(() -> elevator.setElevatorStowedMode()));
-        NamedCommands.registerCommand("ElevatorLevelTwo", new InstantCommand(() -> elevator.setElevatorLevelTwoMode()));
+        NamedCommands.registerCommand(
+                "LevelTwo",
+                new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
+                        .andThen(new InstantCommand(() -> arm.setArmL2())));
         NamedCommands.registerCommand(
                 "LevelThree",
                 new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
