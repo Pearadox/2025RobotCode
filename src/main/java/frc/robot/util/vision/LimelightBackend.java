@@ -74,8 +74,7 @@ public class LimelightBackend extends VisionBackend {
         double z = update.value[2];
         double roll = Units.degreesToRadians(update.value[3]);
         double pitch = Units.degreesToRadians(update.value[4]);
-        double yaw = Units.degreesToRadians(180 + update.value[5]);
-        // TODO: invert limelight orientation
+        double yaw = Units.degreesToRadians(update.value[5]);
 
         double latency = cl.get() + tl.get();
 

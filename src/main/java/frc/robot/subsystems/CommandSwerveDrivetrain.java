@@ -35,6 +35,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private static final double kSimLoopPeriod = 0.005; // 5 ms
     private Notifier m_simNotifier = null;
     private double m_lastSimTime;
+    public boolean isFieldOriented = true;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -102,10 +103,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-    public final SlewRateLimiter frontLimiter = new SlewRateLimiter(2);
-    public final SlewRateLimiter sideLimiter = new SlewRateLimiter(2);
-    public final SlewRateLimiter turnLimiter = new SlewRateLimiter(2);
-
+    public final SlewRateLimiter frontLimiter = new SlewRateLimiter(0.5);
+    public final SlewRateLimiter sideLimiter = new SlewRateLimiter(0.5);
+    public final SlewRateLimiter turnLimiter = new SlewRateLimiter(0.5);
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.
@@ -303,5 +303,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
             Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         super.addVisionMeasurement(
                 visionRobotPoseMeters, Utils.fpgaToCurrentTime(timestampSeconds), visionMeasurementStdDevs);
+    }
+
+    public void changeRobotOrientation() {
+        isFieldOriented = !isFieldOriented;
     }
 }

@@ -5,16 +5,20 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
+import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.RobotContainer;
+import frc.robot.util.SmarterDashboard;
 
 public class EndEffector extends SubsystemBase {
 
@@ -47,55 +51,71 @@ public class EndEffector extends SubsystemBase {
                 endEffector.getTorqueCurrent(),
                 endEffector.getSupplyCurrent(),
                 endEffector.getStatorCurrent());
-        SmartDashboard.putNumber("EE Speed", isCoral ? -0.15 : 0.1);
+        SmarterDashboard.putNumber("EE/EE Speed", isCoral ? -0.15 : 0.1);
+
+        var slot0Configs = new Slot0Configs();
+        slot0Configs.kP = 1;
+        slot0Configs.kI = 0;
+        slot0Configs.kD = 0;
+
+        endEffector.getConfigurator().apply(slot0Configs);
     }
 
     @Override
     public void periodic() {
         collectCoral();
 
-        SmartDashboard.putBoolean("End Sensor", isHolding);
-        SmartDashboard.putBoolean("Has Coral", hasCoral());
+        SmarterDashboard.putBoolean("EE/End Sensor", isHolding);
+        SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
 
-        SmartDashboard.putNumber(
-                "EE Stator Current", endEffector.getStatorCurrent().getValueAsDouble());
-        SmartDashboard.putNumber(
-                "EE Supply Current", endEffector.getSupplyCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("EE Volts", endEffector.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber(
-                "EE Angular Velocity", endEffector.getVelocity().getValueAsDouble());
+        SmarterDashboard.putNumber(
+                "EE/Stator Current", endEffector.getStatorCurrent().getValueAsDouble());
+        SmarterDashboard.putNumber(
+                "EE/Supply Current", endEffector.getSupplyCurrent().getValueAsDouble());
+        SmarterDashboard.putNumber("EE/Volts", endEffector.getMotorVoltage().getValueAsDouble());
+        SmarterDashboard.putNumber(
+                "EE/Angular Velocity", endEffector.getVelocity().getValueAsDouble());
     }
 
     public void collectCoral() {
-        if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
-            coralIn();
-            isHolding = false;
-        } else if (RobotContainer.opController.getLeftTriggerAxis()
-                >= 0.25) { // warning - this left trigger is being used for ground intake too - oops
-            coralOut();
-            isHolding = false;
-        } else if (hasCoral() && isCoral) {
-            stop();
-        } else if (!isHolding) {
-            holdCoral();
+        if (DriverStation.isTeleop()) {
+            if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
+                coralIn();
+                isHolding = false;
+            } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
+                coralOut();
+                isHolding = false;
+            } else if (hasCoral() && isCoral) {
+                stop();
+            } else if (!isHolding) {
+                holdCoral();
+            }
         }
     }
 
+    // scores
     public void coralIn() {
         endEffector.set(EndEffectorConstants.PULL_SPEED);
     }
 
+    // intakes
     public void coralOut() {
         endEffector.set(EndEffectorConstants.PUSH_SPEED);
     }
 
     public void holdCoral() {
-        endEffector.set(SmartDashboard.getNumber("EE Speed", isCoral ? -0.15 : 0.1));
+        endEffector.set(SmartDashboard.getNumber("EE/EE Speed", isCoral ? -0.15 : 0.1));
     }
 
     public void stop() {
         endEffector.set(0);
         isHolding = true;
+    }
+
+    public void passiveCoral() {
+        PositionVoltage request = new PositionVoltage(0).withSlot(0);
+
+        endEffector.setControl(request.withPosition(endEffector.getPosition().getValueAsDouble() + 0.5));
     }
 
     public boolean hasCoral() {

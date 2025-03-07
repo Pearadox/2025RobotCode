@@ -5,19 +5,24 @@
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.configs.Slot0Configs;
+import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.util.SmarterDashboard;
 
 public class Arm extends SubsystemBase {
     private PearadoxTalonFX pivot;
+    private MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0);
 
     private ArmMode armMode = ArmMode.Stowed;
+    private TalonFXConfiguration talonFXConfigs;
+
+    private boolean isCoral = true;
 
     private enum ArmMode {
         Intake,
@@ -28,6 +33,7 @@ public class Arm extends SubsystemBase {
         ALGAE_LOW,
         ALGAE_HIGH,
         BARGE,
+        CLIMB,
         Unpowered
     }
 
@@ -41,7 +47,7 @@ public class Arm extends SubsystemBase {
 
     public Arm() {
         pivot = new PearadoxTalonFX(
-                ArmConstants.ARM_KRAKEN_ID, NeutralModeValue.Brake, ArmConstants.CURRENT_LIMIT, true);
+                ArmConstants.ARM_KRAKEN_ID, NeutralModeValue.Brake, ArmConstants.CURRENT_LIMIT, false);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -55,7 +61,9 @@ public class Arm extends SubsystemBase {
 
         pivot.optimizeBusUtilization();
 
-        Slot0Configs slot0Configs = new Slot0Configs();
+        talonFXConfigs = new TalonFXConfiguration();
+
+        var slot0Configs = talonFXConfigs.Slot0;
         slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving
         slot0Configs.kS = ArmConstants.kS; // Add x output to overcome static friction
         slot0Configs.kV = ArmConstants.kV; // A velocity target of 1 rps results in x output
@@ -64,27 +72,32 @@ public class Arm extends SubsystemBase {
         slot0Configs.kI = ArmConstants.kI; // no output for integrated error
         slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
 
-        pivot.getConfigurator().apply(slot0Configs);
+        // var motionMagicConfigs = talonFXConfigs.MotionMagic;
+        // motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
+        // motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
 
-        // zeroArm();
+        pivot.getConfigurator().apply(talonFXConfigs);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Arm/Raw Position", pivot.getPosition().getValueAsDouble());
-        SmartDashboard.putNumber("Arm/Angle degrees", getArmAngleDegrees());
-        SmartDashboard.putNumber("Arm/Velocity rot/sec", pivot.getVelocity().getValueAsDouble());
-        SmartDashboard.putNumber("Arm/Voltage", pivot.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Arm/Supply Current", pivot.getSupplyCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("Arm/Stator Current", pivot.getStatorCurrent().getValueAsDouble());
-        SmartDashboard.putNumber("Arm/Adjust", armAdjust);
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber("Arm/Raw Position", pivot.getPosition().getValueAsDouble());
+        SmarterDashboard.putNumber("Arm/Angle degrees", getArmAngleDegrees());
+        SmarterDashboard.putNumber("Arm/Velocity rot/sec", pivot.getVelocity().getValueAsDouble());
+        SmarterDashboard.putNumber("Arm/Voltage", pivot.getMotorVoltage().getValueAsDouble());
+        SmarterDashboard.putNumber(
+                "Arm/Supply Current", pivot.getSupplyCurrent().getValueAsDouble());
+        SmarterDashboard.putNumber(
+                "Arm/Stator Current", pivot.getStatorCurrent().getValueAsDouble());
+        SmarterDashboard.putNumber("Arm/Adjust", armAdjust);
+        SmarterDashboard.putNumber(
                 "Arm/Intake Setpoint", ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber(
                 "Arm/L4 Setpoint", ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber(
                 "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
-        SmartDashboard.putString("Arm/Mode", armMode.toString());
+        SmarterDashboard.putString("Arm/Mode", armMode.toString());
+        SmarterDashboard.putBoolean("Arm/IsCoral", isCoral);
     }
 
     public void armHold() {
@@ -97,9 +110,17 @@ public class Arm extends SubsystemBase {
         if (armMode == ArmMode.Intake) {
             setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else if (armMode == ArmMode.L2) {
-            setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            if (isCoral) {
+                setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            } else {
+                setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            }
         } else if (armMode == ArmMode.L3) {
-            setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            if (isCoral) {
+                setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            } else {
+                setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            }
         } else if (armMode == ArmMode.L4) {
             setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else if (armMode == ArmMode.ALGAE_LOW) {
@@ -108,11 +129,15 @@ public class Arm extends SubsystemBase {
             setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else if (armMode == ArmMode.BARGE) {
             setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        } else if (armMode == ArmMode.CLIMB) {
+            setpoint = ArmConstants.ARM_CLIMB * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else {
             setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         }
-        pivot.setControl(new PositionVoltage(setpoint));
-        SmartDashboard.putNumber("Arm/Cur Setpoint", setpoint);
+
+        // pivot.setControl(motionMagicRequest.withPosition(setpoint));
+        pivot.setControl(new PositionVoltage(-setpoint));
+        SmarterDashboard.putNumber("Arm/Cur Setpoint", setpoint);
     }
 
     public void setArmIntake() {
@@ -147,8 +172,28 @@ public class Arm extends SubsystemBase {
         armMode = ArmMode.Stowed;
     }
 
+    public void setClimb() {
+        armMode = ArmMode.CLIMB;
+    }
+
     public void setUnpowered() {
         armMode = ArmMode.Unpowered;
+    }
+
+    public void setCoral() {
+        isCoral = true;
+    }
+
+    public void setAlgae() {
+        isCoral = false;
+    }
+
+    public void changeIsCoral() {
+        isCoral = !isCoral;
+    }
+
+    public boolean getIsCoral() {
+        return isCoral;
     }
 
     public double getPivotPosition() {
@@ -165,5 +210,9 @@ public class Arm extends SubsystemBase {
 
     public void armAdjust(double adjustBy) {
         armAdjust += adjustBy;
+    }
+
+    public void resetAdjust() {
+        armAdjust = 0;
     }
 }

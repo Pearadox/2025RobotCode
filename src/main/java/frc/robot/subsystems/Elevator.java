@@ -13,6 +13,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.util.SmarterDashboard;
 
 public class Elevator extends SubsystemBase {
 
@@ -21,6 +22,9 @@ public class Elevator extends SubsystemBase {
     private MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0);
     private double elevatorOffset = 0.0;
     private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
+    private double lastPos = 0;
+
+    private boolean isCoral = true;
 
     private static enum ElevatorMode {
         STOWED,
@@ -101,29 +105,30 @@ public class Elevator extends SubsystemBase {
         elevatorFollower.optimizeBusUtilization();
         elevatorFollower.setControl(new Follower(ElevatorConstants.ELEVATOR_ID, true));
 
-        SmartDashboard.putNumber("Elevator kG", ElevatorConstants.kG);
-        SmartDashboard.putNumber("Elevator kS", ElevatorConstants.kS);
-        SmartDashboard.putNumber("Elevator kV", ElevatorConstants.kV);
-        SmartDashboard.putNumber("Elevator kA", ElevatorConstants.kA);
-        SmartDashboard.putNumber("Elevator kP", ElevatorConstants.kP);
-        SmartDashboard.putNumber("Elevator kI", ElevatorConstants.kI);
-        SmartDashboard.putNumber("Elevator kD", ElevatorConstants.kD);
+        SmarterDashboard.putNumber("Elevator kG", ElevatorConstants.kG);
+        SmarterDashboard.putNumber("Elevator kS", ElevatorConstants.kS);
+        SmarterDashboard.putNumber("Elevator kV", ElevatorConstants.kV);
+        SmarterDashboard.putNumber("Elevator kA", ElevatorConstants.kA);
+        SmarterDashboard.putNumber("Elevator kP", ElevatorConstants.kP);
+        SmarterDashboard.putNumber("Elevator kI", ElevatorConstants.kI);
+        SmarterDashboard.putNumber("Elevator kD", ElevatorConstants.kD);
     }
 
     @Override
     public void periodic() {
-        SmartDashboard.putNumber("Elevator/Position Inches", getElevatorPositionInches());
-        SmartDashboard.putNumber("Elevator/Velocity (in/sec)", getElevatorVelocityInchesPerSecond());
-        SmartDashboard.putNumber("Elevator/Position Rots", getElevatorPositionRots());
-        SmartDashboard.putNumber("Elevator/Velocity (rot/sec)", getElevatorVelocity_RotsPerSecond());
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber("Elevator/Position Inches", getElevatorPositionInches());
+        SmarterDashboard.putNumber("Elevator/Velocity (in/sec)", getElevatorVelocityInchesPerSecond());
+        SmarterDashboard.putNumber("Elevator/Position Rots", getElevatorPositionRots());
+        SmarterDashboard.putNumber("Elevator/Velocity (rot/sec)", getElevatorVelocity_RotsPerSecond());
+        SmarterDashboard.putNumber(
                 "Elevator/Supply Current A", elevator.getSupplyCurrent().getValueAsDouble());
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber(
                 "Elevator/Stator Current A", elevator.getStatorCurrent().getValueAsDouble());
-        SmartDashboard.putNumber(
+        SmarterDashboard.putNumber(
                 "Elevator/Voltage V", elevator.getMotorVoltage().getValueAsDouble());
-        SmartDashboard.putNumber("Elevator/Offset", elevatorOffset);
-        SmartDashboard.putString("Elevator Mode", elevatorMode.toString());
+        SmarterDashboard.putNumber("Elevator/Offset", elevatorOffset);
+        SmarterDashboard.putString("Elevator Mode", elevatorMode.toString());
+        SmarterDashboard.putBoolean("Elevator/IsCoral", isCoral);
     }
 
     public void setElevatorPosition() {
@@ -131,9 +136,17 @@ public class Elevator extends SubsystemBase {
         if (elevatorMode == ElevatorMode.STATION) {
             setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
         } else if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-            setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+            if (isCoral) {
+                setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+            } else {
+                setpoint = ElevatorConstants.ALGAE_LOW_ROT + elevatorOffset;
+            }
         } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-            setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+            if (isCoral) {
+                setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+            } else {
+                setpoint = ElevatorConstants.ALGAE_HIGH_ROT + elevatorOffset;
+            }
         } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
             setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
         } else if (elevatorMode == ElevatorMode.ALGAE_LOW) {
@@ -141,7 +154,7 @@ public class Elevator extends SubsystemBase {
         } else if (elevatorMode == ElevatorMode.ALGAE_HIGH) {
             setpoint = ElevatorConstants.ALGAE_HIGH_HEIGHT + elevatorOffset;
         } else if (elevatorMode == ElevatorMode.BARGE) {
-            setpoint = ElevatorConstants.BARGE_HEIGHT + elevatorOffset;
+            setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
         }
         // } else { // stowed
         //   setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset), highest_rot));
@@ -157,7 +170,7 @@ public class Elevator extends SubsystemBase {
         // }
 
         elevator.setControl(motionMagicRequest.withPosition(setpoint));
-        SmartDashboard.putNumber("Elevator/Setpoint", setpoint);
+        SmarterDashboard.putNumber("Elevator/Setpoint", setpoint);
     }
 
     public double getElevatorPositionRots() {
@@ -174,6 +187,12 @@ public class Elevator extends SubsystemBase {
 
     public double getElevatorVelocityInchesPerSecond() {
         return getElevatorVelocity_RotsPerSecond() * ElevatorConstants.kRotationToInches;
+    }
+
+    public double deltaElevatorPos() {
+        var temp = lastPos;
+        lastPos = elevator.getPosition().getValueAsDouble();
+        return lastPos - temp;
     }
 
     public void changeElevatorOffset(double value) {
@@ -210,6 +229,26 @@ public class Elevator extends SubsystemBase {
 
     public void setElevatorBarge() {
         elevatorMode = ElevatorMode.BARGE;
+    }
+
+    public void setCoral() {
+        isCoral = true;
+    }
+
+    public void setAlgae() {
+        isCoral = false;
+    }
+
+    public boolean getIsCoral() {
+        return isCoral;
+    }
+
+    public void changeIsCoral() {
+        isCoral = !isCoral;
+    }
+
+    public void resetAdjust() {
+        elevatorOffset = 0;
     }
 
     public void setPID() {

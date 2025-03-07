@@ -12,6 +12,7 @@ public class Constants {
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
+        public static final String LL_B_NAME = "limelight-coral-station"; // TODO: limelight names & offsets
 
         public static final Vector<N3> LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
         public static final Vector<N3> MEGATAG2_LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
@@ -19,9 +20,10 @@ public class Constants {
         public static final double AMBIGUITY_FILTER = 0.3;
         public static final double DISTANCE_FILTER = FieldConstants.FIELD_LENGTH / 2;
 
-        // TODO: determine questnav std dev (likely lower than this)
-        public static final Vector<N3> QUESTNAV_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
+        // // : determine questnav std dev (likely lower than this)
+        // public static final Vector<N3> QUESTNAV_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
 
+        // TODO: use andymark field layout for fit events
         public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     }
 
@@ -43,6 +45,7 @@ public class Constants {
     }
 
     public static final class AlignConstants {
+        // TODO: possible align pid adjustment
         public static final double ALIGN_STRAFE_KP = 0.02;
         public static final double ALIGN_STRAFE_KI = 0.001;
         public static final double ALIGN_FORWARD_KP = 0.06; // -0.06
@@ -57,6 +60,7 @@ public class Constants {
         public static final double ALIGN_DAMPING_FACTOR = 0.75;
         public static final double ALIGN_SPEED_DEADBAND = 0.025;
 
+        // TODO: find left & right branch tx & ty
         public static final double REEF_ALIGN_LEFT_TX = 20;
         public static final double REEF_ALIGN_MID_TX = 0;
         public static final double REEF_ALIGN_RIGHT_TX = -20;
@@ -92,10 +96,10 @@ public class Constants {
         public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO
         public static final double LEVEL_FOUR_HEIGHT = 23.3; // 29.625; //TODO
 
-        public static final double ALGAE_LOW_HEIGHT = 1;
+        public static final double ALGAE_LOW_HEIGHT = 6.7;
         public static final double ALGAE_HIGH_HEIGHT = 12.4;
 
-        public static final double BARGE_HEIGHT = 28;
+        public static final double BARGE_HEIGHT = 30;
 
         public static final double MAX_ELEVATOR_HEIGHT = 20; // TODO
 
@@ -103,7 +107,10 @@ public class Constants {
         public static final double STATION_ROT = STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double LEVEL_THREE_ROT = LEVEL_THREE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double LEVEL_FOUR_ROT = LEVEL_FOUR_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
+        public static final double ALGAE_LOW_ROT = ALGAE_LOW_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
+        public static final double ALGAE_HIGH_ROT = ALGAE_HIGH_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double MAX_ELEVATOR_ROT = MAX_ELEVATOR_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
+        public static final double BARGE_ROT = BARGE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STOWED_ROT = STOWED_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
 
         // public static final double STATION_ROT = 3.868;
@@ -140,11 +147,12 @@ public class Constants {
         public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-23.6); //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0); // should be 0
 
-        public static final double ARM_ALGAE_LOW = Units.degreesToRotations(80);
+        public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73);
         public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(87);
-        public static final double ARM_BARGE = Units.degreesToRotations(152);
+        public static final double ARM_BARGE = Units.degreesToRotations(163);
+        public static final double ARM_CLIMB = Units.degreesToRotations(-50);
 
-        public static final double ARM_ADJUST_INCREMENT = 0.075;
+        public static final double ARM_ADJUST_INCREMENT = 0.15;
 
         public static final double UPDATE_FREQ = 50;
 
@@ -157,6 +165,9 @@ public class Constants {
         public static final double kP = 0.3; // 0.2[]\
         public static final double kI = 0.0; // 0.05
         public static final double kD = 0.05;
+
+        public static final double MM_MAX_CRUISE_VELOCITY = 20;
+        public static final double MM_MAX_CRUISE_ACCELERATION = 10;
     }
 
     public static final class ClimbConstants {
