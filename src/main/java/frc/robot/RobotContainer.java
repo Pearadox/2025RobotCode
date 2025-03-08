@@ -20,10 +20,10 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.commands.Align;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.ClimbCommand;
@@ -65,7 +65,7 @@ public class RobotContainer {
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
     // Controller
-    private static final XboxController driverController = new XboxController(0);
+    public static final XboxController driverController = new XboxController(0);
     public static final XboxController opController = new XboxController(1);
 
     private final JoystickButton resetHeading_Start =
@@ -103,6 +103,7 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     private final AutoAlign align;
+    //     private Map<Integer, Pose3d> tagPoses3d;
 
     public static final PoseEstimation poseEstimation = new PoseEstimation();
 
@@ -114,6 +115,7 @@ public class RobotContainer {
         configureBindings();
 
         align = new AutoAlign(() -> drivetrain.getState().Pose);
+        // tagPoses3d = align.getTagPoses3d();
     }
 
     private void configureBindings() {
@@ -152,6 +154,21 @@ public class RobotContainer {
         coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
                 .andThen(new InstantCommand(() -> arm.changeIsCoral())));
 
+        alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
+                .withVelocityX(align.getFieldRelativeChassisSpeeds(
+                                AlignConstants.REEF_ALIGN_MID_TX,
+                                driverController.getLeftY() * MaxSpeed,
+                                drivetrain.getState().Pose.getRotation(),
+                                MaxSpeed)
+                        .vxMetersPerSecond)
+                .withVelocityY(align.getFieldRelativeChassisSpeeds(
+                                AlignConstants.REEF_ALIGN_MID_TX,
+                                driverController.getLeftY() * MaxSpeed,
+                                drivetrain.getState().Pose.getRotation(),
+                                MaxSpeed)
+                        .vyMetersPerSecond)
+                .withTargetDirection(align.getAlignAngleReef())));
+
         // strafeTriggers.whileTrue(
         //     drivetrain.applyRequest(
         //         () -> robotOrientedDrive
@@ -180,21 +197,6 @@ public class RobotContainer {
         //                 .vyMetersPerSecond)
         //        .withTargetDirection(align.getAlignAngleReef())));
 
-        // alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_MID_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vxMetersPerSecond)
-        //         .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_MID_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vyMetersPerSecond)
-        //         .withTargetDirection(align.getAlignAngleReef())));
-
         // alignPovRight.whileTrue(drivetrain.applyRequest(() -> pointTowards
         //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
         //                         AlignConstants.REEF_ALIGN_RIGHT_TX,
@@ -217,7 +219,7 @@ public class RobotContainer {
 
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        elevatorUp_Y.whileTrue(new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
+        elevatorUp_Y.onTrue(new InstantCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
         elevatorDown_A.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
         armAdjustUp_X.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
@@ -299,11 +301,11 @@ public class RobotContainer {
         NamedCommands.registerCommand("Intake", new InstantCommand(() -> endEffector.coralOut()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
 
-        NamedCommands.registerCommand(
-                "Intake Station",
-                new InstantCommand(() -> endEffector.coralIn())
-                        .until(() -> endEffector.hasCoral())
-                        .andThen(new InstantCommand(() -> endEffector.stop())));
+        // NamedCommands.registerCommand(
+        //         "Intake Station",
+        //         new InstantCommand(() -> endEffector.coralIn())
+        //                 .until(() -> endEffector.hasCoral())
+        //                 .andThen(new InstantCommand(() -> endEffector.stop())));
     }
 
     public void setDefaultCommands() {

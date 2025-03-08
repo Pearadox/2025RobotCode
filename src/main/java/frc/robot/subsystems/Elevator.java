@@ -8,6 +8,7 @@ import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
@@ -76,6 +77,12 @@ public class Elevator extends SubsystemBase {
         // (not sure if needed - > ) motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1
         // seconds)
 
+        talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitEnable = true;
+        talonFXConfigs.SoftwareLimitSwitch.ForwardSoftLimitThreshold = 33.5;
+        talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitEnable = true;
+        talonFXConfigs.SoftwareLimitSwitch.ReverseSoftLimitThreshold = 0;
+        talonFXConfigs.Slot0.GravityType = GravityTypeValue.Elevator_Static;
+
         elevator.getConfigurator().apply(talonFXConfigs);
 
         // elevator.getPosition().setUpdateFrequency(ElevatorConstants.UPDATE_FREQ);
@@ -133,7 +140,11 @@ public class Elevator extends SubsystemBase {
     public void setElevatorPosition() {
         double setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
         if (elevatorMode == ElevatorMode.STATION) {
-            setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            if (isCoral) {
+                setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            } else {
+                setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
+            }
         } else if (elevatorMode == ElevatorMode.LEVEL_TWO) {
             if (isCoral) {
                 setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
@@ -155,6 +166,7 @@ public class Elevator extends SubsystemBase {
         } else if (elevatorMode == ElevatorMode.BARGE) {
             setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
         }
+
         // } else { // stowed
         //   setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset), highest_rot));
         // }

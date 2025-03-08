@@ -15,7 +15,6 @@ import frc.robot.Constants.VisionConstants;
 import frc.robot.Robot;
 import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
-import org.littletonrobotics.junction.Logger;
 
 public class PoseEstimation {
     // private final SwerveDrivePoseEstimator poseEstimator;
@@ -39,13 +38,13 @@ public class PoseEstimation {
     public PoseEstimation(/*SwerveDrivePoseEstimator poseEstimator*/ ) {
         // this.poseEstimator = poseEstimator;
 
-        backends = new LimelightBackend[2];
-        backendToggles = new boolean[2];
+        backends = new LimelightBackend[1];
+        backendToggles = new boolean[1];
 
         backends[0] = new LimelightBackend(VisionConstants.LL_NAME, true);
-        backends[1] = new LimelightBackend(VisionConstants.LL_B_NAME, true);
+        // backends[1] = new LimelightBackend(VisionConstants.LL_B_NAME, true);
         backendToggles[0] = true;
-        backendToggles[1] = true;
+        // backendToggles[1] = true;
     }
 
     public void periodic(double angularSpeed) {
@@ -148,7 +147,7 @@ public class PoseEstimation {
 
     private void loggingPose(VisionBackend.Measurement measurement) {
         SmartDashboard.putString("Vision Pose", measurement.pose.toPose2d().toString());
-        Logger.recordOutput("Drivetrain/Vision Pose", measurement.pose.toPose2d());
+        // Logger.recordOutput("Drivetrain/Vision Pose", measurement.pose.toPose2d());
     }
 
     // private void setRobotOrientation(

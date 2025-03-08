@@ -35,6 +35,7 @@ public class Arm extends SubsystemBase {
         ALGAE_HIGH,
         BARGE,
         CLIMB,
+        LOLIPOP,
         Unpowered
     }
 
@@ -111,7 +112,11 @@ public class Arm extends SubsystemBase {
 
         double setpoint;
         if (armMode == ArmMode.Intake) {
-            setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            if (isCoral) {
+                setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            } else {
+                setpoint = ArmConstants.ARM_LOLIPOP * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+            }
         } else if (armMode == ArmMode.L2) {
             if (isCoral) {
                 setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
@@ -126,6 +131,7 @@ public class Arm extends SubsystemBase {
             }
         } else if (armMode == ArmMode.L4) {
             setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+
         } else if (armMode == ArmMode.ALGAE_LOW) {
             setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         } else if (armMode == ArmMode.ALGAE_HIGH) {
@@ -140,6 +146,8 @@ public class Arm extends SubsystemBase {
 
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
         pivot.setControl(new PositionVoltage(-setpoint));
+        // pivot.setControl(new PositionVoltage(-setpoint).withFeedForward(ArmConstants.kG *
+        // Math.cos(getArmAngleDegrees() - 96)));
         SmarterDashboard.putNumber("Arm/Cur Setpoint", -setpoint);
     }
 

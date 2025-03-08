@@ -107,7 +107,7 @@ public class EndEffector extends SubsystemBase {
                 coralOut();
                 isHoldingCoral = false;
             } else if (hasCoral() && isCoral) {
-                passiveCoral();
+                stop();
             } else if (!isHoldingCoral) {
                 holdCoral();
             }

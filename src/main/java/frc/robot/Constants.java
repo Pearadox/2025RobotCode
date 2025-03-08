@@ -66,7 +66,7 @@ public class Constants {
         public static final double REEF_ALIGN_RIGHT_TX = -20;
 
         public static final double REEF_ALIGN_TY = -15;
-        
+
         public static final double REEF_kP = 0;
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0;
@@ -77,35 +77,35 @@ public class Constants {
         public static final int ELEVATOR_ID = 21;
         public static final int ELEVATOR_FOLLOWER_ID = 20;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;
-        public static final int CURRENT_LIMIT = 60; // TODO
+        public static final int CURRENT_LIMIT = 60; //
         public static final boolean IS_INVERTED = false;
 
         public static final int UPDATE_FREQ = 50;
 
-        public static final double MAX_VELOCITY_MPS = 2.0; // TODO
-        public static final double MAX_ACCELERATION_MPS2 = 8.0; // TODO
-        public static final double MM_CRUISE_VELCOCITY = 45; // TODO
-        public static final double MM_ACCELERATION = 35; // TODO
+        public static final double MAX_VELOCITY_MPS = 2.0; //
+        public static final double MAX_ACCELERATION_MPS2 = 8.0; //
+        public static final double MM_CRUISE_VELCOCITY = 45; //
+        public static final double MM_ACCELERATION = 35; //
 
-        public static final double TICKS_PER_REV = 4000; // TODO
-        public static final double GEAR_RATIO = 3; // TODO
-        public static final double PULLEY_DIAMETER = 2.005; // TODO should be chain pitch * number of teeth / pi
+        public static final double TICKS_PER_REV = 4000; //
+        public static final double GEAR_RATIO = 3; //
+        public static final double PULLEY_DIAMETER = 2.005; // should be chain pitch * number of teeth / pi
         public static final double kRotationToInches = PULLEY_DIAMETER * Math.PI / GEAR_RATIO;
 
         // the following are in inches
         public static final double STOWED_HEIGHT = 0;
-        public static final double STATION_HEIGHT = 12.7; // TODO
+        public static final double STATION_HEIGHT = 12.7; //
         public static final double LEVEL_TWO_HEIGHT =
-                8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //TODO
-        public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO
-        public static final double LEVEL_FOUR_HEIGHT = 23.6; // 29.625; //TODO
+                8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
+        public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO l3 height
+        public static final double LEVEL_FOUR_HEIGHT = 25.6; // 29.625; //
 
         public static final double ALGAE_LOW_HEIGHT = 6.7;
         public static final double ALGAE_HIGH_HEIGHT = 16;
 
         public static final double BARGE_HEIGHT = 33.5;
 
-        public static final double MAX_ELEVATOR_HEIGHT = 20; // TODO
+        public static final double MAX_ELEVATOR_HEIGHT = 34;
 
         public static final double LEVEL_TWO_ROT = LEVEL_TWO_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STATION_ROT = STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
@@ -124,25 +124,24 @@ public class Constants {
         // public static final double MAX_ELEVATOR_ROT = 15.5; // 15.65
         // public static final double STOWED_ROT = 0;
 
-        public static final double ELEVATOR_OFFSET = 0.05;
+        public static final double ELEVATOR_OFFSET = 0.02;
 
         // TODO: change all of these values to match true elevator gains
-        public static final double kG = 0.3; // tuned according to wpilib docs; may need to lower
 
-        public static final double kS = 0.; // 0.2
-        public static final double kV = 0.; // 0.3
-        public static final double kA = 0.0; // 0.02[]\
+        public static final double kG = 0.3; // 0.3
+        public static final double kS = 0.0; // 0
+        public static final double kV = 0.0; // 0
+        public static final double kA = 0.0; // 0
         public static final double kP = 0.4; // 0.4
-        public static final double kI = 0.00; // 0
+        public static final double kI = 0.0; // 0
         public static final double kD = 0.0; // 0
     }
 
     public static final class ArmConstants {
-        // TODO: Update all constants for arm
         public static final int ARM_KRAKEN_ID = 22;
         public static final int CURRENT_LIMIT = 50;
 
-        public static final double ARM_GEAR_RATIO = 60; // TODO?
+        public static final double ARM_GEAR_RATIO = 60; // ?
 
         public static final double ARM_LEVEL_4_ROT = Units.degreesToRotations(156); // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT = Units.degreesToRotations(147); // was -78 //79.08 // -66
@@ -155,6 +154,7 @@ public class Constants {
         public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(82);
         public static final double ARM_BARGE = Units.degreesToRotations(163);
         public static final double ARM_CLIMB = Units.degreesToRotations(-50);
+        public static final double ARM_LOLIPOP = Units.degreesToRotations(50);
 
         public static final double ARM_ADJUST_INCREMENT = 0.15;
 
@@ -162,13 +162,13 @@ public class Constants {
 
         // TODO: tune pid
 
-        public static final double kG = 0.4; // 0.15
+        public static final double kG = 0.4; // 0.4
         public static final double kS = 0.0;
-        public static final double kV = 0.2; // 0.1
-        public static final double kA = 0.07;
-        public static final double kP = 0.3; // 0.2[]\
-        public static final double kI = 0.0; // 0.05
-        public static final double kD = 0.05;
+        public static final double kV = 0.2; // 0.2
+        public static final double kA = 0.0; // 0.07
+        public static final double kP = 0.3; // 0.3
+        public static final double kI = 0.0;
+        public static final double kD = 0.05; // 0.05
 
         public static final double MM_MAX_CRUISE_VELOCITY = 7;
         public static final double MM_MAX_CRUISE_ACCELERATION = 3;

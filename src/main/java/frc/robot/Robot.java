@@ -6,6 +6,8 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
+import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Elevator;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -17,6 +19,8 @@ public class Robot extends LoggedRobot {
     private Command m_autonomousCommand;
 
     private final RobotContainer m_robotContainer;
+    private final Elevator elevator = Elevator.getInstance();
+    private final Arm arm = Arm.getInstance();
 
     public Robot() {
         m_robotContainer = new RobotContainer();
@@ -41,6 +45,12 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        // try {
+        //     RobotContainer.poseEstimation.periodic(0);
+        // } catch (Exception e) {
+        //     System.out.println("Pose estimation exception");
+        //     e.printStackTrace();
+        // }
         RobotContainer.poseEstimation.periodic(0);
     }
 
@@ -73,6 +83,8 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
+        arm.setArmL4();
+        elevator.setElevatorLevelFourMode();
     }
 
     @Override

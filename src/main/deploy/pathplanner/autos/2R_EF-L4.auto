@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Stop EE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "LevelFour"
           }
         },
@@ -17,9 +23,15 @@
           }
         },
         {
-          "type": "named",
+          "type": "wait",
           "data": {
-            "name": "Outtake"
+            "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "EF_BACK"
           }
         }
       ]
