@@ -103,9 +103,9 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     /* The SysId routine to test */
     private SysIdRoutine m_sysIdRoutineToApply = m_sysIdRoutineTranslation;
 
-    public final SlewRateLimiter frontLimiter = new SlewRateLimiter(0.5);
-    public final SlewRateLimiter sideLimiter = new SlewRateLimiter(0.5);
-    public final SlewRateLimiter turnLimiter = new SlewRateLimiter(0.5);
+    public final SlewRateLimiter frontLimiter = new SlewRateLimiter(1.5);
+    public final SlewRateLimiter sideLimiter = new SlewRateLimiter(1.5);
+    public final SlewRateLimiter turnLimiter = new SlewRateLimiter(1.5);
 
     /**
      * Constructs a CTRE SwerveDrivetrain using the specified constants.

@@ -36,13 +36,7 @@ public class PoseEstimation {
     private static final NetworkTable llTable =
             NetworkTableInstance.getDefault().getTable(VisionConstants.LL_NAME);
 
-    public static final PoseEstimation instance = new PoseEstimation();
-
-    public PoseEstimation getInstance() {
-        return instance;
-    }
-
-    private PoseEstimation(/*SwerveDrivePoseEstimator poseEstimator*/ ) {
+    public PoseEstimation(/*SwerveDrivePoseEstimator poseEstimator*/ ) {
         // this.poseEstimator = poseEstimator;
 
         backends = new LimelightBackend[2];

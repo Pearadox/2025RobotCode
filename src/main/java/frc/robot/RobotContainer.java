@@ -25,6 +25,7 @@ import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.Align;
 import frc.robot.commands.ArmHold;
+import frc.robot.commands.AutoAlign;
 import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
@@ -33,6 +34,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.EndEffector;
+import frc.robot.util.vision.PoseEstimation;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
@@ -100,7 +102,9 @@ public class RobotContainer {
 
     public final SendableChooser<Command> autoChooser;
 
-    private final Align align;
+    private final AutoAlign align;
+
+    public static final PoseEstimation poseEstimation = new PoseEstimation();
 
     public RobotContainer() {
         setDefaultCommands();
@@ -109,7 +113,7 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
-        align = new Align(() -> drivetrain.getState().Pose);
+        align = new AutoAlign(() -> drivetrain.getState().Pose);
     }
 
     private void configureBindings() {
@@ -174,7 +178,7 @@ public class RobotContainer {
         //                         drivetrain.getState().Pose.getRotation(),
         //                         MaxSpeed)
         //                 .vyMetersPerSecond)
-        //         .withTargetDirection(align.getAlignAngleReef())));
+        //        .withTargetDirection(align.getAlignAngleReef())));
 
         // alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
         //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
@@ -293,6 +297,13 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralIn()));
         NamedCommands.registerCommand("Intake", new InstantCommand(() -> endEffector.coralOut()));
+        NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
+
+        NamedCommands.registerCommand(
+                "Intake Station",
+                new InstantCommand(() -> endEffector.coralIn())
+                        .until(() -> endEffector.hasCoral())
+                        .andThen(new InstantCommand(() -> endEffector.stop())));
     }
 
     public void setDefaultCommands() {

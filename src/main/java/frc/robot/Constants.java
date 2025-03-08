@@ -66,6 +66,10 @@ public class Constants {
         public static final double REEF_ALIGN_RIGHT_TX = -20;
 
         public static final double REEF_ALIGN_TY = -15;
+        
+        public static final double REEF_kP = 0;
+        public static final double REEF_kI = 0;
+        public static final double REEF_kD = 0;
     }
 
     public static final class ElevatorConstants {
@@ -90,16 +94,16 @@ public class Constants {
 
         // the following are in inches
         public static final double STOWED_HEIGHT = 0;
-        public static final double STATION_HEIGHT = 14.4; // TODO
+        public static final double STATION_HEIGHT = 12.7; // TODO
         public static final double LEVEL_TWO_HEIGHT =
                 8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //TODO
         public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO
-        public static final double LEVEL_FOUR_HEIGHT = 23.3; // 29.625; //TODO
+        public static final double LEVEL_FOUR_HEIGHT = 23.6; // 29.625; //TODO
 
         public static final double ALGAE_LOW_HEIGHT = 6.7;
-        public static final double ALGAE_HIGH_HEIGHT = 12.4;
+        public static final double ALGAE_HIGH_HEIGHT = 16;
 
-        public static final double BARGE_HEIGHT = 30;
+        public static final double BARGE_HEIGHT = 33.5;
 
         public static final double MAX_ELEVATOR_HEIGHT = 20; // TODO
 
@@ -144,11 +148,11 @@ public class Constants {
         public static final double ARM_LEVEL_3_ROT = Units.degreesToRotations(147); // was -78 //79.08 // -66
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(-66); // was -85, then -74.455078125[\] //79.08
-        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-23.6); //  was 61 //-299 // -311
+        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-15); //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0); // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73);
-        public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(87);
+        public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(82);
         public static final double ARM_BARGE = Units.degreesToRotations(163);
         public static final double ARM_CLIMB = Units.degreesToRotations(-50);
 
@@ -166,8 +170,8 @@ public class Constants {
         public static final double kI = 0.0; // 0.05
         public static final double kD = 0.05;
 
-        public static final double MM_MAX_CRUISE_VELOCITY = 20;
-        public static final double MM_MAX_CRUISE_ACCELERATION = 10;
+        public static final double MM_MAX_CRUISE_VELOCITY = 7;
+        public static final double MM_MAX_CRUISE_ACCELERATION = 3;
     }
 
     public static final class ClimbConstants {
@@ -212,8 +216,10 @@ public class Constants {
     public static final class EndEffectorConstants {
         public static final int END_EFFECTOR_ID = 23;
 
-        public static final double PULL_SPEED = 0.4;
-        public static final double PUSH_SPEED = -0.4;
+        public static final double PULL_SPEED = 0.8;
+        public static final double PUSH_SPEED = -0.6;
+        public static final double ALGAE_PULL_SPEED = 1.0;
+        public static final double ALGAE_PUSH_SPEED = -1.0;
 
         public static final int END_SENSOR_CHANNEL = 0;
     }

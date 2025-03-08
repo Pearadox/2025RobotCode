@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Stop EE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "LevelFour"
           }
         },
@@ -26,6 +32,12 @@
           "type": "wait",
           "data": {
             "waitTime": 3.0
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "IJ_BACK"
           }
         }
       ]

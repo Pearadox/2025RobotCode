@@ -22,7 +22,6 @@ public class Elevator extends SubsystemBase {
     private MotionMagicVoltage motionMagicRequest = new MotionMagicVoltage(0);
     private double elevatorOffset = 0.0;
     private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
-    private double lastPos = 0;
 
     private boolean isCoral = true;
 
@@ -187,12 +186,6 @@ public class Elevator extends SubsystemBase {
 
     public double getElevatorVelocityInchesPerSecond() {
         return getElevatorVelocity_RotsPerSecond() * ElevatorConstants.kRotationToInches;
-    }
-
-    public double deltaElevatorPos() {
-        var temp = lastPos;
-        lastPos = elevator.getPosition().getValueAsDouble();
-        return lastPos - temp;
     }
 
     public void changeElevatorOffset(double value) {

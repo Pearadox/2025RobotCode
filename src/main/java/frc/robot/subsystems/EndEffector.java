@@ -35,12 +35,15 @@ public class EndEffector extends SubsystemBase {
     private boolean rumbled = false;
     private boolean isIntaking = false;
     private boolean isCoral = true; // TODO: integrate with arm
-    private boolean isHolding = false;
+    private boolean isHoldingCoral = true;
+    private boolean isHoldingAlgae = false;
+
+    private double lastRot = 0;
 
     public EndEffector() {
         endEffector = new PearadoxTalonFX(EndEffectorConstants.END_EFFECTOR_ID, NeutralModeValue.Brake, 60, false);
         endSensor = new DigitalInput(EndEffectorConstants.END_SENSOR_CHANNEL);
-        debouncer = new Debouncer(0.075, DebounceType.kFalling);
+        debouncer = new Debouncer(0.125, DebounceType.kFalling);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -54,7 +57,7 @@ public class EndEffector extends SubsystemBase {
         SmarterDashboard.putNumber("EE/EE Speed", isCoral ? -0.15 : 0.1);
 
         var slot0Configs = new Slot0Configs();
-        slot0Configs.kP = 1;
+        slot0Configs.kP = 0.2;
         slot0Configs.kI = 0;
         slot0Configs.kD = 0;
 
@@ -63,9 +66,11 @@ public class EndEffector extends SubsystemBase {
 
     @Override
     public void periodic() {
-        collectCoral();
+        // collectCoral();
+        collectGamePiece();
 
-        SmarterDashboard.putBoolean("EE/End Sensor", isHolding);
+        SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
+        SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
         SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
 
         SmarterDashboard.putNumber(
@@ -77,45 +82,96 @@ public class EndEffector extends SubsystemBase {
                 "EE/Angular Velocity", endEffector.getVelocity().getValueAsDouble());
     }
 
-    public void collectCoral() {
+    // public void collectCoral() {
+    //     if (DriverStation.isTeleop()) {
+    //         if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
+    //             coralIn();
+    //             isHolding = false;
+    //         } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
+    //             coralOut();
+    //             isHolding = false;
+    //         } else if (hasCoral() && isCoral) {
+    //             stop();
+    //         } else if (!isHolding) {
+    //             holdCoral();
+    //         }
+    //     }
+    // }
+    public void collectGamePiece() {
         if (DriverStation.isTeleop()) {
+            //     if(isCoral) {
             if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
                 coralIn();
-                isHolding = false;
+                isHoldingCoral = false;
             } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
                 coralOut();
-                isHolding = false;
+                isHoldingCoral = false;
             } else if (hasCoral() && isCoral) {
-                stop();
-            } else if (!isHolding) {
+                passiveCoral();
+            } else if (!isHoldingCoral) {
                 holdCoral();
             }
         }
     }
+    // else if(!isCoral) {
+    //     if(RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
+    //         algaeIn();
+    //         isHoldingAlgae = true;
+    //     }
+    //     else if(RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
+    //         algaeOut();
+    //         isHoldingAlgae = false;
+    //     }
+    //     else if(isHoldingAlgae) {
+    //         stopAlgae();
+    //     }
+    // }
+    // }
 
     // scores
     public void coralIn() {
         endEffector.set(EndEffectorConstants.PULL_SPEED);
+        setLastRot();
+    }
+
+    public void algaeIn() {
+        endEffector.set(EndEffectorConstants.ALGAE_PULL_SPEED);
+    }
+
+    public void algaeOut() {
+        endEffector.set(EndEffectorConstants.ALGAE_PUSH_SPEED);
     }
 
     // intakes
     public void coralOut() {
         endEffector.set(EndEffectorConstants.PUSH_SPEED);
+        setLastRot();
     }
 
     public void holdCoral() {
         endEffector.set(SmartDashboard.getNumber("EE/EE Speed", isCoral ? -0.15 : 0.1));
+        setLastRot();
+    }
+
+    public void stopCoral() {
+        stop();
+        isHoldingCoral = true;
+    }
+
+    public void stopAlgae() {
+        stop();
+        isHoldingAlgae = true;
     }
 
     public void stop() {
         endEffector.set(0);
-        isHolding = true;
     }
 
     public void passiveCoral() {
         PositionVoltage request = new PositionVoltage(0).withSlot(0);
 
-        endEffector.setControl(request.withPosition(endEffector.getPosition().getValueAsDouble() + 0.5));
+        endEffector.setControl(request.withPosition(
+                endEffector.getPosition().getValueAsDouble() + (RobotContainer.arm.deltaArmAngle() / 360)));
     }
 
     public boolean hasCoral() {
@@ -123,10 +179,14 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean getHolding() {
-        return isHolding;
+        return isHoldingCoral;
     }
 
     public void setHolding(boolean hold) {
-        isHolding = hold;
+        isHoldingCoral = hold;
+    }
+
+    public void setLastRot() {
+        lastRot = endEffector.getPosition().getValueAsDouble();
     }
 }

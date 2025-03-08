@@ -23,6 +23,7 @@ public class Arm extends SubsystemBase {
     private TalonFXConfiguration talonFXConfigs;
 
     private boolean isCoral = true;
+    private double lastAngle = 0;
 
     private enum ArmMode {
         Intake,
@@ -72,9 +73,9 @@ public class Arm extends SubsystemBase {
         slot0Configs.kI = ArmConstants.kI; // no output for integrated error
         slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
 
-        // var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        // motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
-        // motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
+        var motionMagicConfigs = talonFXConfigs.MotionMagic;
+        motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
+        motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
 
         pivot.getConfigurator().apply(talonFXConfigs);
     }
@@ -98,6 +99,8 @@ public class Arm extends SubsystemBase {
                 "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
         SmarterDashboard.putString("Arm/Mode", armMode.toString());
         SmarterDashboard.putBoolean("Arm/IsCoral", isCoral);
+        deltaArmAngle();
+        SmarterDashboard.putNumber("Arm/DeltaAngle", deltaArmAngle());
     }
 
     public void armHold() {
@@ -137,7 +140,13 @@ public class Arm extends SubsystemBase {
 
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
         pivot.setControl(new PositionVoltage(-setpoint));
-        SmarterDashboard.putNumber("Arm/Cur Setpoint", setpoint);
+        SmarterDashboard.putNumber("Arm/Cur Setpoint", -setpoint);
+    }
+
+    public double deltaArmAngle() {
+        var temp = lastAngle;
+        lastAngle = getArmAngleDegrees();
+        return lastAngle - temp;
     }
 
     public void setArmIntake() {
