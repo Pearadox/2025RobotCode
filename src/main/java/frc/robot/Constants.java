@@ -85,7 +85,7 @@ public class Constants {
         public static final double MAX_VELOCITY_MPS = 2.0; //
         public static final double MAX_ACCELERATION_MPS2 = 8.0; //
         public static final double MM_CRUISE_VELCOCITY = 45; //
-        public static final double MM_ACCELERATION = 35; //
+        public static final double MM_ACCELERATION = 210; //
 
         public static final double TICKS_PER_REV = 4000; //
         public static final double GEAR_RATIO = 3; //
@@ -128,8 +128,8 @@ public class Constants {
 
         // TODO: change all of these values to match true elevator gains
 
-        public static final double kG = 0.3; // 0.3
-        public static final double kS = 0.0; // 0
+        public static final double kG = 0.29; // 0.3
+        public static final double kS = 0.11; // 0
         public static final double kV = 0.0; // 0
         public static final double kA = 0.0; // 0
         public static final double kP = 0.4; // 0.4

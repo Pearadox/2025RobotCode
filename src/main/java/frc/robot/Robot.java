@@ -83,8 +83,6 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-        arm.setArmL4();
-        elevator.setElevatorLevelFourMode();
     }
 
     @Override

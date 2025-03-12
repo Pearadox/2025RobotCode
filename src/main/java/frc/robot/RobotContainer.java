@@ -6,6 +6,7 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
+import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -16,12 +17,10 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.ArmHold;
@@ -82,7 +81,7 @@ public class RobotContainer {
     private final JoystickButton slewLeftBumper =
             new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
     private final JoystickButton robotOrientedRightBumper =
-            new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
+            new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
 
     private final POVButton climberUp = new POVButton(opController, 0);
     private final POVButton climberDown = new POVButton(opController, 180);
@@ -132,24 +131,28 @@ public class RobotContainer {
                                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
                         ));
 
-        slewLeftBumper.whileTrue(drivetrain.applyRequest(
-                () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                * MaxAngularRate) // Drive counterclockwise with negative X (left)
-                ));
+        // slewLeftBumper.whileTrue(drivetrain.applyRequest(
+        //         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+        //                         * MaxSpeed) // Drive forward with negative Y (forward)
+        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+        //                         * MaxSpeed) // Drive left with negative X (left)
+        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        //         ));
 
-        robotOrientedRightBumper.whileTrue(drivetrain.applyRequest(
-                () -> robotOrientedDrive
-                        .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                * MaxAngularRate) // Drive counterclockwise with negative X (left)
-                ));
+        // robotOrientedRightBumper.whileTrue(drivetrain.applyRequest(
+        //         () -> robotOrientedDrive
+        //                 .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+        //                         * MaxSpeed) // Drive forward with negative Y (forward)
+        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+        //                         * MaxSpeed) // Drive left with negative X (left)
+        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        //         ));
+
+        slewLeftBumper.onTrue(new InstantCommand(() -> SignalLogger.start()));
+
+        robotOrientedRightBumper.onTrue(new InstantCommand(() -> SignalLogger.stop()));
 
         coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
                 .andThen(new InstantCommand(() -> arm.changeIsCoral())));
@@ -220,10 +223,20 @@ public class RobotContainer {
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         elevatorUp_Y.onTrue(new InstantCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
-        elevatorDown_A.whileTrue(
-                new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
-        armAdjustUp_X.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
-        armAdjustDown_B.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+        elevatorDown_A.onTrue(
+                new InstantCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
+        // armAdjustUp_X.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
+        // armAdjustDown_B.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+
+        // elevatorUp_Y.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // elevatorDown_A.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // armAdjustDown_B.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // armAdjustUp_X.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
+
+        // elevatorUp_Y.whileTrue(arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
+        // elevatorDown_A.whileTrue(arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
+        // armAdjustDown_B.whileTrue(arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
+        // armAdjustUp_X.whileTrue(arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         stow_A.onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode())
                 .andThen(new InstantCommand(() -> arm.setStowed())));
