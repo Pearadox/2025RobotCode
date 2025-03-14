@@ -100,10 +100,10 @@ public class EndEffector extends SubsystemBase {
     public void collectGamePiece() {
         if (DriverStation.isTeleop()) {
             //     if(isCoral) {
-            if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
+            if (RobotContainer.driverController.getRightTriggerAxis() >= 0.25) {
                 coralIn();
                 isHoldingCoral = false;
-            } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
+            } else if (RobotContainer.driverController.getLeftTriggerAxis() >= 0.25) {
                 coralOut();
                 isHoldingCoral = false;
             } else if (hasCoral() && isCoral) {

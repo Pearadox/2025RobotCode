@@ -45,8 +45,10 @@ public class Elevator extends SubsystemBase {
     }
 
     private ElevatorMode elevatorMode = ElevatorMode.STOWED;
-    private double lowest_rot = ElevatorConstants.STOWED_ROT;
-    private double highest_rot = ElevatorConstants.MAX_ELEVATOR_ROT;
+    // private double lowest_rot = ElevatorConstants.STOWED_ROT;
+    // private double highest_rot = ElevatorConstants.MAX_ELEVATOR_ROT;
+
+    private boolean isLowering = false;
 
     private static Elevator ELEVATOR = new Elevator();
 
@@ -97,20 +99,20 @@ public class Elevator extends SubsystemBase {
         slot0Configs.kI = ElevatorConstants.kI; // no output for integrated error
         slot0Configs.kD = ElevatorConstants.kD; // A velocity error of 1 rps results in 0.1 V output
 
-        // var slot0Configs = talonFXConfigs.Slot0;
-        // slot0Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
-        // slot0Configs.kS = ElevatorConstants.kS; // Add 0.1 V output to overcome static friction
-        // slot0Configs.kV = ElevatorConstants.kV; // A velocity target of 1 rps results in 0.1 V output
-        // slot0Configs.kA = ElevatorConstants.kA; // An acceleration of 1 rps/s requires 0.01 V output
-        // slot0Configs.kP = ElevatorConstants.kP; // A position error of 2.5 rotations results in 12 V output, prev 4.8
-        // slot0Configs.kI = ElevatorConstants.kI; // no output for integrated error
-        // slot0Configs.kD = ElevatorConstants.kD; // A velocity error of 1 rps results in 0.1 V output
+        var slot1Configs = talonFXConfigs.Slot1;
+        slot1Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
+        slot1Configs.kS = ElevatorConstants.kS; // Add 0.1 V output to overcome static friction
+        slot1Configs.kV = ElevatorConstants.kV * 0.25; // A velocity target of 1 rps results in 0.1 V output
+        slot1Configs.kA = ElevatorConstants.kA; // An acceleration of 1 rps/s requires 0.01 V output
+        slot1Configs.kP = ElevatorConstants.kP; // A position error of 2.5 rotations results in 12 V output, prev 4.8
+        slot1Configs.kI = ElevatorConstants.kI; // no output for integrated error
+        slot1Configs.kD = ElevatorConstants.kD; // A velocity error of 1 rps results in 0.1 V output
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity =
-                ElevatorConstants.MM_CRUISE_VELCOCITY; // Target cruise velocity of 80 rps
+                ElevatorConstants.MM_CRUISE_VELCOCITY_UP; // Target cruise velocity of 80 rps
         motionMagicConfigs.MotionMagicAcceleration =
-                ElevatorConstants.MM_ACCELERATION; // Target acceleration of 160 rps/s (0.5 seconds)
+                ElevatorConstants.MM_ACCELERATION_UP; // Target acceleration of 160 rps/s (0.5 seconds)
         // (not sure if needed - > ) motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1
         // seconds)
 
@@ -217,11 +219,33 @@ public class Elevator extends SubsystemBase {
         //   default: setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset),
         // highest_rot));
         // }
+
+        isLowering = elevator.getPosition().getValueAsDouble() > setpoint;
+
         if (!isZeroing) {
-            elevator.setControl(motionMagicRequest.withPosition(setpoint));
+            elevator.setControl(motionMagicRequest.withPosition(setpoint).withSlot(isLowering ? 1 : 0));
         } else {
             homeElevator();
         }
+
+        // // only reapply configs when this changes
+        // if (isLowering != (elevator.getPosition().getValueAsDouble() > setpoint)) {
+        //     isLowering = elevator.getPosition().getValueAsDouble() > setpoint;
+
+        //     if (isLowering) {
+        //         talonFXConfigs.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MM_CRUISE_VELCOCITY_DOWN;
+        //         talonFXConfigs.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MM_ACCELERATION_DOWN;
+        //     } else {
+        //         talonFXConfigs.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MM_CRUISE_VELCOCITY_UP;
+        //         talonFXConfigs.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MM_ACCELERATION_UP;
+        //     }
+
+        //     elevator.getConfigurator().refresh(talonFXConfigs);
+        //     elevator.getConfigurator().apply(talonFXConfigs);
+
+        //     SmarterDashboard.putBoolean("Elevator/IsLowering", isLowering);
+        // }
+        SmarterDashboard.putBoolean("Elevator/IsLowering", isLowering);
 
         SmarterDashboard.putNumber("Elevator/Setpoint", setpoint);
     }
@@ -323,9 +347,9 @@ public class Elevator extends SubsystemBase {
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity =
-                ElevatorConstants.MM_CRUISE_VELCOCITY; // Target cruise velocity of 80 rps
+                ElevatorConstants.MM_CRUISE_VELCOCITY_UP; // Target cruise velocity of 80 rps
         motionMagicConfigs.MotionMagicAcceleration =
-                ElevatorConstants.MM_ACCELERATION; // Target acceleration of 160 rps/s (0.5 seconds)
+                ElevatorConstants.MM_ACCELERATION_UP; // Target acceleration of 160 rps/s (0.5 seconds)
         // (not sure if needed - > ) motionMagicConfigs.MotionMagicJerk = 1600; // Target jerk of 1600 rps/s/s (0.1
         // seconds)
 

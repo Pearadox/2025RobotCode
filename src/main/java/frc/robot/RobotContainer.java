@@ -6,7 +6,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.SignalLogger;
 import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -23,11 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
-import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
@@ -87,7 +84,8 @@ public class RobotContainer {
     private final JoystickButton barge_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
     private final JoystickButton coralAlgaeSwap_LB =
             new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton resetAdjusts_RB = new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    private final JoystickButton resetAdjusts_RB =
+            new JoystickButton(opController, XboxController.Button.kRightBumper.value);
     private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController, 0);
     private final POVButton elevatorAdjustDown_POV_180 = new POVButton(opController, 180);
     private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
@@ -123,13 +121,10 @@ public class RobotContainer {
                                 * MaxAngularRate) // Drive counterclockwise with negative X (left)
                 ));
 
-
         zeroElevator_LB
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.zeroElevator())
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
-
-    
 
         alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
@@ -191,11 +186,7 @@ public class RobotContainer {
 
         // invertRobotOrientation.onTrue(new InstantCommand(() -> drivetrain.changeRobotOrientation()));
 
-
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-      
-
 
         stow_A.onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode())
                 .andThen(new InstantCommand(() -> arm.setStowed())));
@@ -220,13 +211,12 @@ public class RobotContainer {
         coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
                 .andThen(new InstantCommand(() -> arm.changeIsCoral())));
 
-
-        elevatorAdjustUp_POV_0.whileTrue(new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
+        elevatorAdjustUp_POV_0.whileTrue(
+                new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
         elevatorAdjustDown_POV_180.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
         armAdjustUp_POV_90.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
         armAdjustDown_POV_270.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
-
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }

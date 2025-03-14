@@ -40,6 +40,13 @@ public class Climber extends SubsystemBase {
                 "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
+        //     if(RobotContainer.opController.getLeftTriggerAxis() >= 0.9){
+        //         runClimb(ClimbConstants.CLIMB_VALUE, 0);
+        //     }else if(RobotContainer.opController.getRightTriggerAxis() >= 0.9){
+        //         runClimb(-ClimbConstants.CLIMB_VALUE, 0);
+        //     }else{
+        //         runClimb(0, 0);
+        //     }
     }
 
     /** This is a method that makes the roller spin */

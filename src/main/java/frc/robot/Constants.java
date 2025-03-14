@@ -82,10 +82,14 @@ public class Constants {
 
         public static final int UPDATE_FREQ = 50;
 
-        public static final double MAX_VELOCITY_MPS = 2.0; //
-        public static final double MAX_ACCELERATION_MPS2 = 8.0; //
-        public static final double MM_CRUISE_VELCOCITY = 100; //
-        public static final double MM_ACCELERATION = 100; //
+        // public static final double MAX_VELOCITY_MPS = 2.0; //
+        // public static final double MAX_ACCELERATION_MPS2 = 8.0; // not used currently
+
+        public static final double MM_CRUISE_VELCOCITY_UP = 100; //
+        public static final double MM_ACCELERATION_UP = 100; //
+
+        public static final double MM_CRUISE_VELCOCITY_DOWN = 1; //
+        public static final double MM_ACCELERATION_DOWN = 1; //
 
         public static final double TICKS_PER_REV = 4000; //
         public static final double GEAR_RATIO = 3; //
@@ -172,8 +176,8 @@ public class Constants {
         public static final double kI = 0.0;
         public static final double kD = 0.0; // 0.05
 
-        public static final double MM_MAX_CRUISE_VELOCITY = 7;
-        public static final double MM_MAX_CRUISE_ACCELERATION = 3;
+        public static final double MM_MAX_CRUISE_VELOCITY = 2;
+        public static final double MM_MAX_CRUISE_ACCELERATION = 0.5;
     }
 
     public static final class ClimbConstants {
