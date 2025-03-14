@@ -12,6 +12,8 @@ import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
+import com.ctre.phoenix6.signals.FeedbackSensorSourceValue;
+import com.ctre.phoenix6.signals.GravityTypeValue;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,6 +29,8 @@ public class Arm extends SubsystemBase {
 
     private ArmMode armMode = ArmMode.Stowed;
     private TalonFXConfiguration talonFXConfigs;
+
+    private VoltageOut voltageRequest = new VoltageOut(0);
 
     private boolean isCoral = true;
     private double lastAngle = 0;
@@ -90,18 +94,40 @@ public class Arm extends SubsystemBase {
 
         talonFXConfigs = new TalonFXConfiguration();
 
+        // var slot0Configs = talonFXConfigs.Slot0;
+        // slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving
+        // slot0Configs.kS = ArmConstants.kS; // Add x output to overcome static friction
+        // slot0Configs.kV = ArmConstants.kV; // A velocity target of 1 rps results in x output
+        // slot0Configs.kA = ArmConstants.kA; // An acceleration of 1 rps/s requires x output
+        // slot0Configs.kP = ArmConstants.kP; // A position error of x rotations results in 12 V output
+        // slot0Configs.kI = ArmConstants.kI; // no output for integrated error
+        // slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
+
         var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving
-        slot0Configs.kS = ArmConstants.kS; // Add x output to overcome static friction
-        slot0Configs.kV = ArmConstants.kV; // A velocity target of 1 rps results in x output
-        slot0Configs.kA = ArmConstants.kA; // An acceleration of 1 rps/s requires x output
-        slot0Configs.kP = ArmConstants.kP; // A position error of x rotations results in 12 V output
-        slot0Configs.kI = ArmConstants.kI; // no output for integrated error
-        slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
+        slot0Configs.kG = 0; // add enough Gravity Gain just before motor starts moving
+        slot0Configs.kS = 0.15; // Add x output to overcome static friction
+        slot0Configs.kV = 7.2; // A velocity target of 1 rps results in x output
+        slot0Configs.kA = 0; // An acceleration of 1 rps/s requires x output
+        slot0Configs.kP = 0.4; // A position error of x rotations results in 12 V output
+        slot0Configs.kI = 0; // no output for integrated error
+        slot0Configs.kD = 0; // A velocity error of 1 rps results in x output
+        slot0Configs.GravityType = GravityTypeValue.Arm_Cosine;
+
+        var slot1Configs = talonFXConfigs.Slot1; // configs for game piece
+        slot1Configs.kG = 0;
+        slot1Configs.kS = 0;
+        slot1Configs.kV = 0;
+        slot1Configs.kA = 0;
+        slot1Configs.kP = 0;
+        slot1Configs.kI = 0;
+        slot1Configs.kD = 0;
 
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
         motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
+
+        // talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
+        // talonFXConfigs.Feedback.FeedbackRotorOffset = -16;
 
         pivot.getConfigurator().apply(talonFXConfigs);
     }
@@ -125,26 +151,13 @@ public class Arm extends SubsystemBase {
                 "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
         SmarterDashboard.putString("Arm/Mode", armMode.toString());
         SmarterDashboard.putBoolean("Arm/IsCoral", isCoral);
-        deltaArmAngle();
         SmarterDashboard.putNumber("Arm/DeltaAngle", deltaArmAngle());
+        SmarterDashboard.putNumber("Arm/kG", 0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() -96)));
     }
 
     public void armHold() {
-        talonFXConfigs = new TalonFXConfiguration();
 
-        var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kG = ArmConstants.kG
-                * Math.cos(getArmAngleDegrees() - 96); // add enough Gravity Gain just before motor starts moving
-        slot0Configs.kS = ArmConstants.kS; // Add x output to overcome static friction
-        slot0Configs.kV = ArmConstants.kV; // A velocity target of 1 rps results in x output
-        slot0Configs.kA = ArmConstants.kA; // An acceleration of 1 rps/s requires x output
-        slot0Configs.kP = ArmConstants.kP; // A position error of x rotations results in 12 V output
-        slot0Configs.kI = ArmConstants.kI; // no output for integrated error
-        slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
-
-        var motionMagicConfigs = talonFXConfigs.MotionMagic;
-        motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
-        motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
+        // pivot.setControl(voltageRequest.withOutput(armAdjust));
 
         double setpoint;
         if (armMode == ArmMode.Intake) {
@@ -181,7 +194,8 @@ public class Arm extends SubsystemBase {
         }
 
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
-        pivot.setControl(new PositionVoltage(-setpoint));
+        pivot.setControl(new PositionVoltage(-setpoint)
+                .withFeedForward(0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() - 96))));
         // pivot.setControl(new PositionVoltage(-setpoint).withFeedForward(ArmConstants.kG *
         // Math.cos(getArmAngleDegrees() - 96)));
         SmarterDashboard.putNumber("Arm/Cur Setpoint", -setpoint);

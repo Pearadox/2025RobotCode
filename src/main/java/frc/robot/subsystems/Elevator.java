@@ -31,6 +31,7 @@ public class Elevator extends SubsystemBase {
     private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
     private boolean isCoral = true;
+    private boolean isZeroing = false;
 
     private static enum ElevatorMode {
         STOWED,
@@ -40,7 +41,7 @@ public class Elevator extends SubsystemBase {
         LEVEL_FOUR,
         ALGAE_LOW,
         ALGAE_HIGH,
-        BARGE
+        BARGE,
     }
 
     private ElevatorMode elevatorMode = ElevatorMode.STOWED;
@@ -90,11 +91,11 @@ public class Elevator extends SubsystemBase {
         var slot0Configs = talonFXConfigs.Slot0;
         slot0Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
         slot0Configs.kS = ElevatorConstants.kS; // Add 0.1 V output to overcome static friction
-        slot0Configs.kV = 0; // A velocity target of 1 rps results in 0.1 V output
-        slot0Configs.kA = 0; // An acceleration of 1 rps/s requires 0.01 V output
-        slot0Configs.kP = 1; // A position error of 2.5 rotations results in 12 V output, prev 4.8
-        slot0Configs.kI = 0; // no output for integrated error
-        slot0Configs.kD = 0; // A velocity error of 1 rps results in 0.1 V output
+        slot0Configs.kV = ElevatorConstants.kV; // A velocity target of 1 rps results in 0.1 V output
+        slot0Configs.kA = ElevatorConstants.kA; // An acceleration of 1 rps/s requires 0.01 V output
+        slot0Configs.kP = ElevatorConstants.kP; // A position error of 2.5 rotations results in 12 V output, prev 4.8
+        slot0Configs.kI = ElevatorConstants.kI; // no output for integrated error
+        slot0Configs.kD = ElevatorConstants.kD; // A velocity error of 1 rps results in 0.1 V output
 
         // var slot0Configs = talonFXConfigs.Slot0;
         // slot0Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
@@ -216,9 +217,21 @@ public class Elevator extends SubsystemBase {
         //   default: setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset),
         // highest_rot));
         // }
+        if (!isZeroing) {
+            elevator.setControl(motionMagicRequest.withPosition(setpoint));
+        } else {
+            homeElevator();
+        }
 
-        elevator.setControl(motionMagicRequest.withPosition(setpoint));
         SmarterDashboard.putNumber("Elevator/Setpoint", setpoint);
+    }
+
+    public void homeElevator() {
+        elevator.set(ElevatorConstants.HOMING_SPEED);
+    }
+
+    public void zeroElevator() {
+        elevator.setPosition(0);
     }
 
     public double getElevatorPositionRots() {
@@ -283,6 +296,10 @@ public class Elevator extends SubsystemBase {
 
     public boolean getIsCoral() {
         return isCoral;
+    }
+
+    public void setZeroing(boolean flag) {
+        isZeroing = flag;
     }
 
     public void changeIsCoral() {

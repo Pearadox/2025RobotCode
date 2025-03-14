@@ -84,8 +84,8 @@ public class Constants {
 
         public static final double MAX_VELOCITY_MPS = 2.0; //
         public static final double MAX_ACCELERATION_MPS2 = 8.0; //
-        public static final double MM_CRUISE_VELCOCITY = 45; //
-        public static final double MM_ACCELERATION = 210; //
+        public static final double MM_CRUISE_VELCOCITY = 100; //
+        public static final double MM_ACCELERATION = 100; //
 
         public static final double TICKS_PER_REV = 4000; //
         public static final double GEAR_RATIO = 3; //
@@ -103,9 +103,11 @@ public class Constants {
         public static final double ALGAE_LOW_HEIGHT = 6.7;
         public static final double ALGAE_HIGH_HEIGHT = 16;
 
-        public static final double BARGE_HEIGHT = 33.5;
+        public static final double BARGE_HEIGHT = 33;
 
         public static final double MAX_ELEVATOR_HEIGHT = 34;
+
+        public static final double HOMING_SPEED = -0.05;
 
         public static final double LEVEL_TWO_ROT = LEVEL_TWO_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STATION_ROT = STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
@@ -124,13 +126,13 @@ public class Constants {
         // public static final double MAX_ELEVATOR_ROT = 15.5; // 15.65
         // public static final double STOWED_ROT = 0;
 
-        public static final double ELEVATOR_OFFSET = 0.02;
+        public static final double ELEVATOR_OFFSET = 0.075;
 
         // TODO: change all of these values to match true elevator gains
 
         public static final double kG = 0.29; // 0.3
         public static final double kS = 0.11; // 0
-        public static final double kV = 0.0; // 0
+        public static final double kV = 0.1; // 0
         public static final double kA = 0.0; // 0
         public static final double kP = 0.4; // 0.4
         public static final double kI = 0.0; // 0
@@ -139,7 +141,7 @@ public class Constants {
 
     public static final class ArmConstants {
         public static final int ARM_KRAKEN_ID = 22;
-        public static final int CURRENT_LIMIT = 50;
+        public static final int CURRENT_LIMIT = 60;
 
         public static final double ARM_GEAR_RATIO = 60; // ?
 
@@ -156,19 +158,19 @@ public class Constants {
         public static final double ARM_CLIMB = Units.degreesToRotations(-50);
         public static final double ARM_LOLIPOP = Units.degreesToRotations(50);
 
-        public static final double ARM_ADJUST_INCREMENT = 0.15;
+        public static final double ARM_ADJUST_INCREMENT = 0.05;
 
         public static final double UPDATE_FREQ = 50;
 
         // TODO: tune pid
 
-        public static final double kG = 0.4; // 0.4
-        public static final double kS = 0.0;
-        public static final double kV = 0.2; // 0.2
+        public static final double kG = 0.0; // 0.35;
+        public static final double kS = 0.0; // 0.15;
+        public static final double kV = 0.0; // 0.2
         public static final double kA = 0.0; // 0.07
-        public static final double kP = 0.3; // 0.3
+        public static final double kP = 0.0; // 0.3
         public static final double kI = 0.0;
-        public static final double kD = 0.05; // 0.05
+        public static final double kD = 0.0; // 0.05
 
         public static final double MM_MAX_CRUISE_VELOCITY = 7;
         public static final double MM_MAX_CRUISE_ACCELERATION = 3;

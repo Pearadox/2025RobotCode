@@ -17,10 +17,12 @@ import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.ArmHold;
@@ -69,23 +71,13 @@ public class RobotContainer {
 
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
-    private final JoystickButton elevatorUp_Y = new JoystickButton(driverController, XboxController.Button.kY.value);
-    private final JoystickButton elevatorDown_A = new JoystickButton(driverController, XboxController.Button.kA.value);
-    private final JoystickButton armAdjustUp_X = new JoystickButton(driverController, XboxController.Button.kX.value);
-    private final JoystickButton armAdjustDown_B = new JoystickButton(driverController, XboxController.Button.kB.value);
-    // private final Trigger strafeTriggers = new Trigger(() -> (Math.abs(driverController.getRightTriggerAxis() -
-    // driverController.getLeftTriggerAxis()) > 0.1));
     private final POVButton alignPovLeft = new POVButton(driverController, 270);
     private final POVButton alignPovDown = new POVButton(driverController, 180);
     private final POVButton alignPovRight = new POVButton(driverController, 90);
-    private final JoystickButton slewLeftBumper =
+    private final JoystickButton zeroElevator_LB =
             new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton robotOrientedRightBumper =
+    private final JoystickButton robotOrientated_RB =
             new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
-
-    private final POVButton climberUp = new POVButton(opController, 0);
-    private final POVButton climberDown = new POVButton(opController, 180);
-    private final POVButton resetAdjusts = new POVButton(opController, 270);
 
     private final JoystickButton levelFour_Y = new JoystickButton(opController, XboxController.Button.kY.value);
     private final JoystickButton levelThree_B = new JoystickButton(opController, XboxController.Button.kB.value);
@@ -95,7 +87,11 @@ public class RobotContainer {
     private final JoystickButton barge_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
     private final JoystickButton coralAlgaeSwap_LB =
             new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton climb_RB = new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    private final JoystickButton resetAdjusts_RB = new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController, 0);
+    private final POVButton elevatorAdjustDown_POV_180 = new POVButton(opController, 180);
+    private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
+    private final POVButton armAdjustDown_POV_270 = new POVButton(opController, 270);
 
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -114,48 +110,26 @@ public class RobotContainer {
         configureBindings();
 
         align = new AutoAlign(() -> drivetrain.getState().Pose);
-        // tagPoses3d = align.getTagPoses3d();
     }
 
     private void configureBindings() {
-        // Note that X is defined as forward according to WPILib convention,
-        // and Y is defined as to the left according to WPILib convention.
-        drivetrain.setDefaultCommand(
-                // Drivetrain will execute this command periodically
-                drivetrain.applyRequest(
-                        () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                        * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                        * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                        * MaxAngularRate) // Drive counterclockwise with negative X (left)
-                        ));
+        robotOrientated_RB.whileTrue(drivetrain.applyRequest(
+                () -> robotOrientedDrive
+                        .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+                                * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+                                * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+                                * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                ));
 
-        // slewLeftBumper.whileTrue(drivetrain.applyRequest(
-        //         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        //                         * MaxSpeed) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        //                         * MaxSpeed) // Drive left with negative X (left)
-        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        //         ));
 
-        // robotOrientedRightBumper.whileTrue(drivetrain.applyRequest(
-        //         () -> robotOrientedDrive
-        //                 .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        //                         * MaxSpeed) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        //                         * MaxSpeed) // Drive left with negative X (left)
-        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        //         ));
+        zeroElevator_LB
+                .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
+                .onFalse(new InstantCommand(() -> elevator.zeroElevator())
+                        .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        slewLeftBumper.onTrue(new InstantCommand(() -> SignalLogger.start()));
-
-        robotOrientedRightBumper.onTrue(new InstantCommand(() -> SignalLogger.stop()));
-
-        coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
-                .andThen(new InstantCommand(() -> arm.changeIsCoral())));
+    
 
         alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
@@ -217,26 +191,11 @@ public class RobotContainer {
 
         // invertRobotOrientation.onTrue(new InstantCommand(() -> drivetrain.changeRobotOrientation()));
 
-        elevator.setDefaultCommand(new ElevatorHold());
-        arm.setDefaultCommand(new ArmHold());
 
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        elevatorUp_Y.onTrue(new InstantCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
-        elevatorDown_A.onTrue(
-                new InstantCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
-        // armAdjustUp_X.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
-        // armAdjustDown_B.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+      
 
-        // elevatorUp_Y.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        // elevatorDown_A.whileTrue(elevator.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        // armAdjustDown_B.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        // armAdjustUp_X.whileTrue(elevator.sysIdDynamic(SysIdRoutine.Direction.kReverse));
-
-        // elevatorUp_Y.whileTrue(arm.sysIdQuasistatic(SysIdRoutine.Direction.kForward));
-        // elevatorDown_A.whileTrue(arm.sysIdQuasistatic(SysIdRoutine.Direction.kReverse));
-        // armAdjustDown_B.whileTrue(arm.sysIdDynamic(SysIdRoutine.Direction.kForward));
-        // armAdjustUp_X.whileTrue(arm.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
         stow_A.onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode())
                 .andThen(new InstantCommand(() -> arm.setStowed())));
@@ -252,29 +211,22 @@ public class RobotContainer {
         barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
                 .andThen(new InstantCommand(() -> arm.setBarge())));
 
-        climberUp.whileTrue(new ClimbCommand(() -> ClimbConstants.CLIMB_VALUE, () -> 0, climbSubsystem));
-
-        climberDown.whileTrue(new ClimbCommand(() -> -ClimbConstants.CLIMB_VALUE, () -> 0, climbSubsystem));
-
-        resetAdjusts.onTrue(
+        resetAdjusts_RB.onTrue(
                 new InstantCommand(() -> elevator.resetAdjust()).andThen(new InstantCommand(() -> arm.resetAdjust())));
 
-        climb_RB.onTrue(new InstantCommand(() -> arm.setClimb())
-                .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
-        // elevator.setElevatorStowedMode())));
+        // climb_RB.onTrue(new InstantCommand(() -> arm.setClimb())
+        //         .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
 
-        // // Run SysId routines when holding back/start and X/Y.
-        // // Note that each routine should be run exactly once in a single log.
-        // driverController.back().and(driverController.y()).whileTrue(drivetrain.sysIdDynamic(Direction.kForward));
-        // driverController.back().and(driverController.x()).whileTrue(drivetrain.sysIdDynamic(Direction.kReverse));
-        // driverController.start().and(driverController.y()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kForward));
-        // driverController.start().and(driverController.x()).whileTrue(drivetrain.sysIdQuasistatic(Direction.kReverse));
+        coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
+                .andThen(new InstantCommand(() -> arm.changeIsCoral())));
 
-        // operatorController.start().onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode()));
-        // operatorController.x().onTrue(new InstantCommand(() -> elevator.setElevatorStationMode()));
-        // operatorController.y().onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode()));
-        // operatorController.b().onTrue(new InstantCommand(() -> elevator.setElevatorLevelThreeMode()));
-        // operatorController.a().onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode()));
+
+        elevatorAdjustUp_POV_0.whileTrue(new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
+        elevatorAdjustDown_POV_180.whileTrue(
+                new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
+        armAdjustUp_POV_90.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
+        armAdjustDown_POV_270.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -322,7 +274,18 @@ public class RobotContainer {
     }
 
     public void setDefaultCommands() {
-        // elevator.setDefaultCommand(new ElevatorHold());
-        // arm.setDefaultCommand(new ArmHold());
+        drivetrain.setDefaultCommand(
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(
+                        () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+                                        * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+                                        * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                        ));
+
+        elevator.setDefaultCommand(new ElevatorHold());
+        arm.setDefaultCommand(new ArmHold());
     }
 }
