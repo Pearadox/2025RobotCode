@@ -40,12 +40,7 @@ public class Arm extends SubsystemBase {
         L3,
         L4,
         Stowed,
-        ALGAE_LOW,
-        ALGAE_HIGH,
-        BARGE,
-        CLIMB,
-        LOLIPOP,
-        Unpowered
+        LOLLICLIMB
     }
 
     private double armAdjust = 0.0;
@@ -165,40 +160,63 @@ public class Arm extends SubsystemBase {
 
         // pivot.setControl(voltageRequest.withOutput(armAdjust));
 
-        double setpoint;
-        if (armMode == ArmMode.Intake) {
-            if (isCoral) {
-                setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            } else {
-                setpoint = ArmConstants.ARM_LOLIPOP * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            }
-        } else if (armMode == ArmMode.L2) {
-            if (isCoral) {
-                setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            } else {
-                setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            }
-        } else if (armMode == ArmMode.L3) {
-            if (isCoral) {
-                setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            } else {
-                setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-            }
-        } else if (armMode == ArmMode.L4) {
-            setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        double setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
+        // if (armMode == ArmMode.Intake) {
+        //     if (isCoral) {
+        //         setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     } else {
+        //         setpoint = ArmConstants.ARM_LOLIPOP * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     }
+        // } else if (armMode == ArmMode.L2) {
+        //     if (isCoral) {
+        //         setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     } else {
+        //         setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     }
+        // } else if (armMode == ArmMode.L3) {
+        //     if (isCoral) {
+        //         setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     } else {
+        //         setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        //     }
+        // } else if (armMode == ArmMode.L4) {
+        //     setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
 
-        } else if (armMode == ArmMode.ALGAE_LOW) {
-            setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        } else if (armMode == ArmMode.ALGAE_HIGH) {
-            setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        } else if (armMode == ArmMode.BARGE) {
-            setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        } else if (armMode == ArmMode.CLIMB) {
-            setpoint = ArmConstants.ARM_CLIMB * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        } else {
-            setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // } else if (armMode == ArmMode.ALGAE_LOW) {
+        //     setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // } else if (armMode == ArmMode.ALGAE_HIGH) {
+        //     setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // } else if (armMode == ArmMode.BARGE) {
+        //     setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // } else if (armMode == ArmMode.CLIMB) {
+        //     setpoint = ArmConstants.ARM_CLIMB * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // } else {
+        //     setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
+        // }
+
+        if (isCoral) {
+            if (armMode == ArmMode.Stowed) {
+                setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
+            } else if (armMode == ArmMode.Intake) {
+                setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
+            } else if (armMode == ArmMode.L2) {
+                setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
+            } else if (armMode == ArmMode.L3) {
+                setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
+            } else if (armMode == ArmMode.L4) {
+                setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
+            }
+        } else if (!isCoral) {
+            if (armMode == ArmMode.Stowed) {
+                setpoint = ArmConstants.ARM_LOLLIPOP + armAdjust;
+            } else if (armMode == ArmMode.L2) {
+                setpoint = ArmConstants.ARM_ALGAE_LOW + armAdjust;
+            } else if (armMode == ArmMode.L3) {
+                setpoint = ArmConstants.ARM_ALGAE_HIGH + armAdjust;
+            } else if (armMode == ArmMode.L4) {
+                setpoint = ArmConstants.ARM_BARGE + armAdjust;
+            }
         }
-
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
         pivot.setControl(new PositionVoltage(-setpoint)
                 .withFeedForward(0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() - 96))));
@@ -229,29 +247,29 @@ public class Arm extends SubsystemBase {
         armMode = ArmMode.L4;
     }
 
-    public void setAlgaeLow() {
-        armMode = ArmMode.ALGAE_LOW;
-    }
+    // public void setAlgaeLow() {
+    //     armMode = ArmMode.ALGAE_LOW;
+    // }
 
-    public void setAlgaeHigh() {
-        armMode = ArmMode.ALGAE_HIGH;
-    }
+    // public void setAlgaeHigh() {
+    //     armMode = ArmMode.ALGAE_HIGH;
+    // }
 
-    public void setBarge() {
-        armMode = ArmMode.BARGE;
-    }
+    // public void setBarge() {
+    //     armMode = ArmMode.BARGE;
+    // }
 
     public void setStowed() {
         armMode = ArmMode.Stowed;
     }
 
-    public void setClimb() {
-        armMode = ArmMode.CLIMB;
+    public void setLollipopOrClimb() {
+        armMode = ArmMode.LOLLICLIMB;
     }
 
-    public void setUnpowered() {
-        armMode = ArmMode.Unpowered;
-    }
+    // public void setUnpowered() {
+    //     armMode = ArmMode.Unpowered;
+    // }
 
     public void setCoral() {
         isCoral = true;
@@ -259,10 +277,6 @@ public class Arm extends SubsystemBase {
 
     public void setAlgae() {
         isCoral = false;
-    }
-
-    public void changeIsCoral() {
-        isCoral = !isCoral;
     }
 
     public boolean getIsCoral() {

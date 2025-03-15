@@ -20,9 +20,8 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
+import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.ElevatorHold;
@@ -66,33 +65,62 @@ public class RobotContainer {
     public static final XboxController driverController = new XboxController(0);
     public static final XboxController opController = new XboxController(1);
 
+    // Driver Controller
+
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
-    private final POVButton alignPovLeft = new POVButton(driverController, 270);
-    private final POVButton alignPovDown = new POVButton(driverController, 180);
-    private final POVButton alignPovRight = new POVButton(driverController, 90);
-    private final JoystickButton zeroElevator_LB =
-            new JoystickButton(driverController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton robotOrientated_RB =
-            new JoystickButton(driverController, XboxController.Button.kRightBumper.value);
+
+    private final POVButton leftBranchAlign_PovLeft = new POVButton(driverController, 270);
+    private final POVButton algaeAlign_PovUp = new POVButton(driverController, 0);
+    private final POVButton rightBranchAlign_PovRight = new POVButton(driverController, 90);
+    // private final POVButton csAlign_PovDown = new POVButton(driverController, 90);
+
+    private final JoystickButton intake_LB = new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
+    private final JoystickButton outtake_RB =
+            new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+
+    //     private final JoystickButton zeroElevator_LB =
+    //             new JoystickButton(opController, XboxController.Button.kBack.value);
+    //     private final JoystickButton robotOrientated_RB =
+    //             new JoystickButton(opController, XboxController.Button.kStart.value);
+
+    // Op Controller
+    private final JoystickButton homeElevator_Start =
+            new JoystickButton(opController, XboxController.Button.kStart.value);
+    // private final JoystickButton homeArm_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
+    private final JoystickButton tempCS_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
+
+    private final JoystickButton coralMode_LB =
+            new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
+    private final JoystickButton algaeMode_RB =
+            new JoystickButton(opController, XboxController.Button.kRightBumper.value);
 
     private final JoystickButton levelFour_Y = new JoystickButton(opController, XboxController.Button.kY.value);
     private final JoystickButton levelThree_B = new JoystickButton(opController, XboxController.Button.kB.value);
     private final JoystickButton levelTwo_X = new JoystickButton(opController, XboxController.Button.kX.value);
     private final JoystickButton stow_A = new JoystickButton(opController, XboxController.Button.kA.value);
-    private final JoystickButton station_Start = new JoystickButton(opController, XboxController.Button.kStart.value);
-    private final JoystickButton barge_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
-    private final JoystickButton coralAlgaeSwap_LB =
-            new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton resetAdjusts_RB =
-            new JoystickButton(opController, XboxController.Button.kRightBumper.value);
-    private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController, 0);
-    private final POVButton elevatorAdjustDown_POV_180 = new POVButton(opController, 180);
-    private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
-    private final POVButton armAdjustDown_POV_270 = new POVButton(opController, 270);
 
-    private final JoystickButton strafeTriggers =
-            new JoystickButton(driverController, XboxController.Button.kBack.value);
+    // private final POVButton climbDeploy_PovUp = new POVButton(opController, 0);
+    // private final POVButton climbRetract_PovDown = new POVButton(opController, 180);
+
+    //     private final JoystickButton station_Start = new JoystickButton(opController,
+    // XboxController.Button.kStart.value);
+    //     private final JoystickButton barge_Back = new JoystickButton(opController,
+    // XboxController.Button.kBack.value);
+    //     private final JoystickButton coralAlgaeSwap_LB =
+    //             new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
+    //     private final JoystickButton resetAdjusts_RB =
+    //             new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    //     private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController, 0);
+    //     private final POVButton elevatorAdjustDown_POV_180 = new POVButton(opController, 180);
+    //     private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
+    //     private final POVButton armAdjustDown_POV_270 = new POVButton(opController, 270);
+
+    private final Trigger strafeTriggers = new Trigger(
+            () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
+
+    private final Trigger elevatorAdjust = new Trigger(() -> Math.abs(opController.getLeftY()) > 0.9);
+    private final Trigger armAdjust = new Trigger(() -> Math.abs(opController.getRightX()) > 0.9);
 
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -106,7 +134,7 @@ public class RobotContainer {
     public RobotContainer() {
         setDefaultCommands();
         registerNamedCommands();
-        autoChooser = AutoBuilder.buildAutoChooser("GH_L4");
+        autoChooser = AutoBuilder.buildAutoChooser("2R_EF-L4");
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
@@ -114,22 +142,22 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        robotOrientated_RB.whileTrue(drivetrain.applyRequest(
-                () -> robotOrientedDrive
-                        .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                * MaxSpeed) // Drive forward with negative Y (forward)
-                        .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                * MaxAngularRate) // Drive counterclockwise with negative X (left)
-                ));
+        // robotOrientated_RB.whileTrue(drivetrain.applyRequest(
+        //         () -> robotOrientedDrive
+        //                 .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+        //                         * MaxSpeed) // Drive forward with negative Y (forward)
+        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+        //                         * MaxSpeed) // Drive left with negative X (left)
+        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        //         ));
 
-        zeroElevator_LB
+        homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.zeroElevator())
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        alignPovDown.whileTrue(drivetrain.applyRequest(() -> pointTowards
+        algaeAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> pointTowards
                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
                                 AlignConstants.REEF_ALIGN_MID_TX,
                                 driverController.getLeftY() * MaxSpeed,
@@ -143,18 +171,21 @@ public class RobotContainer {
                                 MaxSpeed)
                         .vyMetersPerSecond)
                 .withTargetDirection(align.getAlignAngleReef())));
-        // uncommented strafe
 
         strafeTriggers.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
                         .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y
                         // (forward)
                         .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
-                                * 0.5
+                                * 0.1
                                 * MaxSpeed) // Drive left with negative X (left)
                         .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise
                 // with negative X (left)
                 ));
+
+        elevatorAdjust.whileTrue(
+                new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(opController.getLeftY()))));
+        armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
 
         // alignPovLeft.whileTrue(drivetrain.applyRequest(() -> pointTowards
         //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
@@ -190,9 +221,11 @@ public class RobotContainer {
 
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
+        intake_LB.onTrue(new InstantCommand(() -> endEffector.collectGamePiece()));
+
         stow_A.onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode())
                 .andThen(new InstantCommand(() -> arm.setStowed())));
-        station_Start.onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
+        tempCS_Back.onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
                 .andThen(new WaitCommand(0.5))
                 .andThen(new InstantCommand(() -> arm.setArmIntake())));
         levelTwo_X.onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
@@ -201,24 +234,30 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> arm.setArmL3())));
         levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                 .andThen(new InstantCommand(() -> arm.setArmL4())));
-        barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
-                .andThen(new InstantCommand(() -> arm.setBarge())));
+        // barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
+        //         .andThen(new InstantCommand(() -> arm.setBarge())));
 
-        resetAdjusts_RB.onTrue(
-                new InstantCommand(() -> elevator.resetAdjust()).andThen(new InstantCommand(() -> arm.resetAdjust())));
+        // resetAdjusts_RB.onTrue(
+        //         new InstantCommand(() -> elevator.resetAdjust()).andThen(new InstantCommand(() ->
+        // arm.resetAdjust())));
 
         // climb_RB.onTrue(new InstantCommand(() -> arm.setClimb())
         //         .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
 
-        coralAlgaeSwap_LB.onTrue(new InstantCommand(() -> elevator.changeIsCoral())
-                .andThen(new InstantCommand(() -> arm.changeIsCoral())));
+        coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
+                .andThen(new InstantCommand(() -> arm.setCoral()))
+                .andThen(new InstantCommand(() -> endEffector.setCoral()))
+                .andThen(new InstantCommand(() -> endEffector.stop())));
+        algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
+                .andThen(new InstantCommand(() -> arm.setAlgae()))
+                .andThen(new InstantCommand(() -> endEffector.setAlgae())));
 
-        elevatorAdjustUp_POV_0.whileTrue(
-                new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
-        elevatorAdjustDown_POV_180.whileTrue(
-                new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
-        armAdjustUp_POV_90.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
-        armAdjustDown_POV_270.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+        // elevatorAdjustUp_POV_0.whileTrue(
+        //         new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
+        // elevatorAdjustDown_POV_180.whileTrue(
+        //         new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
+        // armAdjustUp_POV_90.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
+        // armAdjustDown_POV_270.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -257,6 +296,7 @@ public class RobotContainer {
         NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralIn()));
         NamedCommands.registerCommand("Intake", new InstantCommand(() -> endEffector.coralOut()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
+        NamedCommands.registerCommand("HoldCoral", new InstantCommand(() -> endEffector.holdCoral()));
 
         // NamedCommands.registerCommand(
         //         "Intake Station",

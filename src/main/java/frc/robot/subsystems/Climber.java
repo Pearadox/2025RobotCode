@@ -10,12 +10,19 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
+import frc.robot.RobotContainer;
 import org.littletonrobotics.junction.Logger;
 
 /** Class to run the rollers over CAN */
 public class Climber extends SubsystemBase {
     // private final SparkMax climbMotor;
     private final PearadoxTalonFX climbMotor;
+
+    private static final Climber CLIMBER = new Climber();
+
+    public static Climber getInstance() {
+        return CLIMBER;
+    }
 
     public Climber() {
 
@@ -40,13 +47,13 @@ public class Climber extends SubsystemBase {
                 "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
-        //     if(RobotContainer.opController.getLeftTriggerAxis() >= 0.9){
-        //         runClimb(ClimbConstants.CLIMB_VALUE, 0);
-        //     }else if(RobotContainer.opController.getRightTriggerAxis() >= 0.9){
-        //         runClimb(-ClimbConstants.CLIMB_VALUE, 0);
-        //     }else{
-        //         runClimb(0, 0);
-        //     }
+        if (RobotContainer.opController.getPOV() == 0) {
+            runClimb(ClimbConstants.CLIMB_VALUE, 0);
+        } else if (RobotContainer.opController.getPOV() == 180) {
+            runClimb(-ClimbConstants.CLIMB_VALUE, 0);
+        } else {
+            runClimb(0, 0);
+        }
     }
 
     /** This is a method that makes the roller spin */

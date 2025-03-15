@@ -179,32 +179,55 @@ public class Elevator extends SubsystemBase {
 
     public void setElevatorPosition() {
         double setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
-        if (elevatorMode == ElevatorMode.STATION) {
-            if (isCoral) {
-                setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
-            } else {
-                setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
-            }
-        } else if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-            if (isCoral) {
+        // if (elevatorMode == ElevatorMode.STATION) {
+        //     if (isCoral) {
+        //         setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+        //     } else {
+        //         setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
+        //     }
+        // } else if (elevatorMode == ElevatorMode.LEVEL_TWO) {
+        //     if (isCoral) {
+        //         setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+        //     } else {
+        //         setpoint = ElevatorConstants.ALGAE_LOW_ROT + elevatorOffset;
+        //     }
+        // } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
+        //     if (isCoral) {
+        //         setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+        //     } else {
+        //         setpoint = ElevatorConstants.ALGAE_HIGH_ROT + elevatorOffset;
+        //     }
+        // } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
+        //     setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+        // } else if (elevatorMode == ElevatorMode.ALGAE_LOW) {
+        //     setpoint = ElevatorConstants.ALGAE_LOW_HEIGHT + elevatorOffset;
+        // } else if (elevatorMode == ElevatorMode.ALGAE_HIGH) {
+        //     setpoint = ElevatorConstants.ALGAE_HIGH_HEIGHT + elevatorOffset;
+        // } else if (elevatorMode == ElevatorMode.BARGE) {
+        //     setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+        // }
+
+        if (elevatorMode == ElevatorMode.STOWED) {
+            setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
+        } else if (elevatorMode == ElevatorMode.STATION) {
+            setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+        }
+        if (isCoral) {
+            if (elevatorMode == ElevatorMode.LEVEL_TWO) {
                 setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
-            } else {
-                setpoint = ElevatorConstants.ALGAE_LOW_ROT + elevatorOffset;
-            }
-        } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-            if (isCoral) {
+            } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
-            } else {
-                setpoint = ElevatorConstants.ALGAE_HIGH_ROT + elevatorOffset;
+            } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
+                setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
             }
-        } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
-            setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
-        } else if (elevatorMode == ElevatorMode.ALGAE_LOW) {
-            setpoint = ElevatorConstants.ALGAE_LOW_HEIGHT + elevatorOffset;
-        } else if (elevatorMode == ElevatorMode.ALGAE_HIGH) {
-            setpoint = ElevatorConstants.ALGAE_HIGH_HEIGHT + elevatorOffset;
-        } else if (elevatorMode == ElevatorMode.BARGE) {
-            setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+        } else if (!isCoral) {
+            if (elevatorMode == ElevatorMode.LEVEL_TWO) {
+                setpoint = ElevatorConstants.ALGAE_LOW_ROT + elevatorOffset;
+            } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
+                setpoint = ElevatorConstants.ALGAE_HIGH_ROT + elevatorOffset;
+            } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
+                setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+            }
         }
 
         // } else { // stowed
@@ -326,9 +349,9 @@ public class Elevator extends SubsystemBase {
         isZeroing = flag;
     }
 
-    public void changeIsCoral() {
-        isCoral = !isCoral;
-    }
+    // public void changeIsCoral() {
+    //     isCoral = !isCoral;
+    // }
 
     public void resetAdjust() {
         elevatorOffset = 0;

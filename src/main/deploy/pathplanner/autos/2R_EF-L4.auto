@@ -17,6 +17,12 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "HoldCoral"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "2R_EF"
@@ -29,9 +35,9 @@
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "EF_BACK"
+            "name": "Outtake"
           }
         }
       ]

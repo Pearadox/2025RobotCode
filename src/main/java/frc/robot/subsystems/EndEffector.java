@@ -12,7 +12,6 @@ import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DigitalInput;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
@@ -37,8 +36,14 @@ public class EndEffector extends SubsystemBase {
     private boolean isCoral = true; // TODO: integrate with arm
     private boolean isHoldingCoral = true;
     private boolean isHoldingAlgae = false;
+    private boolean holdSpeed = false;
 
     private double lastRot = 0;
+
+    private static enum EEMode {
+        INTAKEMODE,
+        OUTTAKEMODE
+    }
 
     public EndEffector() {
         endEffector = new PearadoxTalonFX(EndEffectorConstants.END_EFFECTOR_ID, NeutralModeValue.Brake, 60, false);
@@ -72,6 +77,7 @@ public class EndEffector extends SubsystemBase {
         SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
         SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
         SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
+        SmarterDashboard.putBoolean("EE/Holding Speed", holdSpeed);
 
         SmarterDashboard.putNumber(
                 "EE/Stator Current", endEffector.getStatorCurrent().getValueAsDouble());
@@ -100,19 +106,35 @@ public class EndEffector extends SubsystemBase {
     public void collectGamePiece() {
         if (DriverStation.isTeleop()) {
             //     if(isCoral) {
-            if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
-                coralIn();
+            if (RobotContainer.driverController.getLeftBumperButton()) {
+                if (isCoral) {
+                    coralIn();
+                    holdSpeed = false;
+                } else if (!isCoral) {
+                    algaeIn();
+                    holdSpeed = true;
+                }
                 isHoldingCoral = false;
-            } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
-                coralOut();
+            } else if (RobotContainer.driverController.getRightBumperButton()) {
+                if (isCoral) {
+                    coralOut();
+                } else if (!isCoral) {
+                    algaeOut();
+                }
+
+                holdSpeed = false;
                 isHoldingCoral = false;
-                // } else if (hasCoral() && isCoral) {
-                //     stop();
-                // } else if (!isHoldingCoral) {
-                //     holdCoral();
-            } else stop();
+            } else {
+                if (!holdSpeed) {
+                    stop();
+                }
+                if (isCoral) {
+                    holdCoral();
+                }
+            }
         }
     }
+
     // else if(!isCoral) {
     //     if(RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
     //         algaeIn();
@@ -149,7 +171,8 @@ public class EndEffector extends SubsystemBase {
     }
 
     public void holdCoral() {
-        endEffector.set(SmartDashboard.getNumber("EE/EE Speed", isCoral ? -0.15 : 0.1));
+        // endEffector.set(SmartDashboard.getNumber("EE/EE Speed", isCoral ? -0.15 : 0.1));
+        endEffector.set(EndEffectorConstants.HOLD_SPEED);
         setLastRot();
     }
 
@@ -188,5 +211,13 @@ public class EndEffector extends SubsystemBase {
 
     public void setLastRot() {
         lastRot = endEffector.getPosition().getValueAsDouble();
+    }
+
+    public void setCoral() {
+        isCoral = true;
+    }
+
+    public void setAlgae() {
+        isCoral = false;
     }
 }
