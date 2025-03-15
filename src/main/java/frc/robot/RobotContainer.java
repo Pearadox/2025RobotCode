@@ -91,6 +91,9 @@ public class RobotContainer {
     private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
     private final POVButton armAdjustDown_POV_270 = new POVButton(opController, 270);
 
+    private final JoystickButton strafeTriggers =
+            new JoystickButton(driverController, XboxController.Button.kBack.value);
+
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
     public final SendableChooser<Command> autoChooser;
@@ -140,19 +143,18 @@ public class RobotContainer {
                                 MaxSpeed)
                         .vyMetersPerSecond)
                 .withTargetDirection(align.getAlignAngleReef())));
+        // uncommented strafe
 
-        // strafeTriggers.whileTrue(
-        //     drivetrain.applyRequest(
-        //         () -> robotOrientedDrive
-        //             .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y
-        // (forward)
-        //             .withVelocityY(
-        //                     (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
-        //                     * 0.5 * MaxSpeed) // Drive left with negative X (left)
-        //             .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise
-        // with negative X (left)
-        //     )
-        // );
+        strafeTriggers.whileTrue(drivetrain.applyRequest(
+                () -> robotOrientedDrive
+                        .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y
+                        // (forward)
+                        .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
+                                * 0.5
+                                * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise
+                // with negative X (left)
+                ));
 
         // alignPovLeft.whileTrue(drivetrain.applyRequest(() -> pointTowards
         //         .withVelocityX(align.getFieldRelativeChassisSpeeds(

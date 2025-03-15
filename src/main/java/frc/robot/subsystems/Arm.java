@@ -77,7 +77,11 @@ public class Arm extends SubsystemBase {
 
     public Arm() {
         pivot = new PearadoxTalonFX(
-                ArmConstants.ARM_KRAKEN_ID, NeutralModeValue.Brake, ArmConstants.CURRENT_LIMIT, false);
+                ArmConstants.ARM_KRAKEN_ID,
+                NeutralModeValue.Brake,
+                ArmConstants.CURRENT_LIMIT,
+                ArmConstants.CURRENT_LIMIT,
+                false);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -92,6 +96,9 @@ public class Arm extends SubsystemBase {
         pivot.optimizeBusUtilization();
 
         talonFXConfigs = new TalonFXConfiguration();
+
+        talonFXConfigs.Voltage.PeakForwardVoltage = 5.0;
+        talonFXConfigs.Voltage.PeakReverseVoltage = -5.0;
 
         // var slot0Configs = talonFXConfigs.Slot0;
         // slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving

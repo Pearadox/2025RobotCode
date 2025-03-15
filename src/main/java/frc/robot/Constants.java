@@ -145,7 +145,7 @@ public class Constants {
 
     public static final class ArmConstants {
         public static final int ARM_KRAKEN_ID = 22;
-        public static final int CURRENT_LIMIT = 60;
+        public static final int CURRENT_LIMIT = 20;
 
         public static final double ARM_GEAR_RATIO = 60; // ?
 
