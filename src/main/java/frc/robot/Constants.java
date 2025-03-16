@@ -151,7 +151,7 @@ public class Constants {
         public static final double ARM_GEAR_RATIO = 60; // ?
 
         public static final double ARM_LEVEL_4_ROT =
-                Units.degreesToRotations(156) * ARM_GEAR_RATIO + 0.2; // -170 //-180 //0155.94 //-161
+                Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3; // was -78 //79.08 // -66
 
@@ -190,6 +190,8 @@ public class Constants {
         public static final int CLIMB_MOTOR_CURRENT_LIMIT = 40;
         public static final double CLIMB_MOTOR_VOLTAGE_COMP = 10;
         public static final double CLIMB_VALUE = 0.7;
+
+        public static final double CLIMB_ROTS = -126.0;
     }
 
     public static final class IntakeConstants {
@@ -229,7 +231,7 @@ public class Constants {
 
         public static final double PULL_SPEED = -0.3;
 
-        public static final double PUSH_SPEED = 0.6;
+        public static final double PUSH_SPEED = 0.4;
         public static final double ALGAE_PULL_SPEED = 0.8;
         public static final double ALGAE_PUSH_SPEED = -1.0;
 
