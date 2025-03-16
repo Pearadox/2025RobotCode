@@ -24,6 +24,7 @@ import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
@@ -41,8 +42,7 @@ public class RobotContainer {
     public static final Elevator elevator = Elevator.getInstance();
     public static final Arm arm = Arm.getInstance();
     public static final EndEffector endEffector = EndEffector.getInstance();
-    public static final Climber climbSubsystem = new Climber();
-
+    public static final Climber climber = Climber.getInstance();
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1)
@@ -100,8 +100,9 @@ public class RobotContainer {
     private final JoystickButton levelTwo_X = new JoystickButton(opController, XboxController.Button.kX.value);
     private final JoystickButton stow_A = new JoystickButton(opController, XboxController.Button.kA.value);
 
-    // private final POVButton climbDeploy_PovUp = new POVButton(opController, 0);
-    // private final POVButton climbRetract_PovDown = new POVButton(opController, 180);
+    private final POVButton zeroClimber_PovLeft = new POVButton(opController, 270);
+    private final POVButton deployClimber_PovUp = new POVButton(opController, 0);
+    private final POVButton retractClimber_PovDown = new POVButton(opController, 180);
 
     //     private final JoystickButton station_Start = new JoystickButton(opController,
     // XboxController.Button.kStart.value);
@@ -184,7 +185,7 @@ public class RobotContainer {
                 ));
 
         elevatorAdjust.whileTrue(
-                new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(opController.getLeftY()))));
+                new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
         armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
 
         // alignPovLeft.whileTrue(drivetrain.applyRequest(() -> pointTowards
@@ -234,6 +235,10 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> arm.setArmL3())));
         levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                 .andThen(new InstantCommand(() -> arm.setArmL4())));
+
+        deployClimber_PovUp.whileTrue(new RunCommand(() -> climber.deployClimber()));
+        retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
+        zeroClimber_PovLeft.onTrue(new InstantCommand(() -> climber.zeroClimber()));
         // barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
         //         .andThen(new InstantCommand(() -> arm.setBarge())));
 
@@ -319,5 +324,6 @@ public class RobotContainer {
 
         elevator.setDefaultCommand(new ElevatorHold());
         arm.setDefaultCommand(new ArmHold());
+        climber.setDefaultCommand(new ClimbCommand());
     }
 }

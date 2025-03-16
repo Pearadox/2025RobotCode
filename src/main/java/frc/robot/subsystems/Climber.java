@@ -10,7 +10,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
-import frc.robot.RobotContainer;
+import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
 /** Class to run the rollers over CAN */
@@ -41,24 +41,41 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
+        SmarterDashboard.putNumber("Climber/Position", climbMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Climber/Pos", climbMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Climber/Volts", climbMotor.getMotorVoltage().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
-        if (RobotContainer.opController.getPOV() == 0) {
-            runClimb(ClimbConstants.CLIMB_VALUE, 0);
-        } else if (RobotContainer.opController.getPOV() == 180) {
-            runClimb(-ClimbConstants.CLIMB_VALUE, 0);
-        } else {
-            runClimb(0, 0);
-        }
+        // if (RobotContainer.opController.getPOV() == 0) {
+        //     runClimb(ClimbConstants.CLIMB_VALUE, 0);
+        // } else if (RobotContainer.opController.getPOV() == 180) {
+        //     runClimb(-ClimbConstants.CLIMB_VALUE, 0);
+        // } else {
+        //     runClimb(0, 0);
+        // }
     }
 
     /** This is a method that makes the roller spin */
-    public void runClimb(double forward, double reverse) {
-        Logger.recordOutput("Climber/Percent Speed", forward - reverse);
-        climbMotor.set(forward - reverse);
+    // public void runClimb(double forward, double reverse) {
+    //     Logger.recordOutput("Climber/Percent Speed", forward - reverse);
+    //     climbMotor.set(forward - reverse);
+    // }
+
+    public void deployClimber() {
+        climbMotor.set(0.7);
+    }
+
+    public void retractClimber() {
+        climbMotor.set(-0.7);
+    }
+
+    public void zeroClimber() {
+        climbMotor.setPosition(0);
+    }
+
+    public void stop() {
+        climbMotor.set(0);
     }
 }
