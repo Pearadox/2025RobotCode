@@ -92,8 +92,8 @@ public class Arm extends SubsystemBase {
 
         talonFXConfigs = new TalonFXConfiguration();
 
-        talonFXConfigs.Voltage.PeakForwardVoltage = 5.0;
-        talonFXConfigs.Voltage.PeakReverseVoltage = -5.0;
+        talonFXConfigs.Voltage.PeakForwardVoltage = 3.0;
+        talonFXConfigs.Voltage.PeakReverseVoltage = -3.0;
 
         // var slot0Configs = talonFXConfigs.Slot0;
         // slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving

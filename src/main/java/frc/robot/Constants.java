@@ -98,10 +98,11 @@ public class Constants {
 
         // the following are in inches
         public static final double STOWED_HEIGHT = 0;
-        public static final double STATION_HEIGHT = 15.4; // 12.7
+        public static final double STATION_HEIGHT =
+                16.4; // Home Field is 1in higher than official field - official is 15.4
         public static final double LEVEL_TWO_HEIGHT =
                 8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
-        public static final double LEVEL_THREE_HEIGHT = 0; // 15 //TODO l3 height
+        public static final double LEVEL_THREE_HEIGHT = 1.5; // 15 //TODO l3 height
         public static final double LEVEL_FOUR_HEIGHT = 24.6; // 29.625; //
 
         public static final double ALGAE_LOW_HEIGHT = 6.7;

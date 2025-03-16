@@ -23,6 +23,8 @@ public class EndEffector extends SubsystemBase {
 
     private static final EndEffector END_EFFECTOR = new EndEffector();
 
+    private static final LEDStrip leds = LEDStrip.getInstance();
+
     public static EndEffector getInstance() {
         return END_EFFECTOR;
     }
@@ -132,6 +134,11 @@ public class EndEffector extends SubsystemBase {
                     holdCoral();
                 }
             }
+
+            // if (endEffector.getStatorCurrent().getValueAsDouble() > 35.0) {
+            //     leds.setLEDsFlash();
+            //     leds.handleFlashing();
+            // } else leds.stopFlashing();
         }
     }
 

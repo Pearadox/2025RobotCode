@@ -32,6 +32,7 @@ import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator;
 import frc.robot.subsystems.EndEffector;
+import frc.robot.subsystems.LEDStrip;
 import frc.robot.util.vision.PoseEstimation;
 
 public class RobotContainer {
@@ -43,6 +44,7 @@ public class RobotContainer {
     public static final Arm arm = Arm.getInstance();
     public static final EndEffector endEffector = EndEffector.getInstance();
     public static final Climber climber = Climber.getInstance();
+    public static final LEDStrip ledstrip = LEDStrip.getInstance();
     /* Setting up bindings for necessary control of the swerve drive platform */
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1)
@@ -252,10 +254,12 @@ public class RobotContainer {
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
                 .andThen(new InstantCommand(() -> endEffector.setCoral()))
-                .andThen(new InstantCommand(() -> endEffector.stop())));
+                .andThen(new InstantCommand(() -> endEffector.stop()))
+                .andThen(new InstantCommand(() -> ledstrip.setLEDsCoralMode())));
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
-                .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+                .andThen(new InstantCommand(() -> endEffector.setAlgae()))
+                .andThen(new InstantCommand(() -> ledstrip.setLEDsAlgaeMode())));
 
         // elevatorAdjustUp_POV_0.whileTrue(
         //         new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
@@ -325,5 +329,6 @@ public class RobotContainer {
         elevator.setDefaultCommand(new ElevatorHold());
         arm.setDefaultCommand(new ArmHold());
         climber.setDefaultCommand(new ClimbCommand());
+        // ledstrip.setDefaultCommand(new RunCommand(() -> ledstrip.handleFlashing()));
     }
 }
