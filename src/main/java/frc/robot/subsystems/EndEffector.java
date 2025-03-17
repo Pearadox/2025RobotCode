@@ -205,7 +205,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean hasCoral() {
-        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 20);
+        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 40);
     }
 
     public boolean getHolding() {

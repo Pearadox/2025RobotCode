@@ -1,6 +1,7 @@
 package frc.robot;
 
 import com.ctre.phoenix6.signals.NeutralModeValue;
+import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
@@ -46,9 +47,9 @@ public class Constants {
 
     public static final class AlignConstants {
         // TODO: possible align pid adjustment
-        public static final double ALIGN_STRAFE_KP = 0.02;
+        public static final double ALIGN_STRAFE_KP = 0.04;
         public static final double ALIGN_STRAFE_KI = 0.001;
-        public static final double ALIGN_FORWARD_KP = 0.06; // -0.06
+        public static final double ALIGN_FORWARD_KP = 0.05; // -0.06
         public static final double ALIGN_KS = 0.009;
 
         // tx and ty tolerances with setpoint
@@ -60,16 +61,26 @@ public class Constants {
         public static final double ALIGN_DAMPING_FACTOR = 0.75;
         public static final double ALIGN_SPEED_DEADBAND = 0.025;
 
-        // TODO: find left & right branch tx & ty
-        public static final double REEF_ALIGN_LEFT_TX = 20;
-        public static final double REEF_ALIGN_MID_TX = 0;
-        public static final double REEF_ALIGN_RIGHT_TX = -20;
+        public static final double BRANCH_SPACING = Units.inchesToMeters(12.94 / 2.0);
 
-        public static final double REEF_ALIGN_TY = -15;
+        // target relative
+        public static final double REEF_ALIGN_MID_TX = -0.05; // 0.28575
+        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING + REEF_ALIGN_MID_TX;
+        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING + REEF_ALIGN_MID_TX + 0.02;
+        public static final double REEF_ALIGN_TZ = -0; // target relative
 
-        public static final double REEF_kP = 0;
+        public static final double REEF_kP = 0.5; // Tune all PID values
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0;
+
+        public static final double REEF_Forward_kP = 0.2; // Tune all PID values
+
+        public static final double ROT_REEF_kP = 0.02; // Tune all PID values
+        public static final double ROT_REEF_kI = 0;
+        public static final double ROT_REEF_kD = 0;
+
+        public static final PathConstraints PATH_CONSTRAINTS =
+                new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
     }
 
     public static final class ElevatorConstants {

@@ -10,6 +10,7 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathfindingCommand;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -35,9 +36,10 @@ import frc.robot.subsystems.LEDStrip;
 import frc.robot.util.vision.PoseEstimation;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
-    private double MaxAngularRate =
-            RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+    // speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+    // second max angular velocity
 
     public static final Elevator elevator = Elevator.getInstance();
     public static final Arm arm = Arm.getInstance();
@@ -48,15 +50,18 @@ public class RobotContainer {
     private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
             .withDeadband(MaxSpeed * 0.1)
             .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors
     private final SwerveRequest.RobotCentric robotOrientedDrive = new SwerveRequest.RobotCentric()
             .withDeadband(MaxSpeed * 0.1)
             .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors
     private final SwerveRequest.FieldCentricFacingAngle pointTowards = new SwerveRequest.FieldCentricFacingAngle()
             .withDeadband(MaxSpeed * 0.1)
             .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors;
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors;
     private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
     private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
 
@@ -71,24 +76,25 @@ public class RobotContainer {
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
-    private final POVButton leftBranchAlign_PovLeft = new POVButton(driverController, 270);
-    private final POVButton algaeAlign_PovUp = new POVButton(driverController, 0);
-    private final POVButton rightBranchAlign_PovRight = new POVButton(driverController, 90);
-    // private final POVButton csAlign_PovDown = new POVButton(driverController, 90);
+    private final POVButton alignPovLeft = new POVButton(driverController, 270);
+    private final POVButton alignPovDown = new POVButton(driverController, 180);
+    private final POVButton alignPovRight = new POVButton(driverController, 90);
+    private final POVButton alignPOVUp = new POVButton(driverController, 0);
 
     private final JoystickButton intake_LB = new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
     private final JoystickButton outtake_RB =
             new JoystickButton(opController, XboxController.Button.kRightBumper.value);
 
-    //     private final JoystickButton zeroElevator_LB =
-    //             new JoystickButton(opController, XboxController.Button.kBack.value);
-    //     private final JoystickButton robotOrientated_RB =
-    //             new JoystickButton(opController, XboxController.Button.kStart.value);
+    // private final JoystickButton zeroElevator_LB =
+    // new JoystickButton(opController, XboxController.Button.kBack.value);
+    // private final JoystickButton robotOrientated_RB =
+    // new JoystickButton(opController, XboxController.Button.kStart.value);
 
     // Op Controller
     private final JoystickButton homeElevator_Start =
             new JoystickButton(opController, XboxController.Button.kStart.value);
-    // private final JoystickButton homeArm_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
+    // private final JoystickButton homeArm_Back = new JoystickButton(opController,
+    // XboxController.Button.kBack.value);
     private final JoystickButton tempCS_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
 
     private final JoystickButton coralMode_LB =
@@ -105,18 +111,21 @@ public class RobotContainer {
     private final POVButton deployClimber_PovUp = new POVButton(opController, 0);
     private final POVButton retractClimber_PovDown = new POVButton(opController, 180);
 
-    //     private final JoystickButton station_Start = new JoystickButton(opController,
+    // private final JoystickButton station_Start = new JoystickButton(opController,
     // XboxController.Button.kStart.value);
-    //     private final JoystickButton barge_Back = new JoystickButton(opController,
+    // private final JoystickButton barge_Back = new JoystickButton(opController,
     // XboxController.Button.kBack.value);
-    //     private final JoystickButton coralAlgaeSwap_LB =
-    //             new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    //     private final JoystickButton resetAdjusts_RB =
-    //             new JoystickButton(opController, XboxController.Button.kRightBumper.value);
-    //     private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController, 0);
-    //     private final POVButton elevatorAdjustDown_POV_180 = new POVButton(opController, 180);
-    //     private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
-    //     private final POVButton armAdjustDown_POV_270 = new POVButton(opController, 270);
+    // private final JoystickButton coralAlgaeSwap_LB =
+    // new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
+    // private final JoystickButton resetAdjusts_RB =
+    // new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    // private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController,
+    // 0);
+    // private final POVButton elevatorAdjustDown_POV_180 = new
+    // POVButton(opController, 180);
+    // private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
+    // private final POVButton armAdjustDown_POV_270 = new POVButton(opController,
+    // 270);
 
     private final Trigger strafeTriggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
@@ -129,7 +138,7 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     private final AutoAlign align;
-    //     private Map<Integer, Pose3d> tagPoses3d;
+    // private Map<Integer, Pose3d> tagPoses3d;
 
     public static final PoseEstimation poseEstimation = new PoseEstimation();
 
@@ -141,47 +150,77 @@ public class RobotContainer {
         configureBindings();
 
         align = new AutoAlign(() -> drivetrain.getState().Pose);
+        PathfindingCommand.warmupCommand().schedule();
     }
 
     private void configureBindings() {
         // robotOrientated_RB.whileTrue(drivetrain.applyRequest(
-        //         () -> robotOrientedDrive
-        //                 .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        //                         * MaxSpeed) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        //                         * MaxSpeed) // Drive left with negative X (left)
-        //                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-        //                         * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        //         ));
+        // () -> robotOrientedDrive
+        // .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+        // * MaxSpeed) // Drive forward with negative Y (forward)
+        // .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+        // * MaxSpeed) // Drive left with negative X (left)
+        // .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+        // * MaxAngularRate) // Drive counterclockwise with negative X (left)
+        // ));
 
         homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.zeroElevator())
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        algaeAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> pointTowards
-                .withVelocityX(align.getFieldRelativeChassisSpeeds(
-                                AlignConstants.REEF_ALIGN_MID_TX,
-                                driverController.getLeftY() * MaxSpeed,
-                                drivetrain.getState().Pose.getRotation(),
-                                MaxSpeed)
-                        .vxMetersPerSecond)
-                .withVelocityY(align.getFieldRelativeChassisSpeeds(
-                                AlignConstants.REEF_ALIGN_MID_TX,
-                                driverController.getLeftY() * MaxSpeed,
-                                drivetrain.getState().Pose.getRotation(),
-                                MaxSpeed)
-                        .vyMetersPerSecond)
-                .withTargetDirection(align.getAlignAngleReef())));
+        // algaeAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> pointTowards
+        //                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
+        //                                 AlignConstants.REEF_ALIGN_MID_TX,
+        //                                 driverController.getLeftY() * MaxSpeed,
+        //                                 drivetrain.getState().Pose.getRotation(),
+        //                                 MaxSpeed).vxMetersPerSecond)
+        //                 .withVelocityY(align.getFieldRelativeChassisSpeeds(
+        //                                 AlignConstants.REEF_ALIGN_MID_TX,
+        //                                 driverController.getLeftY() * MaxSpeed,
+        //                                 drivetrain.getState().Pose.getRotation(),
+        //                                 MaxSpeed).vyMetersPerSecond)
+        //                 .withTargetDirection(align.getAlignAngleReef())));
+
+        // alignPOVUp.whileTrue(align.getCSPathCommand(
+        //         () -> drivetrain.getState().Pose.getMeasureY().in(Meters) < 4.0259));
+
+        alignPovDown.whileTrue(drivetrain.applyRequest(
+                () -> robotOrientedDrive
+                        .withVelocityX(-align.getAlignForwardSpeedPercent2(AlignConstants.REEF_ALIGN_TZ)
+                                * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityY(-align.getAlignStrafeSpeedPercent2(AlignConstants.REEF_ALIGN_MID_TX)
+                                * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleAlgaeReef())
+                                * MaxAngularRate) // Drive counterclockwise with
+                // negative X (left)
+                ));
+
+        alignPovLeft.whileTrue(drivetrain.applyRequest(
+                () -> robotOrientedDrive
+                        .withVelocityX(align.getAlignForwardSpeedPercent2(AlignConstants.REEF_ALIGN_TZ) * MaxSpeed)
+                        .withVelocityY(align.getAlignStrafeSpeedPercent2(AlignConstants.REEF_ALIGN_LEFT_TX) * MaxSpeed)
+                        .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+                                * MaxAngularRate) // Drive counterclockwise with
+                // negative X (left)
+                ));
+
+        alignPovRight.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
+                .withVelocityX(align.getAlignForwardSpeedPercent2(AlignConstants.REEF_ALIGN_TZ) * MaxSpeed)
+                .withVelocityY(align.getAlignStrafeSpeedPercent2(AlignConstants.REEF_ALIGN_RIGHT_TX) * MaxSpeed)
+                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
 
         strafeTriggers.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
-                        .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward with negative Y
+                        .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward
+                        // with negative
+                        // Y
                         // (forward)
                         .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
                                 * 0.1
                                 * MaxSpeed) // Drive left with negative X (left)
-                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive counterclockwise
+                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive
+                // counterclockwise
                 // with negative X (left)
                 ));
 
@@ -190,36 +229,37 @@ public class RobotContainer {
         armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
 
         // alignPovLeft.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_LEFT_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vxMetersPerSecond)
-        //         .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_LEFT_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vyMetersPerSecond)
-        //        .withTargetDirection(align.getAlignAngleReef())));
+        // .withVelocityX(align.getFieldRelativeChassisSpeeds(
+        // AlignConstants.REEF_ALIGN_LEFT_TX,
+        // AlignConstants.REEF_ALIGN_TY,
+        // drivetrain.getState().Pose.getRotation(),
+        // MaxSpeed)
+        // .vxMetersPerSecond)
+        // .withVelocityY(align.getFieldRelativeChassisSpeeds(
+        // AlignConstants.REEF_ALIGN_LEFT_TX,
+        // AlignConstants.REEF_ALIGN_TY,
+        // drivetrain.getState().Pose.getRotation(),
+        // MaxSpeed)
+        // .vyMetersPerSecond)
+        // .withTargetDirection(align.getAlignAngleReef())));
 
         // alignPovRight.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        //         .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_RIGHT_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vxMetersPerSecond)
-        //         .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        //                         AlignConstants.REEF_ALIGN_RIGHT_TX,
-        //                         AlignConstants.REEF_ALIGN_TY,
-        //                         drivetrain.getState().Pose.getRotation(),
-        //                         MaxSpeed)
-        //                 .vyMetersPerSecond)
-        //         .withTargetDirection(align.getAlignAngleReef())));
+        // .withVelocityX(align.getFieldRelativeChassisSpeeds(
+        // AlignConstants.REEF_ALIGN_RIGHT_TX,
+        // AlignConstants.REEF_ALIGN_TY,
+        // drivetrain.getState().Pose.getRotation(),
+        // MaxSpeed)
+        // .vxMetersPerSecond)
+        // .withVelocityY(align.getFieldRelativeChassisSpeeds(
+        // AlignConstants.REEF_ALIGN_RIGHT_TX,
+        // AlignConstants.REEF_ALIGN_TY,
+        // drivetrain.getState().Pose.getRotation(),
+        // MaxSpeed)
+        // .vyMetersPerSecond)
+        // .withTargetDirection(align.getAlignAngleReef())));
 
-        // invertRobotOrientation.onTrue(new InstantCommand(() -> drivetrain.changeRobotOrientation()));
+        // invertRobotOrientation.onTrue(new InstantCommand(() ->
+        // drivetrain.changeRobotOrientation()));
 
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
@@ -240,14 +280,15 @@ public class RobotContainer {
         retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
         zeroClimber_PovLeft.onTrue(new InstantCommand(() -> climber.zeroClimber()));
         // barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
-        //         .andThen(new InstantCommand(() -> arm.setBarge())));
+        // .andThen(new InstantCommand(() -> arm.setBarge())));
 
         // resetAdjusts_RB.onTrue(
-        //         new InstantCommand(() -> elevator.resetAdjust()).andThen(new InstantCommand(() ->
+        // new InstantCommand(() -> elevator.resetAdjust()).andThen(new
+        // InstantCommand(() ->
         // arm.resetAdjust())));
 
         // climb_RB.onTrue(new InstantCommand(() -> arm.setClimb())
-        //         .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
+        // .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
 
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
@@ -260,11 +301,15 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> ledstrip.setLEDsAlgaeMode())));
 
         // elevatorAdjustUp_POV_0.whileTrue(
-        //         new RunCommand(() -> elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
+        // new RunCommand(() ->
+        // elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
         // elevatorAdjustDown_POV_180.whileTrue(
-        //         new RunCommand(() -> elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
-        // armAdjustUp_POV_90.whileTrue(new RunCommand(() -> arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
-        // armAdjustDown_POV_270.whileTrue(new RunCommand(() -> arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
+        // new RunCommand(() ->
+        // elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
+        // armAdjustUp_POV_90.whileTrue(new RunCommand(() ->
+        // arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
+        // armAdjustDown_POV_270.whileTrue(new RunCommand(() ->
+        // arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -301,15 +346,25 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
         NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralIn()));
-        NamedCommands.registerCommand("Intake", new InstantCommand(() -> endEffector.coralOut()));
+        NamedCommands.registerCommand(
+                "Intake", new InstantCommand(() -> endEffector.coralOut()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
         NamedCommands.registerCommand("HoldCoral", new InstantCommand(() -> endEffector.holdCoral()));
 
+        // NamedCommands.registerCommand("Auto Align", drivetrain.applyRequest(
+        //         () -> robotOrientedDrive
+        //                 .withVelocityX(align.getAlignForwardSpeedPercent2(AlignConstants.REEF_ALIGN_TZ) * MaxSpeed)
+        //                 .withVelocityY(align.getAlignStrafeSpeedPercent2(AlignConstants.REEF_ALIGN_LEFT_TX) * MaxSpeed)
+        //                 .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+        //                         * MaxAngularRate) // Drive counterclockwise with
+        //         // negative X (left)
+        //         ));
+
         // NamedCommands.registerCommand(
-        //         "Intake Station",
-        //         new InstantCommand(() -> endEffector.coralIn())
-        //                 .until(() -> endEffector.hasCoral())
-        //                 .andThen(new InstantCommand(() -> endEffector.stop())));
+        // "Intake Station",
+        // new InstantCommand(() -> endEffector.coralIn())
+        // .until(() -> endEffector.hasCoral())
+        // .andThen(new InstantCommand(() -> endEffector.stop())));
     }
 
     public void setDefaultCommands() {
@@ -319,9 +374,13 @@ public class RobotContainer {
                         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
                                         * MaxSpeed) // Drive forward with negative Y (forward)
                                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                        * MaxSpeed) // Drive left with negative X (left)
+                                        * MaxSpeed) // Drive left with negative
+                                // X (left)
                                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                        * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                                        * MaxAngularRate) // Drive
+                        // counterclockwise
+                        // with negative X
+                        // (left)
                         ));
 
         elevator.setDefaultCommand(new ElevatorHold());
