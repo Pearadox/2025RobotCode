@@ -64,10 +64,13 @@ public class Constants {
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.94 / 2.0);
 
         // target relative
-        public static final double REEF_ALIGN_MID_TX = -0.05; // 0.28575
-        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING + REEF_ALIGN_MID_TX;
-        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING + REEF_ALIGN_MID_TX + 0.02;
+        public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
+        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING + REEF_ALIGN_MID_TX - 0.05;
+        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING + REEF_ALIGN_MID_TX + 0.04 - 0.05;
         public static final double REEF_ALIGN_TZ = -0; // target relative
+
+        public static final double STATION_ALIGN_TX = 0.05;
+        public static final double STATION_ALIGN_TZ = 0.5;
 
         public static final double REEF_kP = 0.5; // Tune all PID values
         public static final double REEF_kI = 0;
@@ -110,7 +113,7 @@ public class Constants {
         // the following are in inches
         public static final double STOWED_HEIGHT = 0;
         public static final double STATION_HEIGHT =
-                16.4; // Home Field is 1in higher than official field - official is 15.4
+                15; // Home Field is 1in higher than official field - official is 15.4
         public static final double LEVEL_TWO_HEIGHT =
                 8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
         public static final double LEVEL_THREE_HEIGHT = 1.5; // 15 //TODO l3 height

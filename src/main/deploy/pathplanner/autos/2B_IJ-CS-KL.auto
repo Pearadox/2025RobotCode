@@ -25,6 +25,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Auto Align Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Outtake"
           }
         },
@@ -32,12 +38,6 @@
           "type": "wait",
           "data": {
             "waitTime": 0.5
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "LevelStation"
           }
         },
         {
@@ -49,7 +49,19 @@
         {
           "type": "named",
           "data": {
+            "name": "Auto Align Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Intake"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
@@ -62,6 +74,12 @@
           "type": "path",
           "data": {
             "pathName": "CS-KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Left"
           }
         },
         {

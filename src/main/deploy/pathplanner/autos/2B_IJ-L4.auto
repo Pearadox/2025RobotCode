@@ -11,21 +11,27 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "LevelFour"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "2B_IJ"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 2.0
+            "name": "Auto Align Left"
           }
         },
         {
-          "type": "path",
+          "type": "named",
           "data": {
-            "pathName": "IJ_BACK"
+            "name": "Outtake"
           }
         }
       ]
