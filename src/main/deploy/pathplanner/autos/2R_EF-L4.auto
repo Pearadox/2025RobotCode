@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop EE"
+            "name": "HoldCoral"
           }
         },
         {
@@ -17,21 +17,21 @@
           }
         },
         {
-          "type": "named",
-          "data": {
-            "name": "HoldCoral"
-          }
-        },
-        {
           "type": "path",
           "data": {
             "pathName": "2R_EF"
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Left"
+          }
+        },
+        {
           "type": "wait",
           "data": {
-            "waitTime": 3.0
+            "waitTime": 0.5
           }
         },
         {

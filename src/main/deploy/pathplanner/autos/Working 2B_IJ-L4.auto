@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop EE"
+            "name": "HoldCoral"
           }
         },
         {
@@ -26,6 +26,12 @@
           "type": "named",
           "data": {
             "name": "Auto Align Left"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.5
           }
         },
         {
