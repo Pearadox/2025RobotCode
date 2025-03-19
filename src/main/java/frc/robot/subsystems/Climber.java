@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
@@ -19,6 +18,8 @@ import org.littletonrobotics.junction.Logger;
 public class Climber extends SubsystemBase {
     // private final SparkMax climbMotor;
     private final PearadoxTalonFX climbMotor;
+
+    private final Arm arm = Arm.getInstance();
 
     private static final Climber CLIMBER = new Climber();
     private TalonFXConfiguration talonFXConfigs;
@@ -84,8 +85,10 @@ public class Climber extends SubsystemBase {
     }
 
     public void retractClimber() {
-        // climbMotor.set(-0.7);
-        climbMotor.setControl(new PositionVoltage(-130)); //-150
+        arm.setAlgae();
+        arm.setStowed();
+        climbMotor.set(-0.7);
+        // climbMotor.setControl(new PositionVoltage(170)); // -130
     }
 
     public void zeroClimber() {
