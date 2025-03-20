@@ -50,7 +50,7 @@ public class EndEffector extends SubsystemBase {
     public EndEffector() {
         endEffector = new PearadoxTalonFX(EndEffectorConstants.END_EFFECTOR_ID, NeutralModeValue.Brake, 60, false);
         endSensor = new DigitalInput(EndEffectorConstants.END_SENSOR_CHANNEL);
-        debouncer = new Debouncer(0.125, DebounceType.kFalling);
+        debouncer = new Debouncer(0.125, DebounceType.kRising);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -205,7 +205,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean hasCoral() {
-        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 40);
+        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 50);
     }
 
     public boolean getHolding() {

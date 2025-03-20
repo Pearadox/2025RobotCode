@@ -13,7 +13,7 @@ public class Constants {
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
-        public static final String LL_B_NAME = "limelight-coral-station"; // TODO: limelight names & offsets
+        public static final String LL_B_NAME = "limelight-front"; // TODO: limelight names & offsets
 
         public static final Vector<N3> LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
         public static final Vector<N3> MEGATAG2_LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
@@ -47,9 +47,9 @@ public class Constants {
 
     public static final class AlignConstants {
         // TODO: possible align pid adjustment
-        public static final double ALIGN_STRAFE_KP = 0.04;
+        public static final double ALIGN_STRAFE_KP = 0.06;
         public static final double ALIGN_STRAFE_KI = 0.001;
-        public static final double ALIGN_FORWARD_KP = 0.05; // -0.06
+        public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
         public static final double ALIGN_KS = 0.009;
 
         // tx and ty tolerances with setpoint
@@ -69,8 +69,8 @@ public class Constants {
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING + REEF_ALIGN_MID_TX + 0.04 - 0.05;
         public static final double REEF_ALIGN_TZ = -0; // target relative
 
-        public static final double STATION_ALIGN_TX = 0.05;
-        public static final double STATION_ALIGN_TZ = 0.5;
+        public static final double STATION_ALIGN_TX = 0.07;
+        public static final double STATION_ALIGN_TZ = -0.3;
 
         public static final double REEF_kP = 0.5; // Tune all PID values
         public static final double REEF_kI = 0;

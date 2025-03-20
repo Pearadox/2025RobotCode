@@ -31,13 +31,13 @@
         {
           "type": "named",
           "data": {
-            "name": "Outtake"
+            "name": "Stop"
           }
         },
         {
-          "type": "wait",
+          "type": "named",
           "data": {
-            "waitTime": 0.5
+            "name": "Outtake"
           }
         },
         {
@@ -49,31 +49,19 @@
         {
           "type": "named",
           "data": {
-            "name": "LevelStation"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "Auto Align Station"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Intake"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
+            "name": "Stop"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "LevelFour"
+            "name": "Intake"
           }
         },
         {
@@ -86,6 +74,60 @@
           "type": "named",
           "data": {
             "name": "Auto Align Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "KL-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS-KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
           }
         },
         {

@@ -11,6 +11,7 @@ import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
+import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -151,6 +152,13 @@ public class RobotContainer {
 
         align = new AutoAlign(() -> drivetrain.getState().Pose);
         PathfindingCommand.warmupCommand().schedule();
+
+        new EventTrigger("LevelStation")
+                .onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
+                        .andThen(new InstantCommand(() -> arm.setArmIntake())));
+        new EventTrigger("LevelFour")
+                .onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+                        .andThen(new InstantCommand(() -> arm.setArmL4())));
     }
 
     private void configureBindings() {
@@ -366,9 +374,18 @@ public class RobotContainer {
 
         NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralOut()));
         NamedCommands.registerCommand(
-                "Intake", new InstantCommand(() -> endEffector.coralIn()).until(() -> endEffector.hasCoral()));
+                "Intake", new RunCommand(() -> endEffector.coralIn()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
         NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
+
+        NamedCommands.registerCommand(
+                "Stop",
+                drivetrain
+                        .applyRequest(() -> robotOrientedDrive
+                                .withVelocityX(0)
+                                .withVelocityY(0)
+                                .withRotationalRate(0))
+                        .withTimeout(0.05));
 
         NamedCommands.registerCommand(
                 "Auto Align Left",
@@ -386,22 +403,43 @@ public class RobotContainer {
                                                         * MaxAngularRate) // Drive counterclockwise with
                                 // negative X (left)
                                 )
-                        .withTimeout(1));
+                        .withTimeout(1.4));
+
+        NamedCommands.registerCommand(
+                "Auto Align Right",
+                drivetrain
+                        .applyRequest(
+                                () -> robotOrientedDrive
+                                        .withVelocityX(align.getAlignForwardSpeedPercent(
+                                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                                                * MaxSpeed)
+                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
+                                                        AlignConstants.REEF_ALIGN_RIGHT_TX, align.getReefAlignTag())
+                                                * MaxSpeed)
+                                        .withRotationalRate(
+                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+                                                        * MaxAngularRate) // Drive counterclockwise with
+                                // negative X (left)
+                                )
+                        .withTimeout(1.4));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
-                drivetrain.applyRequest(
-                        () -> robotOrientedDrive
-                                .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag())
-                                        * MaxSpeed) // Drive forward with negative Y (forward)
-                                .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag())
-                                        * MaxSpeed) // Drive left with negative X (left)
-                                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
-                                        * MaxAngularRate) // Drive counterclockwise with
-                        // negative X (left)
-                        ));
+                drivetrain
+                        .applyRequest(
+                                () -> robotOrientedDrive
+                                        .withVelocityX(-align.getAlignForwardSpeedPercent(
+                                                        AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag())
+                                                * MaxSpeed) // Drive forward with negative Y (forward)
+                                        .withVelocityY(-align.getAlignStrafeSpeedPercent(
+                                                        AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag())
+                                                * MaxSpeed) // Drive left with negative X (left)
+                                        .withRotationalRate(
+                                                align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
+                                                        * MaxAngularRate) // Drive counterclockwise with
+                                // negative X (left)
+                                )
+                        .withTimeout(1));
 
         // NamedCommands.registerCommand(
         // "Intake Station",

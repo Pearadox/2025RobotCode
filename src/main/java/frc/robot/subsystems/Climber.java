@@ -23,6 +23,9 @@ public class Climber extends SubsystemBase {
     private static final Climber CLIMBER = new Climber();
     private TalonFXConfiguration talonFXConfigs;
 
+    private static final Elevator ELEVATOR = Elevator.getInstance();
+    private static final Arm ARM = Arm.getInstance();
+
     public static Climber getInstance() {
         return CLIMBER;
     }
@@ -85,7 +88,10 @@ public class Climber extends SubsystemBase {
 
     public void retractClimber() {
         // climbMotor.set(-0.7);
-        climbMotor.setControl(new PositionVoltage(-130)); //-150
+        ELEVATOR.setElevatorStowedMode();
+        ARM.setAlgae();
+        ARM.setStowed();
+        climbMotor.setControl(new PositionVoltage(-230)); // -150
     }
 
     public void zeroClimber() {

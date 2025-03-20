@@ -184,7 +184,7 @@ public class AutoAlign {
         double tz = targetRelativeRobotPose[2];
         double tzError = tz - setPoint;
 
-        Transform2d offset = poseSupplier.get().minus(getTagPose(currentReefAlignTagID));
+        Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
         if (true) {
             alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
