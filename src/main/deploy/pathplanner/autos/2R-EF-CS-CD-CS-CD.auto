@@ -31,6 +31,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Outtake"
           }
         },
@@ -44,6 +50,12 @@
           "type": "named",
           "data": {
             "name": "Auto Align Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
           }
         },
         {
@@ -67,6 +79,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Outtake"
           }
         },
@@ -85,6 +103,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "Intake"
           }
         },
@@ -98,6 +122,12 @@
           "type": "named",
           "data": {
             "name": "Auto Align Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
           }
         },
         {
