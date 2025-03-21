@@ -9,6 +9,7 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.AlignConstants;
@@ -80,9 +81,9 @@ public class AutoAlign {
     }
 
     public Rotation2d getAlignAngleReef() {
-        currentReefAlignTagID = getClosestAprilTag(
-                RobotContainer.isRedAlliance() ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.BLUE_REEF_TAG_IDS,
-                poseSupplier.get());
+        if (!DriverStation.isAutonomous()) {
+            setReefAlignTagIDtoClosest();
+        }
 
         return getTagAngle(currentReefAlignTagID);
     }
@@ -133,9 +134,9 @@ public class AutoAlign {
     public double getAlignStrafeSpeedPercent(double setPoint, int tagID) {
         // 3D transform of the robot in the coordinate system of the primary in-view AprilTag
         // (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
-        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
-        double tx = targetRelativeRobotPose[0];
-        double txError = tx - setPoint;
+        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
+        // double tx = targetRelativeRobotPose[0];
+        // double txError = tx - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
@@ -158,8 +159,10 @@ public class AutoAlign {
         }
 
         Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
-        Logger.recordOutput("Align/tx", tx);
-        Logger.recordOutput("Align/tx Error", txError);
+        Logger.recordOutput("Align/Strafe Setpoint", setPoint);
+        Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
+        // Logger.recordOutput("Align/tx", tx);
+        // Logger.recordOutput("Align/tx Error", txError);
 
         return alignSpeedStrafe;
     }
@@ -180,9 +183,9 @@ public class AutoAlign {
 
     public double getAlignForwardSpeedPercent(double setPoint, int tagID) {
 
-        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
-        double tz = targetRelativeRobotPose[2];
-        double tzError = tz - setPoint;
+        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
+        // double tz = targetRelativeRobotPose[2];
+        // double tzError = tz - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
@@ -195,10 +198,14 @@ public class AutoAlign {
         }
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
-        Logger.recordOutput("Align/ty", tz);
-        Logger.recordOutput("Align/ty Error", tzError);
+        // Logger.recordOutput("Align/ty", tz);
+        // Logger.recordOutput("Align/ty Error", tzError);
         Logger.recordOutput("Align/x", offset.getX());
         Logger.recordOutput("Align/y", offset.getY());
+        Logger.recordOutput("Align/Offset", offset);
+        Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
+        Logger.recordOutput("Align/Fwd Setpoint", setPoint);
+        Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
 
         return alignSpeedForward;
     }
@@ -245,5 +252,11 @@ public class AutoAlign {
             e.printStackTrace();
             return Commands.print("align csp not found");
         }
+    }
+
+    public void setReefAlignTagIDtoClosest() {
+        currentReefAlignTagID = getClosestAprilTag(
+                RobotContainer.isRedAlliance() ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.BLUE_REEF_TAG_IDS,
+                poseSupplier.get());
     }
 }

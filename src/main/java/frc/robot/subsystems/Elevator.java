@@ -278,7 +278,14 @@ public class Elevator extends SubsystemBase {
     }
 
     public void zeroElevator() {
+        SmarterDashboard.putNumber(
+                "Elevator/New Zero Diff", 0 - elevator.getPosition().getValueAsDouble());
         elevator.setPosition(0);
+        elevatorOffset = 0;
+    }
+
+    public void stopElevator() {
+        elevator.set(0);
     }
 
     public double getElevatorPositionRots() {

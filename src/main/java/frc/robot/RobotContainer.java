@@ -42,6 +42,8 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
     // second max angular velocity
 
+    private double speedMultiplier = 1.0;
+
     public static final Elevator elevator = Elevator.getInstance();
     public static final Arm arm = Arm.getInstance();
     public static final EndEffector endEffector = EndEffector.getInstance();
@@ -85,6 +87,8 @@ public class RobotContainer {
     private final JoystickButton intake_LB = new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
     private final JoystickButton outtake_RB =
             new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+
+    private final JoystickButton slowmode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
 
     // private final JoystickButton zeroElevator_LB =
     // new JoystickButton(opController, XboxController.Button.kBack.value);
@@ -174,8 +178,12 @@ public class RobotContainer {
 
         homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
-                .onFalse(new InstantCommand(() -> elevator.zeroElevator())
-                        .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
+                .onFalse(new InstantCommand(() -> elevator.stopElevator())
+                        .withTimeout(0.2)
+                        .andThen(new InstantCommand(() -> elevator.zeroElevator())
+                                .andThen(new InstantCommand(() -> elevator.setZeroing(false)))));
+
+        slowmode_A.onTrue(new InstantCommand(() -> drivetrain.changeSpeedMultiplier()));
 
         // algaeAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> pointTowards
         //                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
@@ -377,6 +385,14 @@ public class RobotContainer {
                 "Intake", new RunCommand(() -> endEffector.coralIn()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
         NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
+        NamedCommands.registerCommand(
+                "Home Elevator",
+                new InstantCommand(() -> elevator.setZeroing(true))
+                        .withTimeout(2.5)
+                        .andThen(new InstantCommand(() -> elevator.stopElevator()))
+                        .withTimeout(0.2)
+                        .andThen(new InstantCommand(() -> elevator.zeroElevator()))
+                        .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
         NamedCommands.registerCommand(
                 "Stop",
@@ -389,39 +405,43 @@ public class RobotContainer {
 
         NamedCommands.registerCommand(
                 "Auto Align Left",
-                drivetrain
-                        .applyRequest(
-                                () -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_LEFT_TX, align.getReefAlignTag())
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate) // Drive counterclockwise with
-                                // negative X (left)
-                                )
-                        .withTimeout(1.4));
+                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+                        .andThen(drivetrain
+                                .applyRequest(
+                                        () -> robotOrientedDrive
+                                                .withVelocityX(align.getAlignForwardSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                                                        * MaxSpeed)
+                                                .withVelocityY(align.getAlignStrafeSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_LEFT_TX,
+                                                                align.getReefAlignTag())
+                                                        * MaxSpeed)
+                                                .withRotationalRate(
+                                                        align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+                                                                * MaxAngularRate) // Drive counterclockwise with
+                                        // negative X (left)
+                                        )
+                                .withTimeout(1.4)));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
-                drivetrain
-                        .applyRequest(
-                                () -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_RIGHT_TX, align.getReefAlignTag())
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate) // Drive counterclockwise with
-                                // negative X (left)
-                                )
-                        .withTimeout(1.4));
+                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+                        .andThen(drivetrain
+                                .applyRequest(
+                                        () -> robotOrientedDrive
+                                                .withVelocityX(align.getAlignForwardSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                                                        * MaxSpeed)
+                                                .withVelocityY(align.getAlignStrafeSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_RIGHT_TX,
+                                                                align.getReefAlignTag())
+                                                        * MaxSpeed)
+                                                .withRotationalRate(
+                                                        align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+                                                                * MaxAngularRate) // Drive counterclockwise with
+                                        // negative X (left)
+                                        )
+                                .withTimeout(1.4)));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
@@ -439,7 +459,7 @@ public class RobotContainer {
                                                         * MaxAngularRate) // Drive counterclockwise with
                                 // negative X (left)
                                 )
-                        .withTimeout(1));
+                        .withTimeout(1.25));
 
         // NamedCommands.registerCommand(
         // "Intake Station",
@@ -453,9 +473,9 @@ public class RobotContainer {
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                        * MaxSpeed * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
                                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                        * MaxSpeed) // Drive left with negative
+                                        * MaxSpeed * drivetrain.getSpeedMultipler()) // Drive left with negative
                                 // X (left)
                                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
                                         * MaxAngularRate) // Drive

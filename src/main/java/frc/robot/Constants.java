@@ -43,6 +43,8 @@ public class Constants {
 
         public static final double DEFAULT_DEADBAND = 0.07;
         public static final double DRIVER_ALIGNING_DEADBAND = 0.15;
+
+        public static final double SLOW_MODE_SPEED = 0.5;
     }
 
     public static final class AlignConstants {
@@ -61,7 +63,7 @@ public class Constants {
         public static final double ALIGN_DAMPING_FACTOR = 0.75;
         public static final double ALIGN_SPEED_DEADBAND = 0.025;
 
-        public static final double BRANCH_SPACING = Units.inchesToMeters(12.94 / 2.0);
+        public static final double BRANCH_SPACING = Units.inchesToMeters(12.94 / 2.0); // 12.94
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
@@ -206,6 +208,7 @@ public class Constants {
         public static final double CLIMB_VALUE = 0.7;
 
         public static final double CLIMB_ROTS = -126.0;
+        public static final double CLIMB_SETPOINT = -210.0;
     }
 
     public static final class IntakeConstants {
