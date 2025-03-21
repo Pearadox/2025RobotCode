@@ -119,7 +119,7 @@ public class Constants {
         public static final double LEVEL_THREE_HEIGHT = 1.5; // 15 //TODO l3 height
         public static final double LEVEL_FOUR_HEIGHT = 24.6; // 29.625; //
 
-        public static final double ALGAE_LOW_HEIGHT = 6.7;
+        public static final double ALGAE_LOW_HEIGHT = 6.4; // 6.7
         public static final double ALGAE_HIGH_HEIGHT = 16;
 
         public static final double BARGE_HEIGHT = 33;

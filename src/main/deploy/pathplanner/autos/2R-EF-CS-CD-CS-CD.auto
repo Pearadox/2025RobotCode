@@ -135,6 +135,12 @@
           "data": {
             "name": "Outtake"
           }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CD_BackUp"
+          }
         }
       ]
     }
