@@ -12,7 +12,9 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
+import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
@@ -89,6 +91,7 @@ public class RobotContainer {
             new JoystickButton(opController, XboxController.Button.kRightBumper.value);
 
     private final JoystickButton slowmode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
+    private final JoystickButton climbAlign_Y = new JoystickButton(driverController, XboxController.Button.kY.value);
 
     // private final JoystickButton zeroElevator_LB =
     // new JoystickButton(opController, XboxController.Button.kBack.value);
@@ -197,6 +200,24 @@ public class RobotContainer {
         //                                 drivetrain.getState().Pose.getRotation(),
         //                                 MaxSpeed).vyMetersPerSecond)
         //                 .withTargetDirection(align.getAlignAngleReef())));
+
+        climbAlign_Y.whileTrue(drivetrain.applyRequest(
+                () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+                                * MaxSpeed
+                                * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
+                        .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+                                * MaxSpeed
+                                * drivetrain.getSpeedMultipler()) // Drive left with negative
+                        // X (left)
+                        .withRotationalRate(align.getAlignRotationSpeedPercent(
+                                        (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+                                                ? Rotation2d.kCW_90deg
+                                                : Rotation2d.kCCW_90deg)
+                                * MaxAngularRate) // Drive
+                // counterclockwise
+                // with negative X
+                // (left)
+                ));
 
         alignPOVUp.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
@@ -421,7 +442,7 @@ public class RobotContainer {
                                                                 * MaxAngularRate) // Drive counterclockwise with
                                         // negative X (left)
                                         )
-                                .withTimeout(1.4)));
+                                .withTimeout(1.5)));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
@@ -441,7 +462,7 @@ public class RobotContainer {
                                                                 * MaxAngularRate) // Drive counterclockwise with
                                         // negative X (left)
                                         )
-                                .withTimeout(1.4)));
+                                .withTimeout(1.5)));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
@@ -473,9 +494,11 @@ public class RobotContainer {
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                        * MaxSpeed * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
+                                        * MaxSpeed
+                                        * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
                                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                        * MaxSpeed * drivetrain.getSpeedMultipler()) // Drive left with negative
+                                        * MaxSpeed
+                                        * drivetrain.getSpeedMultipler()) // Drive left with negative
                                 // X (left)
                                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
                                         * MaxAngularRate) // Drive

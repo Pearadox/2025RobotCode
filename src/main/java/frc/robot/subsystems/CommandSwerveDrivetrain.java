@@ -47,6 +47,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     private double m_lastSimTime;
     public boolean isFieldOriented = true;
     private double speedMultiplier = 1.0;
+    private boolean isSlowMode = false;
 
     /* Blue alliance sees forward as 0 degrees (toward red alliance wall) */
     private static final Rotation2d kBlueAlliancePerspectiveRotation = Rotation2d.kZero;
@@ -273,6 +274,7 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
 
         SmarterDashboard.putNumber("Drive/X", offset.getX());
         SmarterDashboard.putNumber("Drive/Y", offset.getY());
+        SmarterDashboard.putBoolean("Drive/Slow Mode", isSlowMode);
     }
 
     private void startSimThread() {
@@ -326,11 +328,14 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void changeSpeedMultiplier() {
-        if(speedMultiplier <= DriveConstants.SLOW_MODE_SPEED + 1e-6) {
+        if (speedMultiplier <= DriveConstants.SLOW_MODE_SPEED + 1e-6) {
             speedMultiplier = 1;
+            isSlowMode = false;
+        } else {
+            speedMultiplier = DriveConstants.SLOW_MODE_SPEED;
+            isSlowMode = true;
         }
-        else speedMultiplier = DriveConstants.SLOW_MODE_SPEED;
-    } 
+    }
 
     public double getSpeedMultipler() {
         return speedMultiplier;

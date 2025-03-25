@@ -147,16 +147,16 @@ public class AutoAlign {
         //         < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
         // Logger.recordOutput("Align/IsWithinRotTolerance", withinRotRolerance);
 
-        boolean isValid = llIsValid(); // && withinRotRolerance;
-        if (true) {
-            // multiply error by kP to get the speed
-            alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
-            alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
-        } else {
-            // reduce the current align speed by 1/4 each tick
-            // this prevents it from suddenly stopping and starting when it loses sight of the tag
-            alignSpeedStrafe *= AlignConstants.ALIGN_DAMPING_FACTOR;
-        }
+        // boolean isValid = llIsValid(); // && withinRotRolerance;
+        // if (true) {
+        // multiply error by kP to get the speed
+        alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
+        alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+        // } else {
+        //     // reduce the current align speed by 1/4 each tick
+        //     // this prevents it from suddenly stopping and starting when it loses sight of the tag
+        //     alignSpeedStrafe *= AlignConstants.ALIGN_DAMPING_FACTOR;
+        // }
 
         Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
         Logger.recordOutput("Align/Strafe Setpoint", setPoint);
@@ -189,13 +189,13 @@ public class AutoAlign {
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
-        if (true) {
-            alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
-        } else {
-            // reduce the current align speed by 1/4 each tick
-            // this prevents it from suddenly stopping and starting when it loses sight of the tag
-            alignSpeedForward *= AlignConstants.ALIGN_DAMPING_FACTOR;
-        }
+        // if (true) {
+        alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
+        // } else {
+        //     // reduce the current align speed by 1/4 each tick
+        //     // this prevents it from suddenly stopping and starting when it loses sight of the tag
+        //     alignSpeedForward *= AlignConstants.ALIGN_DAMPING_FACTOR;
+        // }
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
         // Logger.recordOutput("Align/ty", tz);
@@ -205,7 +205,8 @@ public class AutoAlign {
         Logger.recordOutput("Align/Offset", offset);
         Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
         Logger.recordOutput("Align/Fwd Setpoint", setPoint);
-        Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
+        Logger.recordOutput("Align/TagID", tagID);
+        // Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
 
         return alignSpeedForward;
     }
