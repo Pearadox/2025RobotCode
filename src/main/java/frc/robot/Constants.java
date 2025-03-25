@@ -1,5 +1,7 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
@@ -8,6 +10,9 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 
 public class Constants {
 
@@ -255,5 +260,17 @@ public class Constants {
         public static final double HOLD_SPEED = -0.075;
 
         public static final int END_SENSOR_CHANNEL = 0;
+    }
+
+    public static final class LEDConstants {        
+        public static final int NUM_LEDS = 28;
+        public static final int PORT = 9;
+
+        // to adjust
+        public static final Frequency SCROLL_FREQ = Percent.per(Second).of(25);
+        public static final Time BLINK_PERIOD = Seconds.of(0.5);
+        public static final Time BLINKING_DURATION = BLINK_PERIOD.times(2);
+        public static final Dimensionless BLINK_BRIGHTNESS = Percent.of(50);
+        public static final Time BREATHE_PERIOD = Seconds.of(1); 
     }
 }

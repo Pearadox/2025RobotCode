@@ -14,12 +14,9 @@ import com.pathplanner.lib.controllers.PPHolonomicDriveController;
 import edu.wpi.first.math.Matrix;
 import edu.wpi.first.math.filter.SlewRateLimiter;
 import edu.wpi.first.math.geometry.Pose2d;
-import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
-import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.numbers.N1;
 import edu.wpi.first.math.numbers.N3;
-import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Notifier;
@@ -28,13 +25,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Subsystem;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants.DriveConstants;
-import frc.robot.Constants.FieldConstants;
-import frc.robot.Constants.VisionConstants;
-import frc.robot.RobotContainer;
 import frc.robot.generated.TunerConstants.TunerSwerveDrivetrain;
-import frc.robot.util.SmarterDashboard;
-import java.util.HashMap;
-import java.util.Map;
 import java.util.function.Supplier;
 
 /**
@@ -268,11 +259,6 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
                 m_hasAppliedOperatorPerspective = true;
             });
         }
-
-        Transform2d offset = getState().Pose.minus(getTagPose(currentCSAlignTagID));
-
-        SmarterDashboard.putNumber("Drive/X", offset.getX());
-        SmarterDashboard.putNumber("Drive/Y", offset.getY());
     }
 
     private void startSimThread() {
@@ -326,101 +312,12 @@ public class CommandSwerveDrivetrain extends TunerSwerveDrivetrain implements Su
     }
 
     public void changeSpeedMultiplier() {
-        if(speedMultiplier <= DriveConstants.SLOW_MODE_SPEED + 1e-6) {
+        if (speedMultiplier <= DriveConstants.SLOW_MODE_SPEED + 1e-6) {
             speedMultiplier = 1;
-        }
-        else speedMultiplier = DriveConstants.SLOW_MODE_SPEED;
-    } 
+        } else speedMultiplier = DriveConstants.SLOW_MODE_SPEED;
+    }
 
     public double getSpeedMultipler() {
         return speedMultiplier;
-    }
-
-    private int currentReefAlignTagID = 18; // -1
-    private int currentCSAlignTagID = 12; // -1
-    private Map<Integer, Pose3d> tagPoses3d = getTagPoses();
-
-    public Map<Integer, Pose3d> getTagPoses() {
-        Map<Integer, Pose3d> tagPoses = new HashMap<Integer, Pose3d>();
-        for (int tag : FieldConstants.RED_REEF_TAG_IDS) {
-            tagPoses.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
-        }
-        for (int tag : FieldConstants.BLUE_REEF_TAG_IDS) {
-            tagPoses.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
-        }
-        for (int tag : FieldConstants.RED_CORAL_STATION_TAG_IDS) {
-            tagPoses.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
-        }
-        for (int tag : FieldConstants.BLUE_CORAL_STATION_TAG_IDS) {
-            tagPoses.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
-        }
-        return tagPoses;
-    }
-
-    private Rotation2d getTagAngle(int tagID) {
-
-        if (tagPoses3d.containsKey(tagID)) {
-            Pose3d tagPose = tagPoses3d.get(tagID);
-            return new Rotation2d(tagPose.getRotation().getZ());
-        } else return new Rotation2d(0);
-    }
-
-    private Pose2d getTagPose(int tagID) {
-
-        if (tagPoses3d.containsKey(tagID)) {
-            Pose3d tagPose = tagPoses3d.get(tagID);
-            return tagPose.toPose2d();
-        } else return new Pose2d();
-    }
-
-    public Rotation2d getAlignAngleReef() {
-        currentReefAlignTagID = getClosestAprilTag(
-                RobotContainer.isRedAlliance() ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.BLUE_REEF_TAG_IDS,
-                getState().Pose);
-
-        return getTagAngle(currentReefAlignTagID);
-    }
-
-    public Rotation2d getAlignAngleAlgaeReef() {
-        currentReefAlignTagID = getClosestAprilTag(
-                RobotContainer.isRedAlliance() ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.BLUE_REEF_TAG_IDS,
-                getState().Pose);
-
-        return new Rotation2d(getTagAngle(currentReefAlignTagID).getRadians() + Units.degreesToRadians(180));
-    }
-
-    public Rotation2d getAlignAngleStation() {
-        currentCSAlignTagID = getClosestAprilTag(
-                RobotContainer.isRedAlliance()
-                        ? FieldConstants.RED_CORAL_STATION_TAG_IDS
-                        : FieldConstants.BLUE_CORAL_STATION_TAG_IDS,
-                getState().Pose);
-
-        return new Rotation2d(getTagAngle(currentCSAlignTagID).getRadians() + +Units.degreesToRadians(180));
-    }
-
-    private int getClosestAprilTag(int[] tagIDs, Pose2d robotPose) {
-        double minDistance = Double.POSITIVE_INFINITY;
-        int closestTagID = -1;
-
-        // iterates through all tag IDs
-        for (int i : tagIDs) {
-            if (tagPoses3d.containsKey(i)) {
-                Pose3d tagPose = tagPoses3d.get(i);
-
-                // distance between robot pose and april tag
-                double distance = tagPose.getTranslation()
-                        .toTranslation2d()
-                        .minus(robotPose.getTranslation())
-                        .getNorm();
-
-                if (distance < minDistance) {
-                    closestTagID = i;
-                    minDistance = distance;
-                }
-            }
-        }
-
-        return closestTagID;
     }
 }

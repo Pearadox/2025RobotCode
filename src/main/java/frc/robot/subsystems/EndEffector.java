@@ -227,4 +227,8 @@ public class EndEffector extends SubsystemBase {
     public void setAlgae() {
         isCoral = false;
     }
+
+    public boolean isCoral() {
+        return isCoral;
+    }
 }
