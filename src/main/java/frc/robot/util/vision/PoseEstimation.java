@@ -38,13 +38,13 @@ public class PoseEstimation {
     public PoseEstimation(/*SwerveDrivePoseEstimator poseEstimator*/ ) {
         // this.poseEstimator = poseEstimator;
 
-        backends = new LimelightBackend[1];
-        backendToggles = new boolean[1];
+        backends = new LimelightBackend[2];
+        backendToggles = new boolean[2];
 
         backends[0] = new LimelightBackend(VisionConstants.LL_NAME, true);
-        // backends[1] = new LimelightBackend(VisionConstants.LL_B_NAME, true);
+        backends[1] = new LimelightBackend(VisionConstants.LL_B_NAME, true);
         backendToggles[0] = true;
-        // backendToggles[1] = true;
+        backendToggles[1] = true;
     }
 
     public void periodic(double angularSpeed) {

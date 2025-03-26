@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.util.SmarterDashboard;
 
@@ -302,4 +303,10 @@ public class Arm extends SubsystemBase {
     public void resetAdjust() {
         armAdjust = 0;
     }
+
+    // public double getAutoArmAngle(){
+    //     double dist = RobotContainer.align.getTagDist(); //this doesnt work maybe make AutoAlign a subsystem
+        
+    //     return Math.acos((dist + ArmConstants.ARM_LENGTH * Math.cos(0)) / ArmConstants.ARM_LENGTH); //TODO Current Angle Setpoint
+    // }
 }

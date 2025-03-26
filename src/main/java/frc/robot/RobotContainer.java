@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.ClimbCommand;
@@ -222,10 +223,14 @@ public class RobotContainer {
         alignPOVUp.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
                         .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                        AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag())
+                                        AlignConstants.STATION_ALIGN_TZ,
+                                        align.getStationAlignTag(),
+                                        VisionConstants.LL_B_NAME)
                                 * MaxSpeed) // Drive forward with negative Y (forward)
                         .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                        AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag())
+                                        AlignConstants.STATION_ALIGN_TX,
+                                        align.getStationAlignTag(),
+                                        VisionConstants.LL_B_NAME)
                                 * MaxSpeed) // Drive left with negative X (left)
                         .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
                                 * MaxAngularRate) // Drive counterclockwise with
@@ -234,11 +239,13 @@ public class RobotContainer {
 
         alignPovDown.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
-                        .withVelocityX(
-                                align.getAlignForwardSpeedPercent(AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
-                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                        .withVelocityX(align.getAlignForwardSpeedPercent(
+                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                                * MaxSpeed) // Drive forward with negative Y (forward)
                         .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_MID_TX, align.getReefAlignTag())
+                                        AlignConstants.REEF_ALIGN_MID_TX,
+                                        align.getReefAlignTag(),
+                                        VisionConstants.LL_NAME)
                                 * MaxSpeed) // Drive left with negative X (left)
                         .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
                                 * MaxAngularRate) // Drive counterclockwise with
@@ -247,11 +254,13 @@ public class RobotContainer {
 
         alignPovLeft.whileTrue(drivetrain.applyRequest(
                 () -> robotOrientedDrive
-                        .withVelocityX(
-                                align.getAlignForwardSpeedPercent(AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
-                                        * MaxSpeed)
+                        .withVelocityX(align.getAlignForwardSpeedPercent(
+                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                                * MaxSpeed)
                         .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_LEFT_TX, align.getReefAlignTag())
+                                        AlignConstants.REEF_ALIGN_LEFT_TX,
+                                        align.getReefAlignTag(),
+                                        VisionConstants.LL_NAME)
                                 * MaxSpeed)
                         .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
                                 * MaxAngularRate) // Drive counterclockwise with
@@ -259,11 +268,12 @@ public class RobotContainer {
                 ));
 
         alignPovRight.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(align.getAlignForwardSpeedPercent(AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                .withVelocityX(align.getAlignForwardSpeedPercent(
+                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
                         * MaxSpeed)
-                .withVelocityY(
-                        align.getAlignStrafeSpeedPercent(AlignConstants.REEF_ALIGN_RIGHT_TX, align.getReefAlignTag())
-                                * MaxSpeed)
+                .withVelocityY(align.getAlignStrafeSpeedPercent(
+                                AlignConstants.REEF_ALIGN_RIGHT_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                        * MaxSpeed)
                 .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
 
         strafeTriggers.whileTrue(drivetrain.applyRequest(
@@ -431,11 +441,14 @@ public class RobotContainer {
                                 .applyRequest(
                                         () -> robotOrientedDrive
                                                 .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                                                                AlignConstants.REEF_ALIGN_TZ,
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
                                                         * MaxSpeed)
                                                 .withVelocityY(align.getAlignStrafeSpeedPercent(
                                                                 AlignConstants.REEF_ALIGN_LEFT_TX,
-                                                                align.getReefAlignTag())
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
                                                         * MaxSpeed)
                                                 .withRotationalRate(
                                                         align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
@@ -451,11 +464,14 @@ public class RobotContainer {
                                 .applyRequest(
                                         () -> robotOrientedDrive
                                                 .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag())
+                                                                AlignConstants.REEF_ALIGN_TZ,
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
                                                         * MaxSpeed)
                                                 .withVelocityY(align.getAlignStrafeSpeedPercent(
                                                                 AlignConstants.REEF_ALIGN_RIGHT_TX,
-                                                                align.getReefAlignTag())
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
                                                         * MaxSpeed)
                                                 .withRotationalRate(
                                                         align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
@@ -470,10 +486,14 @@ public class RobotContainer {
                         .applyRequest(
                                 () -> robotOrientedDrive
                                         .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag())
+                                                        AlignConstants.STATION_ALIGN_TZ,
+                                                        align.getStationAlignTag(),
+                                                        VisionConstants.LL_B_NAME)
                                                 * MaxSpeed) // Drive forward with negative Y (forward)
                                         .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag())
+                                                        AlignConstants.STATION_ALIGN_TX,
+                                                        align.getStationAlignTag(),
+                                                        VisionConstants.LL_B_NAME)
                                                 * MaxSpeed) // Drive left with negative X (left)
                                         .withRotationalRate(
                                                 align.getAlignRotationSpeedPercent(align.getAlignAngleStation())

@@ -166,6 +166,8 @@ public class Constants {
 
         public static final double ARM_GEAR_RATIO = 60; // ?
 
+        public static final double ARM_LENGTH = 0; //TODO
+
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT =

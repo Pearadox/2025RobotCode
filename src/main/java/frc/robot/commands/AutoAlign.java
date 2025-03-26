@@ -131,12 +131,18 @@ public class AutoAlign {
         return closestTagID;
     }
 
-    public double getAlignStrafeSpeedPercent(double setPoint, int tagID) {
+    public double getTagDist(){
+        Transform2d offset = poseSupplier.get().minus(getTagPose(currentReefAlignTagID));
+
+        return Math.sqrt(Math.pow(offset.getX(), 2) + Math.pow(offset.getY(), 2));
+    }
+
+    public double getAlignStrafeSpeedPercent(double setPoint, int tagID, String llName) {
         // 3D transform of the robot in the coordinate system of the primary in-view AprilTag
         // (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
-        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
-        // double tx = targetRelativeRobotPose[0];
-        // double txError = tx - setPoint;
+        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
+        double tx = targetRelativeRobotPose[0];
+        double txError = tx - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
@@ -147,16 +153,13 @@ public class AutoAlign {
         //         < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
         // Logger.recordOutput("Align/IsWithinRotTolerance", withinRotRolerance);
 
-        // boolean isValid = llIsValid(); // && withinRotRolerance;
-        // if (true) {
-        // multiply error by kP to get the speed
-        alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
-        alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
-        // } else {
-        //     // reduce the current align speed by 1/4 each tick
-        //     // this prevents it from suddenly stopping and starting when it loses sight of the tag
-        //     alignSpeedStrafe *= AlignConstants.ALIGN_DAMPING_FACTOR;
-        // }
+        if (!llIsValid(llName, tagID)) {
+            alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
+            alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+        } else {
+            alignSpeedStrafe = reefStrafeSpeedController.calculate(tx, setPoint);
+            alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+        }
 
         Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
         Logger.recordOutput("Align/Strafe Setpoint", setPoint);
@@ -181,21 +184,22 @@ public class AutoAlign {
         return alignSpeedRotation;
     }
 
-    public double getAlignForwardSpeedPercent(double setPoint, int tagID) {
+    public double getAlignForwardSpeedPercent(double setPoint, int tagID, String llName) {
 
-        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(VisionConstants.LL_NAME);
-        // double tz = targetRelativeRobotPose[2];
-        // double tzError = tz - setPoint;
+        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
+        double tz = targetRelativeRobotPose[2];
+        double tzError = tz - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
-        // if (true) {
-        alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
-        // } else {
-        //     // reduce the current align speed by 1/4 each tick
-        //     // this prevents it from suddenly stopping and starting when it loses sight of the tag
-        //     alignSpeedForward *= AlignConstants.ALIGN_DAMPING_FACTOR;
-        // }
+        if (!llIsValid(llName, tagID)) {
+            alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
+        } else {
+            if (tagID == currentCSAlignTagID) {
+                setPoint = 0;
+            }
+            alignSpeedForward = -reefForwardSpeedController.calculate(tz, setPoint);
+        }
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
         // Logger.recordOutput("Align/ty", tz);
@@ -206,6 +210,7 @@ public class AutoAlign {
         Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
         Logger.recordOutput("Align/Fwd Setpoint", setPoint);
         Logger.recordOutput("Align/TagID", tagID);
+        Logger.recordOutput("LL Valid", llIsValid(llName, tagID));
         // Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
 
         return alignSpeedForward;
@@ -219,10 +224,9 @@ public class AutoAlign {
         return currentCSAlignTagID;
     }
 
-    private boolean llIsValid() {
-        LimelightHelpers.setPriorityTagID(VisionConstants.LL_NAME, currentReefAlignTagID);
-        boolean valid = LimelightHelpers.getTargetCount(VisionConstants.LL_NAME) >= 1
-                && LimelightHelpers.getFiducialID(VisionConstants.LL_NAME) == currentReefAlignTagID;
+    private boolean llIsValid(String llName, int tagID) {
+        LimelightHelpers.setPriorityTagID(llName, tagID);
+        boolean valid = LimelightHelpers.getTargetCount(llName) >= 1 && LimelightHelpers.getFiducialID(llName) == tagID;
         Logger.recordOutput("Align/Valid", valid);
         return valid;
     }
@@ -231,7 +235,7 @@ public class AutoAlign {
             double tx, double ySpeed, Rotation2d gyroAngle, double maxSpeed, double maxAngularSpeed) {
         Logger.recordOutput("Align/Timestamp", System.currentTimeMillis());
         return ChassisSpeeds.fromRobotRelativeSpeeds(
-                getAlignStrafeSpeedPercent(tx, currentReefAlignTagID)
+                getAlignStrafeSpeedPercent(tx, currentReefAlignTagID, VisionConstants.LL_NAME)
                         * maxSpeed, // getAlignStrafeSpeedPercent(tx) * maxSpeed
                 ySpeed,
                 getAlignRotationSpeedPercent(getAlignAngleReef()) * maxAngularSpeed,

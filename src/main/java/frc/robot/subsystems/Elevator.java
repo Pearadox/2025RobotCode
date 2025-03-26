@@ -18,6 +18,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.util.SmarterDashboard;
@@ -287,6 +288,12 @@ public class Elevator extends SubsystemBase {
     public void stopElevator() {
         elevator.set(0);
     }
+
+    // public double getAutoHeightAdjust(){
+    //     double angle = RobotContainer.arm.getAutoArmAngle();
+
+    //     return 
+    // }
 
     public double getElevatorPositionRots() {
         return elevator.getPosition().getValueAsDouble();
