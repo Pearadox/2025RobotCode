@@ -19,9 +19,10 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
-import frc.robot.RobotContainer;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
     private PearadoxTalonFX pivot;
@@ -33,6 +34,7 @@ public class Arm extends SubsystemBase {
     private VoltageOut voltageRequest = new VoltageOut(0);
 
     private boolean isCoral = true;
+    private boolean isAligning = false;
     private double lastAngle = 0;
 
     private enum ArmMode {
@@ -155,6 +157,8 @@ public class Arm extends SubsystemBase {
         SmarterDashboard.putBoolean("Arm/IsCoral", isCoral);
         SmarterDashboard.putNumber("Arm/DeltaAngle", deltaArmAngle());
         SmarterDashboard.putNumber("Arm/kG", 0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() - 96)));
+
+        setAligning(!RobotContainer.align.isAligned());
     }
 
     public void armHold() {
@@ -194,7 +198,6 @@ public class Arm extends SubsystemBase {
         // } else {
         //     setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
         // }
-
         if (isCoral) {
             if (armMode == ArmMode.Stowed) {
                 setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
@@ -205,7 +208,12 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L3) {
                 setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
             } else if (armMode == ArmMode.L4) {
-                setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
+                if (isAligning) {
+                    // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
+                    setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
+                } else {
+                    setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
+                }
             }
         } else if (!isCoral) {
             if (armMode == ArmMode.Stowed) {
@@ -218,6 +226,9 @@ public class Arm extends SubsystemBase {
                 setpoint = ArmConstants.ARM_BARGE + armAdjust;
             }
         }
+
+        Logger.recordOutput("Arm/Align Setpoint", RobotContainer.align.getArmAngleRots() + armAdjust);
+
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
         pivot.setControl(new PositionVoltage(-setpoint)
                 .withFeedForward(0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() - 96))));
@@ -284,6 +295,10 @@ public class Arm extends SubsystemBase {
         return isCoral;
     }
 
+    public void setAligning(boolean flag) {
+        isAligning = flag;
+    }
+
     public double getPivotPosition() {
         return pivot.getPosition().getValueAsDouble() / ArmConstants.ARM_GEAR_RATIO;
     }
@@ -306,7 +321,8 @@ public class Arm extends SubsystemBase {
 
     // public double getAutoArmAngle(){
     //     double dist = RobotContainer.align.getTagDist(); //this doesnt work maybe make AutoAlign a subsystem
-        
-    //     return Math.acos((dist + ArmConstants.ARM_LENGTH * Math.cos(0)) / ArmConstants.ARM_LENGTH); //TODO Current Angle Setpoint
+
+    //     return Math.acos((dist + ArmConstants.ARM_LENGTH * Math.cos(0)) / ArmConstants.ARM_LENGTH); //TODO Current
+    // Angle Setpoint
     // }
 }

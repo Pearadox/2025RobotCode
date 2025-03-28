@@ -76,6 +76,8 @@ public class EndEffector extends SubsystemBase {
         // collectCoral();
         collectGamePiece();
 
+        // isCoral = true;
+
         SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
         SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
         SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
@@ -226,5 +228,9 @@ public class EndEffector extends SubsystemBase {
 
     public void setAlgae() {
         isCoral = false;
+    }
+
+    public boolean isCoral() {
+        return isCoral;
     }
 }

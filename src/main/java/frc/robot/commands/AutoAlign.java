@@ -1,7 +1,5 @@
 package frc.robot.commands;
 
-import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.path.PathPlannerPath;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -10,16 +8,15 @@ import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
-import edu.wpi.first.wpilibj2.command.Command;
-import edu.wpi.first.wpilibj2.command.Commands;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
 import frc.robot.util.vision.LimelightHelpers;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.function.BooleanSupplier;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,6 +35,7 @@ public class AutoAlign {
     private double alignSpeedStrafe = 0;
     private double alignSpeedRotation = 0;
     private double alignSpeedForward = 0;
+    private double horizDisplacement = 0;
     private int currentReefAlignTagID = 18; // -1
     private int currentCSAlignTagID = 12; // -1
     private Map<Integer, Pose3d> tagPoses3d = getTagPoses();
@@ -131,7 +129,7 @@ public class AutoAlign {
         return closestTagID;
     }
 
-    public double getTagDist(){
+    public double getTagDist() {
         Transform2d offset = poseSupplier.get().minus(getTagPose(currentReefAlignTagID));
 
         return Math.sqrt(Math.pow(offset.getX(), 2) + Math.pow(offset.getY(), 2));
@@ -191,6 +189,7 @@ public class AutoAlign {
         double tzError = tz - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
+        this.horizDisplacement = offset.getX();
 
         if (!llIsValid(llName, tagID)) {
             alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
@@ -242,26 +241,87 @@ public class AutoAlign {
                 gyroAngle);
     }
 
-    public Command getCSPathCommand(BooleanSupplier isProcessorSide) {
-        try {
-            if (isProcessorSide.getAsBoolean()) { // 2 & 12, processor side
-                PathPlannerPath alignCSP = PathPlannerPath.fromPathFile("Align_CS_P");
-                // Since AutoBuilder is configured, we can use it to build pathfinding commands
-                return AutoBuilder.pathfindThenFollowPath(alignCSP, AlignConstants.PATH_CONSTRAINTS);
-            } else {
-                PathPlannerPath alignCSNP = PathPlannerPath.fromPathFile("Align_CS_NP");
-                // Since AutoBuilder is configured, we can use it to build pathfinding commands
-                return AutoBuilder.pathfindThenFollowPath(alignCSNP, AlignConstants.PATH_CONSTRAINTS);
-            }
-        } catch (Exception e) {
-            e.printStackTrace();
-            return Commands.print("align csp not found");
-        }
-    }
+    // public Command getCSPathCommand(BooleanSupplier isProcessorSide) {
+    //     try {
+    //         if (isProcessorSide.getAsBoolean()) { // 2 & 12, processor side
+    //             PathPlannerPath alignCSP = PathPlannerPath.fromPathFile("Align_CS_P");
+    //             // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    //             return AutoBuilder.pathfindThenFollowPath(alignCSP, AlignConstants.PATH_CONSTRAINTS);
+    //         } else {
+    //             PathPlannerPath alignCSNP = PathPlannerPath.fromPathFile("Align_CS_NP");
+    //             // Since AutoBuilder is configured, we can use it to build pathfinding commands
+    //             return AutoBuilder.pathfindThenFollowPath(alignCSNP, AlignConstants.PATH_CONSTRAINTS);
+    //         }
+    //     } catch (Exception e) {
+    //         e.printStackTrace();
+    //         return Commands.print("align csp not found");
+    //     }
+    // }
 
     public void setReefAlignTagIDtoClosest() {
         currentReefAlignTagID = getClosestAprilTag(
                 RobotContainer.isRedAlliance() ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.BLUE_REEF_TAG_IDS,
                 poseSupplier.get());
+    }
+
+    public boolean isAligned() {
+        boolean isAligned = Math.abs(reefForwardSpeedController.getError()) < 0.6
+                && reefRotationSpeedController.getError() < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
+
+        // + Math.abs(reefStrafeSpeedController.getError())
+
+        Logger.recordOutput("Align/Error/IsAligned", isAligned);
+        Logger.recordOutput("Align/Error/fwd", reefForwardSpeedController.getError());
+        Logger.recordOutput("Align/Error/strafe", reefStrafeSpeedController.getError());
+        Logger.recordOutput("Align/Error/rot", reefRotationSpeedController.getError());
+
+        return isAligned;
+    }
+
+    private double getArmAngleRads() {
+        Logger.recordOutput("Align/Math/tz", horizDisplacement);
+        double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
+        Logger.recordOutput("Align/Math/deltaX", deltaX);
+        return Math.acos(deltaX / AlignConstants.PIVOT_TO_CORAL_RADIUS);
+    }
+
+    public double getArmAngleRots() {
+        double armAngleRads = getArmAngleRads();
+        double armAngleRots;
+        if (Double.isNaN(armAngleRads)) {
+            armAngleRots = ArmConstants.ARM_L4_BEHIND_CORAL;
+        } else {
+            armAngleRots = Units.radiansToRotations(armAngleRads
+                            + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET
+                            - AlignConstants.ARM_STARTING_ANGLE)
+                    * ArmConstants.ARM_GEAR_RATIO;
+        }
+        Logger.recordOutput("Align/Math/Arm Rads from x-axis", armAngleRads);
+        Logger.recordOutput("Align/Math/Arm Degs from x-axis", Units.radiansToDegrees(armAngleRads));
+        Logger.recordOutput("Align/Math/Arm Rots", armAngleRots);
+        return armAngleRots;
+    }
+
+    private double getElevatorHeightMeters() {
+        double armAngleRads = getArmAngleRads();
+        if (Double.isNaN(armAngleRads)) {
+            return Double.NaN;
+        } else {
+            return AlignConstants.L4_HEIGHT - AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(armAngleRads);
+        }
+    }
+
+    public double getElevatorHeightRots() {
+        double heightMeters = getElevatorHeightMeters();
+        if (Double.isNaN(heightMeters)) {
+            return ElevatorConstants.BARGE_ROT;
+        }
+
+        double height = Units.metersToInches(heightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT);
+        double rots = height * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+
+        Logger.recordOutput("Align/Math/Elev Height (m)", height);
+        Logger.recordOutput("Align/Math/Elev Rots", rots);
+        return rots;
     }
 }

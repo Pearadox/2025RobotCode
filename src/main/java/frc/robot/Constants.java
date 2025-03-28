@@ -1,13 +1,17 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
+
 import com.ctre.phoenix6.signals.NeutralModeValue;
-import com.pathplanner.lib.path.PathConstraints;
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.units.measure.Dimensionless;
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 
 public class Constants {
 
@@ -49,9 +53,10 @@ public class Constants {
 
     public static final class AlignConstants {
         // TODO: possible align pid adjustment
-        public static final double ALIGN_STRAFE_KP = 0.06;
-        public static final double ALIGN_STRAFE_KI = 0.001;
-        public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
+        // public static final double ALIGN_STRAFE_KP = 0.06;
+        // public static final double ALIGN_STRAFE_KI = 0.001;
+        // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
+
         public static final double ALIGN_KS = 0.009;
 
         // tx and ty tolerances with setpoint
@@ -84,8 +89,20 @@ public class Constants {
         public static final double ROT_REEF_kI = 0;
         public static final double ROT_REEF_kD = 0;
 
-        public static final PathConstraints PATH_CONSTRAINTS =
-                new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+        // public static final PathConstraints PATH_CONSTRAINTS =
+        //         new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
+
+        // the top of the branch (L4) is ~2" behind the april tag
+        public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
+        public static final double L4_HEIGHT = Units.inchesToMeters(72);
+
+        // these are from the arm's pivot point to the bottom of a held coral
+        public static final double PIVOT_TO_CORAL_RADIUS = Units.inchesToMeters(23.4106654653);
+        public static final double ARM_TO_CORAL_ANGULAR_OFFSET = Units.degreesToRadians(34.8693502919);
+
+        public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
+        // from the arm's pivot point to floor
+        public static final double ELEVATOR_STARTING_HEIGHT = Units.inchesToMeters(39);
     }
 
     public static final class ElevatorConstants {
@@ -166,7 +183,7 @@ public class Constants {
 
         public static final double ARM_GEAR_RATIO = 60; // ?
 
-        public static final double ARM_LENGTH = 0; //TODO
+        public static final double ARM_LENGTH = 0; // TODO
 
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
@@ -184,6 +201,7 @@ public class Constants {
         public static final double ARM_BARGE = Units.degreesToRotations(160) * ARM_GEAR_RATIO - 2.1;
         // public static final double ARM_CLIMB = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
+        public static final double ARM_L4_BEHIND_CORAL = 22.057; // rots
 
         public static final double ARM_ADJUST_INCREMENT = 0.05;
 
@@ -257,5 +275,17 @@ public class Constants {
         public static final double HOLD_SPEED = -0.075;
 
         public static final int END_SENSOR_CHANNEL = 0;
+    }
+
+    public static final class LEDConstants {
+        public static final int NUM_LEDS = 28;
+        public static final int PORT = 9;
+
+        // to adjust
+        public static final Frequency SCROLL_FREQ = Percent.per(Second).of(50);
+        public static final Time BLINK_PERIOD = Seconds.of(0.5);
+        public static final Time BLINKING_DURATION = BLINK_PERIOD.times(2);
+        public static final Dimensionless BLINK_BRIGHTNESS = Percent.of(50);
+        public static final Time BREATHE_PERIOD = Seconds.of(1);
     }
 }
