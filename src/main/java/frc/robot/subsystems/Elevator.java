@@ -20,7 +20,9 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
+import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
 
@@ -31,6 +33,7 @@ public class Elevator extends SubsystemBase {
     private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
     private boolean isCoral = true;
+    private boolean isAligning = false;
     private boolean isZeroing = false;
 
     private static enum ElevatorMode {
@@ -175,6 +178,8 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putNumber("Elevator/Offset", elevatorOffset);
         SmarterDashboard.putString("Elevator Mode", elevatorMode.toString());
         SmarterDashboard.putBoolean("Elevator/IsCoral", isCoral);
+
+        setAligning(!RobotContainer.align.isAligned());
     }
 
     public void setElevatorPosition() {
@@ -218,7 +223,12 @@ public class Elevator extends SubsystemBase {
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
-                setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                if (isAligning) {
+                    // setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
+                    setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+                } else {
+                    setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                }
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
@@ -271,6 +281,7 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putBoolean("Elevator/IsLowering", isLowering);
 
         SmarterDashboard.putNumber("Elevator/Setpoint", setpoint);
+        Logger.recordOutput("Elevator/Align Setpoint", RobotContainer.align.getElevatorHeightRots() + elevatorOffset);
     }
 
     public void homeElevator() {
@@ -356,6 +367,10 @@ public class Elevator extends SubsystemBase {
 
     public boolean getIsCoral() {
         return isCoral;
+    }
+
+    public void setAligning(boolean flag) {
+        isAligning = flag;
     }
 
     public void setZeroing(boolean flag) {
