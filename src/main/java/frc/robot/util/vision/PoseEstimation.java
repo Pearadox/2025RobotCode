@@ -142,7 +142,7 @@ public class PoseEstimation {
         //         measurement.pose.toPose2d(), measurement.timestamp, measurement.stdDeviation);
         loggingPose(measurement);
         RobotContainer.drivetrain.addVisionMeasurement(
-                measurement.pose.toPose2d(), measurement.timestamp, VisionConstants.MEGATAG2_LIMELIGHT_STD_DEV);
+                measurement.pose.toPose2d(), measurement.timestamp, measurement.stdDeviation);
     }
 
     private void loggingPose(VisionBackend.Measurement measurement) {

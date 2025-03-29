@@ -42,14 +42,22 @@ public class Constants {
         public static final int[] RED_REEF_TAG_IDS = {7, 6, 11, 10, 9, 8};
         public static final int[] RED_CORAL_STATION_TAG_IDS = {1, 2};
 
-        public static final Translation2d farCage =
+        public static final Translation2d BLUE_FAR_CAGE =
                 new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
-        public static final Translation2d middleCage =
+        public static final Translation2d BLUE_MID_CAGE =
                 new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(242.855));
-        public static final Translation2d closeCage =
+        public static final Translation2d BLUE_CLOSE_CAGE =
                 new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(199.947));
 
-        public static final Translation2d[] CAGE_TRANSLATION2DS = {farCage, middleCage, closeCage};
+        public static final Translation2d RED_FAR_CAGE = new Translation2d(
+                Units.inchesToMeters(345.428), Units.inchesToMeters(FIELD_WIDTH / 2 + (FIELD_WIDTH / 2 - 286.779)));
+        public static final Translation2d RED_MID_CAGE = new Translation2d(
+                Units.inchesToMeters(345.428), Units.inchesToMeters(FIELD_WIDTH / 2 + (FIELD_WIDTH / 2 - 242.855)));
+        public static final Translation2d RED_CLOSE_CAGE = new Translation2d(
+                Units.inchesToMeters(345.428), Units.inchesToMeters(FIELD_WIDTH / 2 + (FIELD_WIDTH / 2 - 199.947)));
+
+        public static final Translation2d[] BLUE_CAGES = {BLUE_FAR_CAGE, BLUE_MID_CAGE, BLUE_CLOSE_CAGE};
+        public static final Translation2d[] RED_CAGES = {RED_FAR_CAGE, RED_MID_CAGE, RED_CLOSE_CAGE};
     }
 
     public static final class DriveConstants {
@@ -144,7 +152,7 @@ public class Constants {
         public static final double STATION_HEIGHT =
                 15; // Home Field is 1in higher than official field - official is 15.4
         public static final double LEVEL_TWO_HEIGHT =
-                8.625; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
+                0; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
         public static final double LEVEL_THREE_HEIGHT = 1.5; // 15 //TODO l3 height
         public static final double LEVEL_FOUR_HEIGHT = 24.6; // 29.625; //
 
@@ -201,7 +209,7 @@ public class Constants {
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3; // was -78 //79.08 // -66
 
         public static final double ARM_LEVEL_2_ROT =
-                Units.degreesToRotations(-66) * ARM_GEAR_RATIO; // was -85, then -74.455078125[\] //79.08
+                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08
         public static final double ARM_INTAKE_ROT =
                 Units.degreesToRotations(-15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0) * ARM_GEAR_RATIO; // should be 0
@@ -213,7 +221,7 @@ public class Constants {
         public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_L4_BEHIND_CORAL = 22.057; // rots
 
-        public static final double ARM_ADJUST_INCREMENT = 0.05;
+        public static final double ARM_ADJUST_INCREMENT = 0.1;
 
         public static final double UPDATE_FREQ = 50;
 

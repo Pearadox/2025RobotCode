@@ -4,12 +4,15 @@
 
 package frc.robot.util.vision;
 
+import edu.wpi.first.math.VecBuilder;
+import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Translation3d;
+import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.networktables.*;
-import frc.robot.Constants;
+import frc.robot.util.SmarterDashboard;
 import java.util.Arrays;
 import java.util.Optional;
 
@@ -23,6 +26,7 @@ public class LimelightBackend extends VisionBackend {
     private final DoubleArraySubscriber hw;
     private final DoubleSubscriber cl;
     private final DoubleSubscriber tl;
+    private final DoubleSubscriber ta;
 
     public LimelightBackend(String llName, boolean megaTag2) {
         this.llName = llName;
@@ -47,6 +51,11 @@ public class LimelightBackend extends VisionBackend {
         tl = NetworkTableInstance.getDefault()
                 .getTable(llName)
                 .getDoubleTopic("tl")
+                .subscribe(0);
+
+        ta = NetworkTableInstance.getDefault()
+                .getTable(llName)
+                .getDoubleTopic("ta")
                 .subscribe(0);
     }
 
@@ -81,7 +90,7 @@ public class LimelightBackend extends VisionBackend {
         double timestamp = (update.timestamp * 1e-6) - (latency * 1e-3);
         Pose3d pose = new Pose3d(new Translation3d(x, y, z), new Rotation3d(roll, pitch, yaw));
 
-        return Optional.of(new Measurement(timestamp, pose, Constants.VisionConstants.LIMELIGHT_STD_DEV));
+        return Optional.of(new Measurement(timestamp, pose, getStdDevs()));
     }
 
     public boolean isValid() {
@@ -94,5 +103,14 @@ public class LimelightBackend extends VisionBackend {
         double avgDist = botpose_orb_wpiblue[9];
 
         return tagCount > 0 && avgDist < 4.5;
+    }
+
+    public Vector<N3> getStdDevs() {
+        double xyStdDev = ta.get() < 1 ? Math.log(-(ta.get() - 1)) + 1 : 0.1;
+        xyStdDev = Math.max(xyStdDev, 0.1);
+        xyStdDev = Math.min(xyStdDev, 0.9);
+
+        SmarterDashboard.putNumber("Vision/STDS", xyStdDev);
+        return VecBuilder.fill(xyStdDev, xyStdDev, 0.999999);
     }
 }

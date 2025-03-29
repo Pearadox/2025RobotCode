@@ -17,6 +17,7 @@ import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.Arm.ArmMode;
 import frc.robot.util.SmarterDashboard;
 
 public class EndEffector extends SubsystemBase {
@@ -24,6 +25,8 @@ public class EndEffector extends SubsystemBase {
     private static final EndEffector END_EFFECTOR = new EndEffector();
 
     private static final LEDStrip leds = LEDStrip.getInstance();
+
+    private static final Arm arm = Arm.getInstance();
 
     public static EndEffector getInstance() {
         return END_EFFECTOR;
@@ -73,10 +76,7 @@ public class EndEffector extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // collectCoral();
         collectGamePiece();
-
-        // isCoral = true;
 
         SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
         SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
@@ -175,7 +175,9 @@ public class EndEffector extends SubsystemBase {
 
     // intakes
     public void coralOut() {
-        endEffector.set(EndEffectorConstants.PUSH_SPEED);
+        if (arm.getArmMode() == ArmMode.L2) {
+            endEffector.set(0.2);
+        } else endEffector.set(EndEffectorConstants.PUSH_SPEED);
         setLastRot();
     }
 

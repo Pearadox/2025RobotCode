@@ -37,7 +37,7 @@ public class Arm extends SubsystemBase {
     private boolean isAligning = false;
     private double lastAngle = 0;
 
-    private enum ArmMode {
+    public enum ArmMode {
         Intake,
         L2,
         L3,
@@ -95,8 +95,8 @@ public class Arm extends SubsystemBase {
 
         talonFXConfigs = new TalonFXConfiguration();
 
-        talonFXConfigs.Voltage.PeakForwardVoltage = 3.0;
-        talonFXConfigs.Voltage.PeakReverseVoltage = -3.0;
+        talonFXConfigs.Voltage.PeakForwardVoltage = 4.0;
+        talonFXConfigs.Voltage.PeakReverseVoltage = -4.0;
 
         // var slot0Configs = talonFXConfigs.Slot0;
         // slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving
@@ -289,6 +289,10 @@ public class Arm extends SubsystemBase {
 
     public void setAlgae() {
         isCoral = false;
+    }
+
+    public ArmMode getArmMode() {
+        return armMode;
     }
 
     public boolean getIsCoral() {

@@ -130,7 +130,7 @@ public class AutoAlign {
         return closestTagID;
     }
 
-    public double getTagDist(){
+    public double getTagDist() {
         Transform2d offset = poseSupplier.get().minus(getTagPose(currentReefAlignTagID));
 
         return Math.sqrt(Math.pow(offset.getX(), 2) + Math.pow(offset.getY(), 2));
@@ -235,7 +235,8 @@ public class AutoAlign {
 
         Translation2d robotTranslation2d = poseSupplier.get().getTranslation();
 
-        alignSpeedForward = reefStrafeSpeedController.calculate(robotTranslation2d.getX(), targetTranslation2d.getX());
+        alignSpeedForward =
+                reefStrafeSpeedController.calculate(robotTranslation2d.getX(), targetTranslation2d.getX()) / 2;
         alignSpeedForward += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
