@@ -7,6 +7,7 @@ import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -103,7 +104,7 @@ public class AutoAlign {
                         : FieldConstants.BLUE_CORAL_STATION_TAG_IDS,
                 poseSupplier.get());
 
-        return new Rotation2d(getTagAngle(currentCSAlignTagID).getRadians() + +Units.degreesToRadians(180));
+        return new Rotation2d(getTagAngle(currentCSAlignTagID).getRadians() + Units.degreesToRadians(180));
     }
 
     private int getClosestAprilTag(int[] tagIDs, Pose2d robotPose) {
@@ -131,8 +132,31 @@ public class AutoAlign {
         return closestTagID;
     }
 
-    public double getTagDist(){
+    public Translation2d getClosestCageTranslation2d(Pose2d robotPose) {
+
+        double minDistance = Double.POSITIVE_INFINITY;
+        int minId = -1;
+
+        for (int i = 0; i < FieldConstants.CAGE_TRANSLATION2DS.length; i++) {
+            double distance = getCageDist(FieldConstants.CAGE_TRANSLATION2DS[i]);
+            if (distance < minDistance) {
+                minDistance = distance;
+                minId = i;
+            }
+        }
+
+        Logger.recordOutput("Current Cage", minId);
+        return FieldConstants.CAGE_TRANSLATION2DS[minId];
+    }
+
+    public double getTagDist() {
         Transform2d offset = poseSupplier.get().minus(getTagPose(currentReefAlignTagID));
+
+        return Math.sqrt(Math.pow(offset.getX(), 2) + Math.pow(offset.getY(), 2));
+    }
+
+    public double getCageDist(Translation2d CageTranslation2d) {
+        Translation2d offset = poseSupplier.get().getTranslation().minus(CageTranslation2d);
 
         return Math.sqrt(Math.pow(offset.getX(), 2) + Math.pow(offset.getY(), 2));
     }
@@ -145,13 +169,6 @@ public class AutoAlign {
         double txError = tx - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
-
-        // // if the drivetrain isn't yet rotationally aligned, this affects the tx
-        // boolean withinRotRolerance = Math.abs(getAlignAngleReef()
-        //                 .minus(poseSupplier.get().getRotation())
-        //                 .getDegrees())
-        //         < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
-        // Logger.recordOutput("Align/IsWithinRotTolerance", withinRotRolerance);
 
         if (!llIsValid(llName, tagID)) {
             alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
@@ -166,6 +183,22 @@ public class AutoAlign {
         Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
         // Logger.recordOutput("Align/tx", tx);
         // Logger.recordOutput("Align/tx Error", txError);
+
+        return alignSpeedStrafe;
+    }
+
+    public double getAlignStrafeSpeedPercent(Translation2d targetTranslation2d) {
+
+        Translation2d robotTranslation2d = poseSupplier.get().getTranslation();
+
+        alignSpeedStrafe = reefStrafeSpeedController.calculate(robotTranslation2d.getY(), targetTranslation2d.getY());
+        alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+
+        Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
+        Logger.recordOutput("Align/Strafe/CageTranslation2d", targetTranslation2d);
+        Logger.recordOutput("Align/Strafe/CageTargetY", targetTranslation2d.getY());
+        // Logger.recordOutput("Align/Strafe Setpoint", setPoint);
+        // Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
 
         return alignSpeedStrafe;
     }
@@ -213,6 +246,19 @@ public class AutoAlign {
         Logger.recordOutput("LL Valid", llIsValid(llName, tagID));
         // Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
 
+        return alignSpeedForward;
+    }
+
+    public double getAlignForwardSpeedPercent(Translation2d targetTranslation2d) {
+
+        Translation2d robotTranslation2d = poseSupplier.get().getTranslation();
+
+        alignSpeedForward = reefStrafeSpeedController.calculate(robotTranslation2d.getX(), targetTranslation2d.getX());
+        alignSpeedForward += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+
+        Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
+        Logger.recordOutput("Align/Forward/CageTranslation2d", targetTranslation2d);
+        Logger.recordOutput("Align/Strafe/CageTargetX", targetTranslation2d.getX());
         return alignSpeedForward;
     }
 

@@ -6,6 +6,7 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 
@@ -36,6 +37,15 @@ public class Constants {
         public static final int[] BLUE_CORAL_STATION_TAG_IDS = {12, 13};
         public static final int[] RED_REEF_TAG_IDS = {7, 6, 11, 10, 9, 8};
         public static final int[] RED_CORAL_STATION_TAG_IDS = {1, 2};
+
+        public static final Translation2d farCage =
+                new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
+        public static final Translation2d middleCage =
+                new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(242.855));
+        public static final Translation2d closeCage =
+                new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(199.947));
+
+        public static final Translation2d[] CAGE_TRANSLATION2DS = {farCage, middleCage, closeCage};
     }
 
     public static final class DriveConstants {
@@ -166,7 +176,7 @@ public class Constants {
 
         public static final double ARM_GEAR_RATIO = 60; // ?
 
-        public static final double ARM_LENGTH = 0; //TODO
+        public static final double ARM_LENGTH = 0; // TODO
 
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161

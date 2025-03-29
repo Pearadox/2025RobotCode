@@ -25,6 +25,7 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
@@ -116,7 +117,8 @@ public class RobotContainer {
     private final JoystickButton levelTwo_X = new JoystickButton(opController, XboxController.Button.kX.value);
     private final JoystickButton stow_A = new JoystickButton(opController, XboxController.Button.kA.value);
 
-    private final POVButton zeroClimber_PovLeft = new POVButton(opController, 270);
+    private final POVButton climberAlignPovLeft = new POVButton(opController, 270);
+    private final POVButton climberAlignPovRight = new POVButton(opController, 90);
     private final POVButton deployClimber_PovUp = new POVButton(opController, 0);
     private final POVButton retractClimber_PovDown = new POVButton(opController, 180);
 
@@ -344,7 +346,25 @@ public class RobotContainer {
 
         deployClimber_PovUp.whileTrue(new RunCommand(() -> climber.deployClimber()));
         retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
-        zeroClimber_PovLeft.onTrue(new InstantCommand(() -> climber.zeroClimber()));
+        // zeroClimber_PovLeft.onTrue(new InstantCommand(() -> climber.zeroClimber()));
+
+        climberAlignPovLeft.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
+                .withVelocityX(align.getAlignForwardSpeedPercent(FieldConstants.CAGE_TRANSLATION2DS[2]) * MaxSpeed)
+                .withVelocityY(align.getAlignStrafeSpeedPercent(FieldConstants.CAGE_TRANSLATION2DS[2]) * MaxSpeed)
+                .withRotationalRate(align.getAlignRotationSpeedPercent(
+                                (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+                                        ? Rotation2d.kCCW_90deg
+                                        : Rotation2d.kCW_90deg)
+                        * MaxAngularRate)));
+
+        climberAlignPovRight.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
+                .withVelocityX(align.getAlignForwardSpeedPercent(FieldConstants.CAGE_TRANSLATION2DS[0]) * MaxSpeed)
+                .withVelocityY(align.getAlignStrafeSpeedPercent(FieldConstants.CAGE_TRANSLATION2DS[0]) * MaxSpeed)
+                .withRotationalRate(align.getAlignRotationSpeedPercent(
+                                (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
+                                        ? Rotation2d.kCCW_90deg
+                                        : Rotation2d.kCW_90deg)
+                        * MaxAngularRate)));
         // barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
         // .andThen(new InstantCommand(() -> arm.setBarge())));
 
