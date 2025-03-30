@@ -24,7 +24,7 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         m_robotContainer = new RobotContainer();
-        Logger.recordMetadata("2025RobotCode", "Comp Bot Code"); // Set a metadata value
+        Logger.recordMetadata("2025RobotCode", "Practice Bot Code"); // Set a metadata value
 
         if (isReal()) {
             Logger.addDataReceiver(new WPILOGWriter("/media/sda1/")); // Log to a USB stick ("/U/logs")
@@ -45,12 +45,6 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        // try {
-        //     RobotContainer.poseEstimation.periodic(0);
-        // } catch (Exception e) {
-        //     System.out.println("Pose estimation exception");
-        //     e.printStackTrace();
-        // }
         RobotContainer.poseEstimation.periodic(0);
     }
 

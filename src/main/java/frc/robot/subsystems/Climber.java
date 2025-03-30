@@ -22,6 +22,7 @@ public class Climber extends SubsystemBase {
     private final PearadoxTalonFX climbMotor;
 
     private final Arm arm = Arm.getInstance();
+    private final GroundIntake gIntake = GroundIntake.getInstance();
 
     private static final Climber CLIMBER = new Climber();
     private TalonFXConfiguration talonFXConfigs;
@@ -67,13 +68,6 @@ public class Climber extends SubsystemBase {
                 "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
-        // if (RobotContainer.opController.getPOV() == 0) {
-        //     runClimb(ClimbConstants.CLIMB_VALUE, 0);
-        // } else if (RobotContainer.opController.getPOV() == 180) {
-        //     runClimb(-ClimbConstants.CLIMB_VALUE, 0);
-        // } else {
-        //     runClimb(0, 0);
-        // }
     }
 
     /** This is a method that makes the roller spin */
@@ -87,11 +81,12 @@ public class Climber extends SubsystemBase {
     }
 
     public void retractClimber() {
+        gIntake.setCoralMode();
+        gIntake.setIntakePos();
         arm.setAlgae();
         arm.setStowed();
         // climbMotor.set(-0.7);
-        climbMotor.setControl(new PositionVoltage(-230)); // -130
-
+        climbMotor.setControl(new PositionVoltage(-230));
     }
 
     public void zeroClimber() {

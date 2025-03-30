@@ -73,14 +73,12 @@ public class EndEffector extends SubsystemBase {
 
     @Override
     public void periodic() {
-        // collectCoral();
         collectGamePiece();
 
         SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
         SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
         SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
         SmarterDashboard.putBoolean("EE/Holding Speed", holdSpeed);
-
         SmarterDashboard.putNumber(
                 "EE/Stator Current", endEffector.getStatorCurrent().getValueAsDouble());
         SmarterDashboard.putNumber(
@@ -90,24 +88,8 @@ public class EndEffector extends SubsystemBase {
                 "EE/Angular Velocity", endEffector.getVelocity().getValueAsDouble());
     }
 
-    // public void collectCoral() {
-    //     if (DriverStation.isTeleop()) {
-    //         if (RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
-    //             coralIn();
-    //             isHolding = false;
-    //         } else if (RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
-    //             coralOut();
-    //             isHolding = false;
-    //         } else if (hasCoral() && isCoral) {
-    //             stop();
-    //         } else if (!isHolding) {
-    //             holdCoral();
-    //         }
-    //     }
-    // }
     public void collectGamePiece() {
         if (DriverStation.isTeleop()) {
-            //     if(isCoral) {
             if (RobotContainer.driverController.getLeftBumperButton()) {
                 if (isCoral) {
                     coralIn();
@@ -134,28 +116,8 @@ public class EndEffector extends SubsystemBase {
                     holdCoral();
                 }
             }
-
-            // if (endEffector.getStatorCurrent().getValueAsDouble() > 35.0) {
-            //     leds.setLEDsFlash();
-            //     leds.handleFlashing();
-            // } else leds.stopFlashing();
         }
     }
-
-    // else if(!isCoral) {
-    //     if(RobotContainer.opController.getRightTriggerAxis() >= 0.25) {
-    //         algaeIn();
-    //         isHoldingAlgae = true;
-    //     }
-    //     else if(RobotContainer.opController.getLeftTriggerAxis() >= 0.25) {
-    //         algaeOut();
-    //         isHoldingAlgae = false;
-    //     }
-    //     else if(isHoldingAlgae) {
-    //         stopAlgae();
-    //     }
-    // }
-    // }
 
     // scores
     public void coralIn() {

@@ -21,9 +21,6 @@ public class Constants {
         public static final double AMBIGUITY_FILTER = 0.3;
         public static final double DISTANCE_FILTER = FieldConstants.FIELD_LENGTH / 2;
 
-        // // : determine questnav std dev (likely lower than this)
-        // public static final Vector<N3> QUESTNAV_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
-
         // TODO: use andymark field layout for fit events
         public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
     }
@@ -96,9 +93,6 @@ public class Constants {
 
         public static final int UPDATE_FREQ = 50;
 
-        // public static final double MAX_VELOCITY_MPS = 2.0; //
-        // public static final double MAX_ACCELERATION_MPS2 = 8.0; // not used currently
-
         public static final double MM_CRUISE_VELCOCITY_UP = 100; //
         public static final double MM_ACCELERATION_UP = 100; //
 
@@ -138,13 +132,6 @@ public class Constants {
         public static final double BARGE_ROT = BARGE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STOWED_ROT = STOWED_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
 
-        // public static final double STATION_ROT = 3.868;
-        // public static final double LEVEL_TWO_ROT = 3.868;
-        // public static final double LEVEL_THREE_ROT = 10;
-        // public static final double LEVEL_FOUR_ROT = 15.0;
-        // public static final double MAX_ELEVATOR_ROT = 15.5; // 15.65
-        // public static final double STOWED_ROT = 0;
-
         public static final double ELEVATOR_OFFSET = 0.075;
 
         // TODO: change all of these values to match true elevator gains
@@ -162,24 +149,18 @@ public class Constants {
         public static final int ARM_KRAKEN_ID = 22;
         public static final int CURRENT_LIMIT = 20;
 
-        public static final double ARM_GEAR_RATIO = 60; // ?
+        public static final double ARM_GEAR_RATIO = 60;
 
-        public static final double ARM_LEVEL_4_ROT =
-                Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
-        public static final double ARM_LEVEL_3_ROT =
-                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3; // was -78 //79.08 // -66
-
-        public static final double ARM_LEVEL_2_ROT =
-                Units.degreesToRotations(-66) * ARM_GEAR_RATIO; // was -85, then -74.455078125[\] //79.08
-        public static final double ARM_INTAKE_ROT =
-                Units.degreesToRotations(-15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
+        public static final double ARM_LEVEL_4_ROT = Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52;
+        public static final double ARM_LEVEL_3_ROT = Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3;
+        public static final double ARM_LEVEL_2_ROT = Units.degreesToRotations(-66) * ARM_GEAR_RATIO;
+        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(-15) * ARM_GEAR_RATIO;
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0) * ARM_GEAR_RATIO; // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73) * ARM_GEAR_RATIO;
         public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(82) * ARM_GEAR_RATIO;
         public static final double ARM_BARGE = Units.degreesToRotations(160) * ARM_GEAR_RATIO - 2.1;
-        // public static final double ARM_CLIMB = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
-        public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
+        public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO; // climb is the same
 
         public static final double ARM_ADJUST_INCREMENT = 0.05;
 
@@ -208,11 +189,10 @@ public class Constants {
         public static final double CLIMB_ROTS = -126.0;
     }
 
-    public static final class IntakeConstants {
-        // CANID for pivot
-        public static final int PIVOT_ID = 40; // real CANID
+    public static final class GroundIntakeConstants {
+        public static final int PIVOT_ID = 40;
+        public static final int ROLLER_ID = 41;
 
-        // public static final int PIVOT_GEAR_RATIO = 60;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;
         public static final int ROLLER_CURRENT_LIMIT = 30;
         public static final int PIVOT_CURRENT_LIMIT = 30;
@@ -225,26 +205,28 @@ public class Constants {
         public static final double PIVOT_MIN_OUTPUT = -0.5;
         public static final double PIVOT_MAX_OUTPUT = 0.5;
 
-        public static final double PIVOT_GEARING = 60; // 25:1 reduction gear ratio
+        public static final double PULL_SPEED = 0.3;
+        public static final double PUSH_SPEED = -0.3;
+        public static final double ALGAE_PULL_SPEED = -0.5;
+        public static final double ALGAE_PUSH_SPEED = 0.5;
+        
+
+        public static final double PIVOT_GEARING = 48; // 48:1 on practice bot, 60:1 on compbot
 
         public static final double PIVOT_OUTTAKE_ROT =
-                Units.degreesToRotations(10.0) * PIVOT_GEARING; // TODO: find outtake rot in motor rotations
+                Units.degreesToRotations(-20.0) * PIVOT_GEARING; // TODO: find outtake rot in motor rotations
         public static final double PIVOT_INTAKE_ROT =
-                Units.degreesToRotations(105.0) * PIVOT_GEARING; // TODO: find intake rot in motor rotations
+                Units.degreesToRotations(-110.0) * PIVOT_GEARING; // TODO: find intake rot in motor rotations -130
         public static final double PIVOT_STOWED_ROT =
                 Units.degreesToRotations(0.0) * PIVOT_GEARING; // TODO: find stowed rot in motor rotations
         public static final double PIVOT_ALGAE_ROT =
                 Units.degreesToRotations(40.0) * PIVOT_GEARING; // TODO: find stowed rot in motor rotations
-
-        // CAN ID for roller
-        public static final int ROLLER_ID = 41;
     }
 
     public static final class EndEffectorConstants {
         public static final int END_EFFECTOR_ID = 23;
 
         public static final double PULL_SPEED = -0.3;
-
         public static final double PUSH_SPEED = 0.4;
         public static final double ALGAE_PULL_SPEED = 0.8;
         public static final double ALGAE_PUSH_SPEED = -1.0;

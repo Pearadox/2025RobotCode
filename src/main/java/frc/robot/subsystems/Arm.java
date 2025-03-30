@@ -161,38 +161,6 @@ public class Arm extends SubsystemBase {
         // pivot.setControl(voltageRequest.withOutput(armAdjust));
 
         double setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
-        // if (armMode == ArmMode.Intake) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_LOLIPOP * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L2) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L3) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L4) {
-        //     setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-
-        // } else if (armMode == ArmMode.ALGAE_LOW) {
-        //     setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.ALGAE_HIGH) {
-        //     setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.BARGE) {
-        //     setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.CLIMB) {
-        //     setpoint = ArmConstants.ARM_CLIMB * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else {
-        //     setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // }
 
         if (isCoral) {
             if (armMode == ArmMode.Stowed) {

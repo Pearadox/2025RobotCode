@@ -1,8 +1,16 @@
 package frc.robot.subsystems;
 
+import static edu.wpi.first.units.Units.Percent;
+import static edu.wpi.first.units.Units.Second;
+import static edu.wpi.first.units.Units.Seconds;
+
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.LEDPattern;
+import edu.wpi.first.wpilibj.LEDPattern.GradientType;
 import edu.wpi.first.wpilibj.Timer;
+import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.util.SmarterDashboard;
 
@@ -39,7 +47,13 @@ public class LEDStrip extends SubsystemBase {
         led.setLength(ledBuffer.getLength());
         led.setData(ledBuffer);
         led.start();
-        setSolid(CORAL[0], CORAL[1], CORAL[2]);
+        // setSolid(CORAL[0], CORAL[1], CORAL[2]);
+        // default config
+        LEDPattern base = LEDPattern.gradient(GradientType.kDiscontinuous, Color.kGreen, Color.kYellow);
+        LEDPattern pattern = base.breathe(Time.ofBaseUnits(2, Seconds));
+        LEDPattern scroll = base.scrollAtRelativeSpeed(Percent.per(Second).of(2));
+        pattern.applyTo(ledBuffer);
+        led.setData(ledBuffer);
     }
 
     public void periodic() {
@@ -92,7 +106,6 @@ public class LEDStrip extends SubsystemBase {
     public void gamePieceScored() {
         hasGamePiece = false;
         stopFlashing();
-        ;
     }
 
     public void handleFlashing() {
