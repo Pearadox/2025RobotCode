@@ -43,7 +43,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "IJ-CS"
+            "pathName": "Align_IJ-CS"
           }
         },
         {
@@ -91,7 +91,13 @@
         {
           "type": "path",
           "data": {
-            "pathName": "KL-CS"
+            "pathName": "Align_KL-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
           }
         },
         {
@@ -103,13 +109,37 @@
         {
           "type": "named",
           "data": {
-            "name": "Home Elevator"
+            "name": "Intake"
           }
         },
         {
-          "type": "wait",
+          "type": "path",
           "data": {
-            "waitTime": 3.0
+            "pathName": "CS-KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "KL-BackUp"
           }
         }
       ]

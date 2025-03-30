@@ -1,7 +1,3 @@
-// Copyright (c) FIRST and other WPILib contributors.
-// Open Source Software; you can modify and/or share it under the terms of
-// the WPILib BSD license file in the root directory of this project.
-
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
@@ -79,32 +75,24 @@ public class RobotContainer {
     public static final XboxController opController = new XboxController(1);
 
     // Driver Controller
-
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
-    private final POVButton alignPovLeft = new POVButton(driverController, 270);
-    private final POVButton alignPovDown = new POVButton(driverController, 180);
-    private final POVButton alignPovRight = new POVButton(driverController, 90);
-    private final POVButton alignPOVUp = new POVButton(driverController, 0);
-
-    private final JoystickButton intake_LB = new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    private final JoystickButton outtake_RB =
-            new JoystickButton(opController, XboxController.Button.kRightBumper.value);
+    private final POVButton reefAlignLeft_PovLeft = new POVButton(driverController, 270);
+    private final POVButton reefAlignCenter_PovDown = new POVButton(driverController, 180);
+    private final POVButton reefAlignRight_PovRight = new POVButton(driverController, 90);
+    private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
 
     private final JoystickButton slowmode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
     private final JoystickButton climbAlign_Y = new JoystickButton(driverController, XboxController.Button.kY.value);
+    
+    private final Trigger strafeTriggers = new Trigger(
+            () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
 
-    // private final JoystickButton zeroElevator_LB =
-    // new JoystickButton(opController, XboxController.Button.kBack.value);
-    // private final JoystickButton robotOrientated_RB =
-    // new JoystickButton(opController, XboxController.Button.kStart.value);
 
     // Op Controller
     private final JoystickButton homeElevator_Start =
             new JoystickButton(opController, XboxController.Button.kStart.value);
-    // private final JoystickButton homeArm_Back = new JoystickButton(opController,
-    // XboxController.Button.kBack.value);
     private final JoystickButton tempCS_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
 
     private final JoystickButton coralMode_LB =
@@ -117,30 +105,10 @@ public class RobotContainer {
     private final JoystickButton levelTwo_X = new JoystickButton(opController, XboxController.Button.kX.value);
     private final JoystickButton stow_A = new JoystickButton(opController, XboxController.Button.kA.value);
 
-    private final POVButton climberAlignPovLeft = new POVButton(opController, 270);
-    private final POVButton climberAlignPovRight = new POVButton(opController, 90);
+    private final POVButton climberAlign_PovLeft = new POVButton(opController, 270);
+    private final POVButton climberAlign_PovRight = new POVButton(opController, 90);
     private final POVButton deployClimber_PovUp = new POVButton(opController, 0);
     private final POVButton retractClimber_PovDown = new POVButton(opController, 180);
-
-    // private final JoystickButton station_Start = new JoystickButton(opController,
-    // XboxController.Button.kStart.value);
-    // private final JoystickButton barge_Back = new JoystickButton(opController,
-    // XboxController.Button.kBack.value);
-    // private final JoystickButton coralAlgaeSwap_LB =
-    // new JoystickButton(opController, XboxController.Button.kLeftBumper.value);
-    // private final JoystickButton resetAdjusts_RB =
-    // new JoystickButton(opController, XboxController.Button.kRightBumper.value);
-
-    // private final POVButton elevatorAdjustUp_POV_0 = new POVButton(opController,
-    // 0);
-    // private final POVButton elevatorAdjustDown_POV_180 = new
-    // POVButton(opController, 180);
-    // private final POVButton armAdjustUp_POV_90 = new POVButton(opController, 90);
-    // private final POVButton armAdjustDown_POV_270 = new POVButton(opController,
-    // 270);
-
-    private final Trigger strafeTriggers = new Trigger(
-            () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
 
     private final Trigger elevatorAdjust = new Trigger(() -> Math.abs(opController.getLeftY()) > 0.9);
     private final Trigger armAdjust = new Trigger(() -> Math.abs(opController.getRightX()) > 0.9);
@@ -150,7 +118,6 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
-    // private Map<Integer, Pose3d> tagPoses3d;
 
     public static final PoseEstimation poseEstimation = new PoseEstimation();
 
@@ -172,16 +139,6 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // robotOrientated_RB.whileTrue(drivetrain.applyRequest(
-        // () -> robotOrientedDrive
-        // .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        // * MaxSpeed) // Drive forward with negative Y (forward)
-        // .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        // * MaxSpeed) // Drive left with negative X (left)
-        // .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-        // * MaxAngularRate) // Drive counterclockwise with negative X (left)
-        // ));
-
         homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.stopElevator())
@@ -191,18 +148,6 @@ public class RobotContainer {
 
         slowmode_A.onTrue(new InstantCommand(() -> drivetrain.changeSpeedMultiplier()));
 
-        // algaeAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        //                 .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        //                                 AlignConstants.REEF_ALIGN_MID_TX,
-        //                                 driverController.getLeftY() * MaxSpeed,
-        //                                 drivetrain.getState().Pose.getRotation(),
-        //                                 MaxSpeed).vxMetersPerSecond)
-        //                 .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        //                                 AlignConstants.REEF_ALIGN_MID_TX,
-        //                                 driverController.getLeftY() * MaxSpeed,
-        //                                 drivetrain.getState().Pose.getRotation(),
-        //                                 MaxSpeed).vyMetersPerSecond)
-        //                 .withTargetDirection(align.getAlignAngleReef())));
 
         climbAlign_Y.whileTrue(drivetrain.applyRequest(
                 () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
@@ -222,7 +167,7 @@ public class RobotContainer {
                 // (left)
                 ));
 
-        alignPOVUp.whileTrue(drivetrain
+        stationAlign_PovUp.whileTrue(drivetrain
                 .applyRequest(
                         () -> robotOrientedDrive
                                 .withVelocityX(-align.getAlignForwardSpeedPercent(
@@ -241,7 +186,7 @@ public class RobotContainer {
                         )
                 .alongWith(ledstrip.aligning(() -> align.isAligned())));
 
-        alignPovDown.whileTrue(drivetrain
+        reefAlignCenter_PovDown.whileTrue(drivetrain
                 .applyRequest(
                         () -> robotOrientedDrive
                                 .withVelocityX(align.getAlignForwardSpeedPercent(
@@ -260,7 +205,7 @@ public class RobotContainer {
                         )
                 .alongWith(ledstrip.aligning(() -> align.isAligned())));
 
-        alignPovLeft.whileTrue(drivetrain
+        reefAlignLeft_PovLeft.whileTrue(drivetrain
                 .applyRequest(
                         () -> robotOrientedDrive
                                 .withVelocityX(align.getAlignForwardSpeedPercent(
@@ -279,7 +224,7 @@ public class RobotContainer {
                         )
                 .alongWith(ledstrip.aligning(() -> align.isAligned())));
 
-        alignPovRight.whileTrue(drivetrain
+        reefAlignRight_PovRight.whileTrue(drivetrain
                 .applyRequest(() -> robotOrientedDrive
                         .withVelocityX(align.getAlignForwardSpeedPercent(
                                         AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
@@ -311,42 +256,7 @@ public class RobotContainer {
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
         armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
 
-        // alignPovLeft.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        // .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        // AlignConstants.REEF_ALIGN_LEFT_TX,
-        // AlignConstants.REEF_ALIGN_TY,
-        // drivetrain.getState().Pose.getRotation(),
-        // MaxSpeed)
-        // .vxMetersPerSecond)
-        // .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        // AlignConstants.REEF_ALIGN_LEFT_TX,
-        // AlignConstants.REEF_ALIGN_TY,
-        // drivetrain.getState().Pose.getRotation(),
-        // MaxSpeed)
-        // .vyMetersPerSecond)
-        // .withTargetDirection(align.getAlignAngleReef())));
-
-        // alignPovRight.whileTrue(drivetrain.applyRequest(() -> pointTowards
-        // .withVelocityX(align.getFieldRelativeChassisSpeeds(
-        // AlignConstants.REEF_ALIGN_RIGHT_TX,
-        // AlignConstants.REEF_ALIGN_TY,
-        // drivetrain.getState().Pose.getRotation(),
-        // MaxSpeed)
-        // .vxMetersPerSecond)
-        // .withVelocityY(align.getFieldRelativeChassisSpeeds(
-        // AlignConstants.REEF_ALIGN_RIGHT_TX,
-        // AlignConstants.REEF_ALIGN_TY,
-        // drivetrain.getState().Pose.getRotation(),
-        // MaxSpeed)
-        // .vyMetersPerSecond)
-        // .withTargetDirection(align.getAlignAngleReef())));
-
-        // invertRobotOrientation.onTrue(new InstantCommand(() ->
-        // drivetrain.changeRobotOrientation()));
-
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
-
-        intake_LB.onTrue(new InstantCommand(() -> endEffector.collectGamePiece()));
 
         stow_A.onTrue(new InstantCommand(() -> elevator.setElevatorStowedMode())
                 .andThen(new InstantCommand(() -> arm.setStowed())));
@@ -361,9 +271,8 @@ public class RobotContainer {
 
         deployClimber_PovUp.whileTrue(new RunCommand(() -> climber.deployClimber()));
         retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
-        // zeroClimber_PovLeft.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
-        climberAlignPovLeft.whileTrue(
+        climberAlign_PovLeft.whileTrue(
                 drivetrain.applyRequest(() -> drive.withVelocityX(align.getAlignForwardSpeedPercent(
                                         isRedAlliance() ? FieldConstants.RED_CAGES[0] : FieldConstants.BLUE_CAGES[0])
                                 * MaxSpeed)
@@ -374,7 +283,7 @@ public class RobotContainer {
                                         (isRedAlliance()) ? Rotation2d.kCCW_90deg : Rotation2d.kCW_90deg)
                                 * MaxAngularRate)));
 
-        climberAlignPovRight.whileTrue(
+        climberAlign_PovRight.whileTrue(
                 drivetrain.applyRequest(() -> drive.withVelocityX(align.getAlignForwardSpeedPercent(
                                         isRedAlliance() ? FieldConstants.RED_CAGES[2] : FieldConstants.BLUE_CAGES[2])
                                 * MaxSpeed)
@@ -384,16 +293,6 @@ public class RobotContainer {
                         .withRotationalRate(align.getAlignRotationSpeedPercent(
                                         (isRedAlliance()) ? Rotation2d.kCCW_90deg : Rotation2d.kCW_90deg)
                                 * MaxAngularRate)));
-        // barge_Back.onTrue(new InstantCommand(() -> elevator.setElevatorBarge())
-        // .andThen(new InstantCommand(() -> arm.setBarge())));
-
-        // resetAdjusts_RB.onTrue(
-        // new InstantCommand(() -> elevator.resetAdjust()).andThen(new
-        // InstantCommand(() ->
-        // arm.resetAdjust())));
-
-        // climb_RB.onTrue(new InstantCommand(() -> arm.setClimb())
-        // .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
 
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
@@ -402,17 +301,6 @@ public class RobotContainer {
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
                 .andThen(new InstantCommand(() -> endEffector.setAlgae())));
-
-        // elevatorAdjustUp_POV_0.whileTrue(
-        // new RunCommand(() ->
-        // elevator.changeElevatorOffset(ElevatorConstants.ELEVATOR_OFFSET)));
-        // elevatorAdjustDown_POV_180.whileTrue(
-        // new RunCommand(() ->
-        // elevator.changeElevatorOffset(-ElevatorConstants.ELEVATOR_OFFSET)));
-        // armAdjustUp_POV_90.whileTrue(new RunCommand(() ->
-        // arm.armAdjust(ArmConstants.ARM_ADJUST_INCREMENT)));
-        // armAdjustDown_POV_270.whileTrue(new RunCommand(() ->
-        // arm.armAdjust(-ArmConstants.ARM_ADJUST_INCREMENT)));
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -493,7 +381,7 @@ public class RobotContainer {
                                                 // negative X (left)
                                                 )
                                         .alongWith(ledstrip.aligning(() -> align.isAligned())))
-                                .withTimeout(1.5)));
+                                .until(() -> align.isAlignedTest())));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
@@ -517,10 +405,11 @@ public class RobotContainer {
                                                 // negative X (left)
                                                 )
                                         .alongWith(ledstrip.aligning(() -> align.isAligned())))
-                                .withTimeout(1.5)));
+                                .until(() -> align.isAlignedTest())));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
+                new InstantCommand(() -> poseEstimation.toggleBackends(0)).andThen
                 (drivetrain.applyRequest(
                                 () -> robotOrientedDrive
                                         .withVelocityX(-align.getAlignForwardSpeedPercent(
@@ -539,13 +428,8 @@ public class RobotContainer {
                                 // negative X (left)
                                 ))
                         .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                        .withTimeout(1.25));
+                        .withTimeout(0.5).andThen(new InstantCommand(() -> poseEstimation.toggleBackends(0))));
 
-        // NamedCommands.registerCommand(
-        // "Intake Station",
-        // new InstantCommand(() -> endEffector.coralIn())
-        // .until(() -> endEffector.hasCoral())
-        // .andThen(new InstantCommand(() -> endEffector.stop())));
     }
 
     public void setDefaultCommands() {
@@ -569,7 +453,6 @@ public class RobotContainer {
         elevator.setDefaultCommand(new ElevatorHold());
         arm.setDefaultCommand(new ArmHold());
         climber.setDefaultCommand(new ClimbCommand());
-        // ledstrip.setDefaultCommand(new RunCommand(() -> ledstrip.handleFlashing()));
         ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
     }
 }

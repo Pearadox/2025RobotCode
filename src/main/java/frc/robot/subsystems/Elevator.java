@@ -225,7 +225,9 @@ public class Elevator extends SubsystemBase {
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 if (isAligning) {
                     // setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
-                    setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+                    // setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+                    setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+
                 } else {
                     setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
                 }
@@ -272,7 +274,7 @@ public class Elevator extends SubsystemBase {
         //         talonFXConfigs.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MM_CRUISE_VELCOCITY_UP;
         //         talonFXConfigs.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MM_ACCELERATION_UP;
         //     }
-
+ 
         //     elevator.getConfigurator().refresh(talonFXConfigs);
         //     elevator.getConfigurator().apply(talonFXConfigs);
 
@@ -376,10 +378,6 @@ public class Elevator extends SubsystemBase {
     public void setZeroing(boolean flag) {
         isZeroing = flag;
     }
-
-    // public void changeIsCoral() {
-    //     isCoral = !isCoral;
-    // }
 
     public void resetAdjust() {
         elevatorOffset = 0;

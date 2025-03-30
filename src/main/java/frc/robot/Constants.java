@@ -95,7 +95,7 @@ public class Constants {
         public static final double REEF_ALIGN_TZ = -0; // target relative
 
         public static final double STATION_ALIGN_TX = 0.07;
-        public static final double STATION_ALIGN_TZ = -0.3;
+        public static final double STATION_ALIGN_TZ = 0;
 
         public static final double REEF_kP = 0.5; // Tune all PID values
         public static final double REEF_kI = 0;
@@ -286,7 +286,7 @@ public class Constants {
 
         public static final double PULL_SPEED = -0.3;
 
-        public static final double PUSH_SPEED = 0.3; // 0.4
+        public static final double PUSH_SPEED = 0.6; // 0.3
         public static final double ALGAE_PULL_SPEED = 0.8;
         public static final double ALGAE_PUSH_SPEED = -1.0;
 

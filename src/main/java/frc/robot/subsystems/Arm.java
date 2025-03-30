@@ -98,15 +98,6 @@ public class Arm extends SubsystemBase {
         talonFXConfigs.Voltage.PeakForwardVoltage = 4.0;
         talonFXConfigs.Voltage.PeakReverseVoltage = -4.0;
 
-        // var slot0Configs = talonFXConfigs.Slot0;
-        // slot0Configs.kG = ArmConstants.kG; // add enough Gravity Gain just before motor starts moving
-        // slot0Configs.kS = ArmConstants.kS; // Add x output to overcome static friction
-        // slot0Configs.kV = ArmConstants.kV; // A velocity target of 1 rps results in x output
-        // slot0Configs.kA = ArmConstants.kA; // An acceleration of 1 rps/s requires x output
-        // slot0Configs.kP = ArmConstants.kP; // A position error of x rotations results in 12 V output
-        // slot0Configs.kI = ArmConstants.kI; // no output for integrated error
-        // slot0Configs.kD = ArmConstants.kD; // A velocity error of 1 rps results in x output
-
         var slot0Configs = talonFXConfigs.Slot0;
         slot0Configs.kG = 0; // add enough Gravity Gain just before motor starts moving
         slot0Configs.kS = 0.15; // Add x output to overcome static friction
@@ -129,9 +120,6 @@ public class Arm extends SubsystemBase {
         var motionMagicConfigs = talonFXConfigs.MotionMagic;
         motionMagicConfigs.MotionMagicCruiseVelocity = ArmConstants.MM_MAX_CRUISE_VELOCITY;
         motionMagicConfigs.MotionMagicAcceleration = ArmConstants.MM_MAX_CRUISE_ACCELERATION;
-
-        // talonFXConfigs.Feedback.FeedbackSensorSource = FeedbackSensorSourceValue.RotorSensor;
-        // talonFXConfigs.Feedback.FeedbackRotorOffset = -16;
 
         pivot.getConfigurator().apply(talonFXConfigs);
     }
@@ -162,42 +150,8 @@ public class Arm extends SubsystemBase {
     }
 
     public void armHold() {
-
-        // pivot.setControl(voltageRequest.withOutput(armAdjust));
-
         double setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
-        // if (armMode == ArmMode.Intake) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_LOLIPOP * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L2) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_LEVEL_2_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L3) {
-        //     if (isCoral) {
-        //         setpoint = ArmConstants.ARM_LEVEL_3_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     } else {
-        //         setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        //     }
-        // } else if (armMode == ArmMode.L4) {
-        //     setpoint = ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
 
-        // } else if (armMode == ArmMode.ALGAE_LOW) {
-        //     setpoint = ArmConstants.ARM_ALGAE_LOW * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.ALGAE_HIGH) {
-        //     setpoint = ArmConstants.ARM_ALGAE_HIGH * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.BARGE) {
-        //     setpoint = ArmConstants.ARM_BARGE * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else if (armMode == ArmMode.CLIMB) {
-        //     setpoint = ArmConstants.ARM_CLIMB * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // } else {
-        //     setpoint = ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust;
-        // }
         if (isCoral) {
             if (armMode == ArmMode.Stowed) {
                 setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
@@ -210,7 +164,9 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L4) {
                 if (isAligning) {
                     // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                    setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
+                    // setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
+                    setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
+
                 } else {
                     setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
                 }
@@ -259,18 +215,6 @@ public class Arm extends SubsystemBase {
         armMode = ArmMode.L4;
     }
 
-    // public void setAlgaeLow() {
-    //     armMode = ArmMode.ALGAE_LOW;
-    // }
-
-    // public void setAlgaeHigh() {
-    //     armMode = ArmMode.ALGAE_HIGH;
-    // }
-
-    // public void setBarge() {
-    //     armMode = ArmMode.BARGE;
-    // }
-
     public void setStowed() {
         armMode = ArmMode.Stowed;
     }
@@ -278,10 +222,6 @@ public class Arm extends SubsystemBase {
     public void setLollipopOrClimb() {
         armMode = ArmMode.LOLLICLIMB;
     }
-
-    // public void setUnpowered() {
-    //     armMode = ArmMode.Unpowered;
-    // }
 
     public void setCoral() {
         isCoral = true;

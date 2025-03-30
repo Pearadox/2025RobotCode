@@ -26,7 +26,7 @@ public class EndEffector extends SubsystemBase {
 
     private static final LEDStrip leds = LEDStrip.getInstance();
 
-    private static final Arm arm = Arm.getInstance();
+    private static final Arm ARM = Arm.getInstance();
 
     public static EndEffector getInstance() {
         return END_EFFECTOR;
@@ -175,8 +175,10 @@ public class EndEffector extends SubsystemBase {
 
     // intakes
     public void coralOut() {
-        if (arm.getArmMode() == ArmMode.L2) {
+        if (ARM.getArmMode() == ArmMode.L2) {
             endEffector.set(0.2);
+        } else if (ARM.getArmMode() == ArmMode.L3) {
+            endEffector.set(0.3);
         } else endEffector.set(EndEffectorConstants.PUSH_SPEED);
         setLastRot();
     }
@@ -209,7 +211,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean hasCoral() {
-        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 50);
+        return debouncer.calculate(endEffector.getStatorCurrent().getValueAsDouble() > 30);
     }
 
     public boolean getHolding() {

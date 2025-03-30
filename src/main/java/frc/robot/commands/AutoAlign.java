@@ -308,6 +308,13 @@ public class AutoAlign {
         return isAligned;
     }
 
+    public boolean isAlignedTest() {
+        boolean isAligned = Math.abs(reefForwardSpeedController.getError()) < 0.49
+                && reefRotationSpeedController.getError() < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
+
+        return isAligned;
+    }
+
     private double getArmAngleRads() {
         Logger.recordOutput("Align/Math/tz", horizDisplacement);
         double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
