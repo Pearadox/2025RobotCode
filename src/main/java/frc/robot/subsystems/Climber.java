@@ -6,6 +6,7 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
+import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.lib.drivers.PearadoxTalonFX;
@@ -86,12 +87,11 @@ public class Climber extends SubsystemBase {
         climbMotor.set(0.7);
     }
 
-    public void retractClimber() {
+    public void prepClimber() {
         ELEVATOR.setElevatorStowedMode();
         ARM.setAlgae();
         ARM.setStowed();
         climbMotor.set(-0.7);
-        // climbMotor.setControl(new PositionVoltage(setpoint)); //-230 // -150
     }
 
     public void zeroClimber() {
@@ -100,5 +100,12 @@ public class Climber extends SubsystemBase {
 
     public void stop() {
         climbMotor.set(0);
+    }
+
+    public void retractClimber() {
+        ELEVATOR.setElevatorStowedMode();
+        ARM.setAlgae();
+        ARM.setStowed();
+        climbMotor.setControl(new PositionVoltage(-270)); // -230 // -150
     }
 }

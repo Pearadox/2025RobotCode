@@ -20,9 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
-import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
     private PearadoxTalonFX pivot;
@@ -135,18 +133,12 @@ public class Arm extends SubsystemBase {
         SmarterDashboard.putNumber(
                 "Arm/Stator Current", pivot.getStatorCurrent().getValueAsDouble());
         SmarterDashboard.putNumber("Arm/Adjust", armAdjust);
-        SmarterDashboard.putNumber(
-                "Arm/Intake Setpoint", ArmConstants.ARM_INTAKE_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
-        SmarterDashboard.putNumber(
-                "Arm/L4 Setpoint", ArmConstants.ARM_LEVEL_4_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
-        SmarterDashboard.putNumber(
-                "Arm/Stow Setpoint", ArmConstants.ARM_STOWED_ROT * ArmConstants.ARM_GEAR_RATIO + armAdjust);
         SmarterDashboard.putString("Arm/Mode", armMode.toString());
         SmarterDashboard.putBoolean("Arm/IsCoral", isCoral);
         SmarterDashboard.putNumber("Arm/DeltaAngle", deltaArmAngle());
         SmarterDashboard.putNumber("Arm/kG", 0.35 * Math.cos(-1 * Units.degreesToRadians(getArmAngleDegrees() - 96)));
 
-        setAligning(!RobotContainer.align.isAligned());
+        // setAligning(!RobotContainer.align.isAligned());
     }
 
     public void armHold() {
@@ -183,7 +175,7 @@ public class Arm extends SubsystemBase {
             }
         }
 
-        Logger.recordOutput("Arm/Align Setpoint", RobotContainer.align.getArmAngleRots() + armAdjust);
+        // Logger.recordOutput("Arm/Align Setpoint", RobotContainer.align.getArmAngleRots() + armAdjust);
 
         // pivot.setControl(motionMagicRequest.withPosition(setpoint));
         pivot.setControl(new PositionVoltage(-setpoint)

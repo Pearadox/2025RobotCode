@@ -20,9 +20,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
-import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
-import org.littletonrobotics.junction.Logger;
 
 public class Elevator extends SubsystemBase {
 
@@ -36,7 +34,7 @@ public class Elevator extends SubsystemBase {
     private boolean isAligning = false;
     private boolean isZeroing = false;
 
-    private static enum ElevatorMode {
+    public static enum ElevatorMode {
         STOWED,
         STATION,
         LEVEL_TWO,
@@ -154,13 +152,13 @@ public class Elevator extends SubsystemBase {
         elevatorFollower.optimizeBusUtilization();
         elevatorFollower.setControl(new Follower(ElevatorConstants.ELEVATOR_ID, true));
 
-        SmarterDashboard.putNumber("Elevator kG", ElevatorConstants.kG);
-        SmarterDashboard.putNumber("Elevator kS", ElevatorConstants.kS);
-        SmarterDashboard.putNumber("Elevator kV", ElevatorConstants.kV);
-        SmarterDashboard.putNumber("Elevator kA", ElevatorConstants.kA);
-        SmarterDashboard.putNumber("Elevator kP", ElevatorConstants.kP);
-        SmarterDashboard.putNumber("Elevator kI", ElevatorConstants.kI);
-        SmarterDashboard.putNumber("Elevator kD", ElevatorConstants.kD);
+        // SmarterDashboard.putNumber("Elevator kG", ElevatorConstants.kG);
+        // SmarterDashboard.putNumber("Elevator kS", ElevatorConstants.kS);
+        // SmarterDashboard.putNumber("Elevator kV", ElevatorConstants.kV);
+        // SmarterDashboard.putNumber("Elevator kA", ElevatorConstants.kA);
+        // SmarterDashboard.putNumber("Elevator kP", ElevatorConstants.kP);
+        // SmarterDashboard.putNumber("Elevator kI", ElevatorConstants.kI);
+        // SmarterDashboard.putNumber("Elevator kD", ElevatorConstants.kD);
     }
 
     @Override
@@ -179,7 +177,7 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putString("Elevator Mode", elevatorMode.toString());
         SmarterDashboard.putBoolean("Elevator/IsCoral", isCoral);
 
-        setAligning(!RobotContainer.align.isAligned());
+        // setAligning(!RobotContainer.align.isAligned());
     }
 
     public void setElevatorPosition() {
@@ -274,7 +272,7 @@ public class Elevator extends SubsystemBase {
         //         talonFXConfigs.MotionMagic.MotionMagicCruiseVelocity = ElevatorConstants.MM_CRUISE_VELCOCITY_UP;
         //         talonFXConfigs.MotionMagic.MotionMagicAcceleration = ElevatorConstants.MM_ACCELERATION_UP;
         //     }
- 
+
         //     elevator.getConfigurator().refresh(talonFXConfigs);
         //     elevator.getConfigurator().apply(talonFXConfigs);
 
@@ -283,7 +281,8 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putBoolean("Elevator/IsLowering", isLowering);
 
         SmarterDashboard.putNumber("Elevator/Setpoint", setpoint);
-        Logger.recordOutput("Elevator/Align Setpoint", RobotContainer.align.getElevatorHeightRots() + elevatorOffset);
+        // Logger.recordOutput("Elevator/Align Setpoint", RobotContainer.align.getElevatorHeightRots() +
+        // elevatorOffset);
     }
 
     public void homeElevator() {
@@ -321,6 +320,10 @@ public class Elevator extends SubsystemBase {
 
     public double getElevatorVelocityInchesPerSecond() {
         return getElevatorVelocity_RotsPerSecond() * ElevatorConstants.kRotationToInches;
+    }
+
+    public ElevatorMode getElevatorMode() {
+        return elevatorMode;
     }
 
     public void changeElevatorOffset(double value) {

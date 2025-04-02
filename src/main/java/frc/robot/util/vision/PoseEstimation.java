@@ -150,7 +150,7 @@ public class PoseEstimation {
         // Logger.recordOutput("Drivetrain/Vision Pose", measurement.pose.toPose2d());
     }
 
-    public void toggleBackends(int index){
+    public void toggleBackends(int index) {
         backendToggles[index] = !backendToggles[index];
     }
 

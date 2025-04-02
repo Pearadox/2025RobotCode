@@ -37,8 +37,7 @@ public class LEDStrip extends SubsystemBase {
     }
 
     public Command defaultCommand(BooleanSupplier isCoralSupplier) {
-        return new RunCommand(
-                () -> setSolid(isCoralSupplier.getAsBoolean() ? Color.kCoral : Color.kMediumAquamarine), this);
+        return new RunCommand(() -> setCoralOrAlgae(isCoralSupplier), this);
     }
 
     public Command aligning(BooleanSupplier isAligned) {
@@ -49,6 +48,10 @@ public class LEDStrip extends SubsystemBase {
 
     public Command success() {
         return new RunCommand(() -> setBlinking(Color.kGreen), this).withTimeout(LEDConstants.BLINKING_DURATION);
+    }
+
+    private void setCoralOrAlgae(BooleanSupplier isCoralSupplier) {
+        setSolid(isCoralSupplier.getAsBoolean() ? Color.kCoral : Color.kMediumAquamarine);
     }
 
     private void setSolid(Color color) {

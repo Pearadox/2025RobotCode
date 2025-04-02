@@ -49,12 +49,6 @@
         {
           "type": "named",
           "data": {
-            "name": "Auto Align Station"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
             "name": "Stop"
           }
         },
@@ -98,12 +92,6 @@
           "type": "path",
           "data": {
             "pathName": "KL-CS"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Auto Align Station"
           }
         },
         {

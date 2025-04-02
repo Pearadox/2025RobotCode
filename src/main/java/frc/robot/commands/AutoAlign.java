@@ -10,8 +10,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
@@ -159,9 +157,9 @@ public class AutoAlign {
             alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
         }
 
-        Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
-        Logger.recordOutput("Align/Strafe Setpoint", setPoint);
-        Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
+        // Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
+        // Logger.recordOutput("Align/Strafe Setpoint", setPoint);
+        // Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
         // Logger.recordOutput("Align/tx", tx);
         // Logger.recordOutput("Align/tx Error", txError);
 
@@ -175,9 +173,9 @@ public class AutoAlign {
         alignSpeedStrafe = reefStrafeSpeedController.calculate(robotTranslation2d.getY(), targetTranslation2d.getY());
         alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
 
-        Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
-        Logger.recordOutput("Align/Strafe/CageTranslation2d", targetTranslation2d);
-        Logger.recordOutput("Align/Strafe/CageTargetY", targetTranslation2d.getY());
+        // Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
+        // Logger.recordOutput("Align/Strafe/CageTranslation2d", targetTranslation2d);
+        // Logger.recordOutput("Align/Strafe/CageTargetY", targetTranslation2d.getY());
         // Logger.recordOutput("Align/Strafe Setpoint", setPoint);
         // Logger.recordOutput("Align/Strafe Error", setPoint - offset.getY());
 
@@ -191,9 +189,9 @@ public class AutoAlign {
 
         alignSpeedRotation = reefRotationSpeedController.calculate(robotAngle, targetAngle);
 
-        Logger.recordOutput("Align/Rotation Speed", alignSpeedRotation);
-        Logger.recordOutput("Align/Robot Angle", robotAngle);
-        Logger.recordOutput("Align/Rotation Error", rotationError);
+        // Logger.recordOutput("Align/Rotation Speed", alignSpeedRotation);
+        // Logger.recordOutput("Align/Robot Angle", robotAngle);
+        // Logger.recordOutput("Align/Rotation Error", rotationError);
 
         return alignSpeedRotation;
     }
@@ -216,16 +214,16 @@ public class AutoAlign {
             alignSpeedForward = -reefForwardSpeedController.calculate(tz, setPoint);
         }
 
-        Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
+        // Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
         // Logger.recordOutput("Align/ty", tz);
         // Logger.recordOutput("Align/ty Error", tzError);
-        Logger.recordOutput("Align/x", offset.getX());
-        Logger.recordOutput("Align/y", offset.getY());
-        Logger.recordOutput("Align/Offset", offset);
-        Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
-        Logger.recordOutput("Align/Fwd Setpoint", setPoint);
-        Logger.recordOutput("Align/TagID", tagID);
-        Logger.recordOutput("LL Valid", llIsValid(llName, tagID));
+        // Logger.recordOutput("Align/x", offset.getX());
+        // Logger.recordOutput("Align/y", offset.getY());
+        // Logger.recordOutput("Align/Offset", offset);
+        // Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
+        // Logger.recordOutput("Align/Fwd Setpoint", setPoint);
+        // Logger.recordOutput("Align/TagID", tagID);
+        // Logger.recordOutput("LL Valid", llIsValid(llName, tagID));
         // Logger.recordOutput("Align/Tag Pose", getTagPose(tagID));
 
         return alignSpeedForward;
@@ -239,9 +237,9 @@ public class AutoAlign {
                 reefStrafeSpeedController.calculate(robotTranslation2d.getX(), targetTranslation2d.getX()) / 2;
         alignSpeedForward += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
 
-        Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
-        Logger.recordOutput("Align/Forward/CageTranslation2d", targetTranslation2d);
-        Logger.recordOutput("Align/Strafe/CageTargetX", targetTranslation2d.getX());
+        // Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
+        // Logger.recordOutput("Align/Forward/CageTranslation2d", targetTranslation2d);
+        // Logger.recordOutput("Align/Strafe/CageTargetX", targetTranslation2d.getX());
         return alignSpeedForward;
     }
 
@@ -300,10 +298,10 @@ public class AutoAlign {
 
         // + Math.abs(reefStrafeSpeedController.getError())
 
-        Logger.recordOutput("Align/Error/IsAligned", isAligned);
-        Logger.recordOutput("Align/Error/fwd", reefForwardSpeedController.getError());
-        Logger.recordOutput("Align/Error/strafe", reefStrafeSpeedController.getError());
-        Logger.recordOutput("Align/Error/rot", reefRotationSpeedController.getError());
+        // Logger.recordOutput("Align/Error/IsAligned", isAligned);
+        // Logger.recordOutput("Align/Error/fwd", reefForwardSpeedController.getError());
+        // Logger.recordOutput("Align/Error/strafe", reefStrafeSpeedController.getError());
+        // Logger.recordOutput("Align/Error/rot", reefRotationSpeedController.getError());
 
         return isAligned;
     }
@@ -315,50 +313,50 @@ public class AutoAlign {
         return isAligned;
     }
 
-    private double getArmAngleRads() {
-        Logger.recordOutput("Align/Math/tz", horizDisplacement);
-        double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
-        Logger.recordOutput("Align/Math/deltaX", deltaX);
-        return Math.acos(deltaX / AlignConstants.PIVOT_TO_CORAL_RADIUS);
-    }
+    // private double getArmAngleRads() {
+    //     Logger.recordOutput("Align/Math/tz", horizDisplacement);
+    //     double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
+    //     Logger.recordOutput("Align/Math/deltaX", deltaX);
+    //     return Math.acos(deltaX / AlignConstants.PIVOT_TO_CORAL_RADIUS);
+    // }
 
-    public double getArmAngleRots() {
-        double armAngleRads = getArmAngleRads();
-        double armAngleRots;
-        if (Double.isNaN(armAngleRads)) {
-            armAngleRots = ArmConstants.ARM_L4_BEHIND_CORAL;
-        } else {
-            armAngleRots = Units.radiansToRotations(armAngleRads
-                            + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET
-                            - AlignConstants.ARM_STARTING_ANGLE)
-                    * ArmConstants.ARM_GEAR_RATIO;
-        }
-        Logger.recordOutput("Align/Math/Arm Rads from x-axis", armAngleRads);
-        Logger.recordOutput("Align/Math/Arm Degs from x-axis", Units.radiansToDegrees(armAngleRads));
-        Logger.recordOutput("Align/Math/Arm Rots", armAngleRots);
-        return armAngleRots;
-    }
+    // public double getArmAngleRots() {
+    //     double armAngleRads = getArmAngleRads();
+    //     double armAngleRots;
+    //     if (Double.isNaN(armAngleRads)) {
+    //         armAngleRots = ArmConstants.ARM_L4_BEHIND_CORAL;
+    //     } else {
+    //         armAngleRots = Units.radiansToRotations(armAngleRads
+    //                         + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET
+    //                         - AlignConstants.ARM_STARTING_ANGLE)
+    //                 * ArmConstants.ARM_GEAR_RATIO;
+    //     }
+    //     Logger.recordOutput("Align/Math/Arm Rads from x-axis", armAngleRads);
+    //     Logger.recordOutput("Align/Math/Arm Degs from x-axis", Units.radiansToDegrees(armAngleRads));
+    //     Logger.recordOutput("Align/Math/Arm Rots", armAngleRots);
+    //     return armAngleRots;
+    // }
 
-    private double getElevatorHeightMeters() {
-        double armAngleRads = getArmAngleRads();
-        if (Double.isNaN(armAngleRads)) {
-            return Double.NaN;
-        } else {
-            return AlignConstants.L4_HEIGHT - AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(armAngleRads);
-        }
-    }
+    // private double getElevatorHeightMeters() {
+    //     double armAngleRads = getArmAngleRads();
+    //     if (Double.isNaN(armAngleRads)) {
+    //         return Double.NaN;
+    //     } else {
+    //         return AlignConstants.L4_HEIGHT - AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(armAngleRads);
+    //     }
+    // }
 
-    public double getElevatorHeightRots() {
-        double heightMeters = getElevatorHeightMeters();
-        if (Double.isNaN(heightMeters)) {
-            return ElevatorConstants.BARGE_ROT;
-        }
+    // public double getElevatorHeightRots() {
+    //     double heightMeters = getElevatorHeightMeters();
+    //     if (Double.isNaN(heightMeters)) {
+    //         return ElevatorConstants.BARGE_ROT;
+    //     }
 
-        double height = Units.metersToInches(heightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT);
-        double rots = height * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+    //     double height = Units.metersToInches(heightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT);
+    //     double rots = height * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
 
-        Logger.recordOutput("Align/Math/Elev Height (m)", height);
-        Logger.recordOutput("Align/Math/Elev Rots", rots);
-        return rots;
-    }
+    //     Logger.recordOutput("Align/Math/Elev Height (m)", height);
+    //     Logger.recordOutput("Align/Math/Elev Rots", rots);
+    //     return rots;
+    // }
 }
