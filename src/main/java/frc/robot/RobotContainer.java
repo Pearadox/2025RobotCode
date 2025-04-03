@@ -268,7 +268,9 @@ public class RobotContainer {
         levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                 .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        deployClimber_PovUp.whileTrue(new RunCommand(() -> climber.deployClimber())).onFalse(new InstantCommand(() -> climber.zeroClimber()));
+        deployClimber_PovUp
+                .whileTrue(new RunCommand(() -> climber.deployClimber()))
+                .onFalse(new InstantCommand(() -> climber.zeroClimber()));
         retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
         zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 

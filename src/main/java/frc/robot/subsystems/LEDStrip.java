@@ -11,6 +11,8 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
 import java.util.function.BooleanSupplier;
 
+// Shaotan - OOPS I MADE A BIG MISTAKE = FORGIVE ME!!!!!!!!!!!
+
 public class LEDStrip extends SubsystemBase {
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
