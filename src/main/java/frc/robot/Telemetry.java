@@ -31,7 +31,7 @@ public class Telemetry {
     public Telemetry(double maxSpeed) {
         MaxSpeed = maxSpeed;
         SignalLogger.setPath("/media/sda1/ctre/ctre-logs/");
-        SignalLogger.start();
+        // SignalLogger.start(); //might be needed for SysID
     }
 
     /* What to publish over networktables for telemetry */

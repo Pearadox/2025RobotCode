@@ -70,8 +70,6 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.schedule();
         }
-
-        RobotContainer.poseEstimation.toggleBackends(1);
     }
 
     @Override
@@ -85,8 +83,6 @@ public class Robot extends LoggedRobot {
         if (m_autonomousCommand != null) {
             m_autonomousCommand.cancel();
         }
-
-        RobotContainer.poseEstimation.toggleBackends(1);
     }
 
     @Override

@@ -156,8 +156,7 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L4) {
                 if (isAligning) {
                     // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                    // setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
-                    setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
+                    setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
 
                 } else {
                     setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;

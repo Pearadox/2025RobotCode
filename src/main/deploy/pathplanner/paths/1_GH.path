@@ -16,11 +16,11 @@
     },
     {
       "anchor": {
-        "x": 6.279000000000001,
+        "x": 6.50325,
         "y": 4.055
       },
       "prevControl": {
-        "x": 6.529000000000001,
+        "x": 6.75325,
         "y": 4.055
       },
       "nextControl": null,
@@ -31,7 +31,14 @@
   "rotationTargets": [],
   "constraintZones": [],
   "pointTowardsZones": [],
-  "eventMarkers": [],
+  "eventMarkers": [
+    {
+      "name": "LevelFour",
+      "waypointRelativePos": 0.029856115107911665,
+      "endWaypointRelativePos": null,
+      "command": null
+    }
+  ],
   "globalConstraints": {
     "maxVelocity": 2.0,
     "maxAcceleration": 2.0,

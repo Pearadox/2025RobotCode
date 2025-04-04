@@ -175,7 +175,7 @@ public class EndEffector extends SubsystemBase {
 
     // intakes
     public void coralOut() {
-        if (ARM.getArmMode() == ArmMode.L2) {
+        if (ARM.getArmMode() == ArmMode.L2 || ARM.getArmMode() == ArmMode.Stowed) {
             endEffector.set(0.2);
         } else if (ARM.getArmMode() == ArmMode.L3) {
             endEffector.set(0.3);

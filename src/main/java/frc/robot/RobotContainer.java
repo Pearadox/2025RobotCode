@@ -8,7 +8,6 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -23,11 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
-import frc.robot.commands.ClimbCommand;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm;
@@ -108,13 +105,15 @@ public class RobotContainer {
     private final JoystickButton levelTwo_X = new JoystickButton(opController, XboxController.Button.kX.value);
     private final JoystickButton stow_A = new JoystickButton(opController, XboxController.Button.kA.value);
 
-    private final POVButton climberAlign_PovLeft = new POVButton(opController, 270);
-    private final POVButton climberAlign_PovRight = new POVButton(opController, 90);
-    private final POVButton deployClimber_PovUp = new POVButton(opController, 0);
-    private final POVButton retractClimber_PovDown = new POVButton(opController, 180);
+    private final POVButton climberStateInc_PovLeft = new POVButton(opController, 270);
+    private final POVButton climberStateDec_PovRight = new POVButton(opController, 90);
+    private final POVButton climberAdjustUp_PovUp = new POVButton(opController, 0);
+    private final POVButton climberAdjustDown_PovDown = new POVButton(opController, 180);
 
     private final Trigger elevatorAdjust = new Trigger(() -> Math.abs(opController.getLeftY()) > 0.9);
     private final Trigger armAdjust = new Trigger(() -> Math.abs(opController.getRightX()) > 0.9);
+
+    private final Trigger alignAdjust = new Trigger(() -> Math.abs(opController.getLeftTriggerAxis()) > 0.9);
 
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
@@ -252,47 +251,55 @@ public class RobotContainer {
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
         armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
 
+        alignAdjust
+                .onTrue(new InstantCommand(() -> arm.setAligning(true))
+                        .andThen(new InstantCommand(() -> elevator.setAligning(true))))
+                .onFalse(new InstantCommand(() -> arm.setAligning(false))
+                        .andThen(new InstantCommand(() -> elevator.setAligning(false))));
+
         resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
         stow_A.onTrue(new InstantCommand(() -> arm.setStowed())
-                .andThen(new WaitCommand(2))
+                // .andThen(new ConditionalCommand(
+                //         new InstantCommand(() -> elevator.setElevatorStationMode()), Commands.none(), () ->
+                // !arm.getIsCoral()))
+                .andThen(new WaitCommand(1))
                 .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
+
         tempCS_Back.onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
                 .andThen(new ConditionalCommand(
-                        new WaitCommand(2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
+                        new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                 .andThen(new InstantCommand(() -> arm.setArmIntake())));
         levelTwo_X.onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                 .andThen(new InstantCommand(() -> arm.setArmL2())));
+        // levelTwo_X.onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
+        //         .andThen(new InstantCommand(() -> arm.setArmL2())));
         levelThree_B.onTrue(new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                 .andThen(new InstantCommand(() -> arm.setArmL3())));
+        // levelThree_B.onTrue(new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
+        //         .andThen(new InstantCommand(() -> arm.setArmL3())));
         levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                 .andThen(new InstantCommand(() -> arm.setArmL4())));
+        // levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+        //         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        deployClimber_PovUp.whileTrue(new RunCommand(() -> climber.deployClimber())).onFalse(new InstantCommand(() -> climber.zeroClimber()));
-        retractClimber_PovDown.whileTrue(new RunCommand(() -> climber.retractClimber()));
+        //
+        climberAdjustUp_PovUp
+                .whileTrue(new RunCommand(() -> climber.climberUp()))
+                .onFalse(new InstantCommand(() -> climber.stop()));
+        climberAdjustDown_PovDown
+                .whileTrue(new RunCommand(() -> climber.climberDown()))
+                .onFalse(new InstantCommand(() -> climber.stop()));
         zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
-        climberAlign_PovLeft.whileTrue(
-                drivetrain.applyRequest(() -> drive.withVelocityX(align.getAlignForwardSpeedPercent(
-                                        isRedAlliance() ? FieldConstants.RED_CAGES[0] : FieldConstants.BLUE_CAGES[0])
-                                * MaxSpeed)
-                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        isRedAlliance() ? FieldConstants.RED_CAGES[0] : FieldConstants.BLUE_CAGES[0])
-                                * MaxSpeed)
-                        .withRotationalRate(align.getAlignRotationSpeedPercent(
-                                        (isRedAlliance()) ? Rotation2d.kCCW_90deg : Rotation2d.kCW_90deg)
-                                * MaxAngularRate)));
-
-        climberAlign_PovRight.whileTrue(
-                drivetrain.applyRequest(() -> drive.withVelocityX(align.getAlignForwardSpeedPercent(
-                                        isRedAlliance() ? FieldConstants.RED_CAGES[2] : FieldConstants.BLUE_CAGES[2])
-                                * MaxSpeed)
-                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        isRedAlliance() ? FieldConstants.RED_CAGES[2] : FieldConstants.BLUE_CAGES[2])
-                                * MaxSpeed)
-                        .withRotationalRate(align.getAlignRotationSpeedPercent(
-                                        (isRedAlliance()) ? Rotation2d.kCCW_90deg : Rotation2d.kCW_90deg)
-                                * MaxAngularRate)));
+        climberStateInc_PovLeft.onTrue(new InstantCommand(() -> climber.decrementClimbState()));
+        climberStateDec_PovRight.onTrue(new InstantCommand(() -> climber.incrementClimbState()));
 
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
@@ -334,7 +341,11 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "LevelFour",
                 new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+                        .andThen(new ConditionalCommand(
+                                new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
+        // new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+        //         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
         NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralOut()));
         NamedCommands.registerCommand(
@@ -381,7 +392,8 @@ public class RobotContainer {
                                         )
                                 // .alongWith(ledstrip.aligning(() -> align.isAligned()))
                                 )
-                                .until(() -> align.isAlignedTest())));
+                                .until(() -> align.isAlignedTest()))
+                        .andThen(new WaitCommand(0.2)));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
@@ -405,7 +417,8 @@ public class RobotContainer {
                                         )
                                 // .alongWith(ledstrip.aligning(() -> align.isAligned()))
                                 )
-                                .until(() -> align.isAlignedTest())));
+                                .until(() -> align.isAlignedTest())
+                                .andThen(new WaitCommand(0.2))));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
@@ -453,7 +466,7 @@ public class RobotContainer {
 
         elevator.setDefaultCommand(new ElevatorHold());
         arm.setDefaultCommand(new ArmHold());
-        climber.setDefaultCommand(new ClimbCommand());
+        // climber.setDefaultCommand(new ClimbCommand());
         // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
     }
 }

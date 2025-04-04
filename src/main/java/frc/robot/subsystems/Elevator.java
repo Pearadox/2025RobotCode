@@ -211,7 +211,12 @@ public class Elevator extends SubsystemBase {
         // }
 
         if (elevatorMode == ElevatorMode.STOWED) {
+            // if (isCoral) {
             setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
+            // } else {
+            // setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            // ;
+            // }
         } else if (elevatorMode == ElevatorMode.STATION) {
             setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
         }

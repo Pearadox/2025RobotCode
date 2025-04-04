@@ -75,7 +75,7 @@ public class Constants {
         // public static final double ALIGN_STRAFE_KI = 0.001;
         // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
 
-        public static final double ALIGN_KS = 0.009;
+        public static final double ALIGN_KS = 0.03; // 0.009
 
         // tx and ty tolerances with setpoint
         public static final double ALIGN_TOLERANCE_PIXELS = 0.5;
@@ -148,7 +148,7 @@ public class Constants {
         public static final double kRotationToInches = PULLEY_DIAMETER * Math.PI / GEAR_RATIO;
 
         // the following are in inches
-        public static final double STOWED_HEIGHT = 0;
+        public static final double STOWED_HEIGHT = 0; // 0
         public static final double STATION_HEIGHT =
                 15; // Home Field is 1in higher than official field - official is 15.4
         public static final double LEVEL_TWO_HEIGHT =
@@ -206,7 +206,7 @@ public class Constants {
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT =
-                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3; // was -78 //79.08 // -66
+                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3 - 0.19; // was -78 //79.08 // -66
 
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08

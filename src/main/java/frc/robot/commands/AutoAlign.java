@@ -205,6 +205,10 @@ public class AutoAlign {
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
         this.horizDisplacement = offset.getX();
 
+        if (offset.getX() < 1 && Math.abs(reefStrafeSpeedController.getError()) > 0.5) {
+            return 0;
+        }
+
         if (!llIsValid(llName, tagID)) {
             alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
         } else {
@@ -214,13 +218,15 @@ public class AutoAlign {
             alignSpeedForward = -reefForwardSpeedController.calculate(tz, setPoint);
         }
 
-        // Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
-        // Logger.recordOutput("Align/ty", tz);
-        // Logger.recordOutput("Align/ty Error", tzError);
-        // Logger.recordOutput("Align/x", offset.getX());
-        // Logger.recordOutput("Align/y", offset.getY());
+        isAligned();
+
+        Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
+        Logger.recordOutput("Align/ty", tz);
+        Logger.recordOutput("Align/ty Error", tzError);
+        Logger.recordOutput("Align/x", offset.getX());
+        Logger.recordOutput("Align/y", offset.getY());
         // Logger.recordOutput("Align/Offset", offset);
-        // Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
+        Logger.recordOutput("Align/Fwd Error", offset.getX() - setPoint);
         // Logger.recordOutput("Align/Fwd Setpoint", setPoint);
         // Logger.recordOutput("Align/TagID", tagID);
         // Logger.recordOutput("LL Valid", llIsValid(llName, tagID));
@@ -298,10 +304,10 @@ public class AutoAlign {
 
         // + Math.abs(reefStrafeSpeedController.getError())
 
-        // Logger.recordOutput("Align/Error/IsAligned", isAligned);
-        // Logger.recordOutput("Align/Error/fwd", reefForwardSpeedController.getError());
-        // Logger.recordOutput("Align/Error/strafe", reefStrafeSpeedController.getError());
-        // Logger.recordOutput("Align/Error/rot", reefRotationSpeedController.getError());
+        Logger.recordOutput("Align/Error/IsAligned", isAligned);
+        Logger.recordOutput("Align/Error/fwd", reefForwardSpeedController.getError());
+        Logger.recordOutput("Align/Error/strafe", reefStrafeSpeedController.getError());
+        Logger.recordOutput("Align/Error/rot", reefRotationSpeedController.getError());
 
         return isAligned;
     }
@@ -309,6 +315,8 @@ public class AutoAlign {
     public boolean isAlignedTest() {
         boolean isAligned = Math.abs(reefForwardSpeedController.getError()) < 0.49
                 && reefRotationSpeedController.getError() < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
+
+        Logger.recordOutput("Align/Error/isAlignedTest", isAligned);
 
         return isAligned;
     }
