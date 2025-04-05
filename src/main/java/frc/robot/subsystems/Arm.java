@@ -93,8 +93,8 @@ public class Arm extends SubsystemBase {
 
         talonFXConfigs = new TalonFXConfiguration();
 
-        talonFXConfigs.Voltage.PeakForwardVoltage = 4.0;
-        talonFXConfigs.Voltage.PeakReverseVoltage = -4.0;
+        talonFXConfigs.Voltage.PeakForwardVoltage = 4.5;
+        talonFXConfigs.Voltage.PeakReverseVoltage = -4.5;
 
         var slot0Configs = talonFXConfigs.Slot0;
         slot0Configs.kG = 0; // add enough Gravity Gain just before motor starts moving
@@ -148,7 +148,12 @@ public class Arm extends SubsystemBase {
             if (armMode == ArmMode.Stowed) {
                 setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
             } else if (armMode == ArmMode.Intake) {
-                setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
+                if (isAligning) {
+                    setpoint = ArmConstants.ARM_STATION_BEHIND_CORAL + armAdjust;
+
+                } else {
+                    setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
+                }
             } else if (armMode == ArmMode.L2) {
                 setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
             } else if (armMode == ArmMode.L3) {

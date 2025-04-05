@@ -396,6 +396,31 @@ public class RobotContainer {
                         .andThen(new WaitCommand(0.2)));
 
         NamedCommands.registerCommand(
+                "Auto Align Mid",
+                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+                        .andThen((drivetrain.applyRequest(
+                                        () -> robotOrientedDrive
+                                                .withVelocityX(align.getAlignForwardSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_TZ,
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
+                                                        * MaxSpeed)
+                                                .withVelocityY(align.getAlignStrafeSpeedPercent(
+                                                                AlignConstants.REEF_ALIGN_MID_TX,
+                                                                align.getReefAlignTag(),
+                                                                VisionConstants.LL_NAME)
+                                                        * MaxSpeed)
+                                                .withRotationalRate(
+                                                        align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+                                                                * MaxAngularRate) // Drive counterclockwise with
+                                        // negative X (left)
+                                        )
+                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
+                                )
+                                .until(() -> align.isAlignedTest()))
+                        .andThen(new WaitCommand(0.2)));
+
+        NamedCommands.registerCommand(
                 "Auto Align Right",
                 new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
                         .andThen((drivetrain.applyRequest(
@@ -444,6 +469,15 @@ public class RobotContainer {
                         .withTimeout(0.5)
                 // .andThen(new InstantCommand(() -> poseEstimation.toggleBackends(0)))
                 );
+
+        NamedCommands.registerCommand(
+                "Set Algae",
+                new InstantCommand(() -> elevator.setAlgae())
+                        .andThen(new InstantCommand(() -> arm.setAlgae()))
+                        .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+
+        NamedCommands.registerCommand(
+                "Algae Intake", new RunCommand(() -> endEffector.algaeIn()).until(() -> endEffector.hasCoral()));
     }
 
     public void setDefaultCommands() {

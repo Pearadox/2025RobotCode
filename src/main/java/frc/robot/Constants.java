@@ -66,7 +66,7 @@ public class Constants {
         public static final double DEFAULT_DEADBAND = 0.07;
         public static final double DRIVER_ALIGNING_DEADBAND = 0.15;
 
-        public static final double SLOW_MODE_SPEED = 0.5;
+        public static final double SLOW_MODE_SPEED = 0.3;
     }
 
     public static final class AlignConstants {
@@ -75,7 +75,7 @@ public class Constants {
         // public static final double ALIGN_STRAFE_KI = 0.001;
         // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
 
-        public static final double ALIGN_KS = 0.03; // 0.009
+        public static final double ALIGN_KS = 0.02; // 0.009
 
         // tx and ty tolerances with setpoint
         public static final double ALIGN_TOLERANCE_PIXELS = 0.5;
@@ -90,8 +90,8 @@ public class Constants {
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
-        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05;
-        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03;
+        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
+        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
         public static final double REEF_ALIGN_TZ = -0; // target relative
 
         public static final double STATION_ALIGN_TX = 0.07;
@@ -137,7 +137,7 @@ public class Constants {
         // public static final double MAX_ACCELERATION_MPS2 = 8.0; // not used currently
 
         public static final double MM_CRUISE_VELCOCITY_UP = 100; //
-        public static final double MM_ACCELERATION_UP = 100; //
+        public static final double MM_ACCELERATION_UP = 200; //
 
         public static final double MM_CRUISE_VELCOCITY_DOWN = 1; //
         public static final double MM_ACCELERATION_DOWN = 1; //
@@ -159,7 +159,7 @@ public class Constants {
         public static final double ALGAE_LOW_HEIGHT = 6.4; // 6.7
         public static final double ALGAE_HIGH_HEIGHT = 16;
 
-        public static final double BARGE_HEIGHT = 33;
+        public static final double BARGE_HEIGHT = 32; // 33
 
         public static final double MAX_ELEVATOR_HEIGHT = 34;
 
@@ -167,6 +167,8 @@ public class Constants {
 
         public static final double LEVEL_TWO_ROT = LEVEL_TWO_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STATION_ROT = STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
+        public static final double OBSTRUCTED_STATION_ROT =
+                STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER) - 1.26;
         public static final double LEVEL_THREE_ROT = LEVEL_THREE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double LEVEL_FOUR_ROT = LEVEL_FOUR_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double ALGAE_LOW_ROT = ALGAE_LOW_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
@@ -220,6 +222,7 @@ public class Constants {
         // public static final double ARM_CLIMB = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_L4_BEHIND_CORAL = 22.057; // rots
+        public static final double ARM_STATION_BEHIND_CORAL = Units.degreesToRotations(-15) * ARM_GEAR_RATIO - 1.63;
 
         public static final double ARM_ADJUST_INCREMENT = 0.1;
 

@@ -106,7 +106,7 @@ public class LimelightBackend extends VisionBackend {
     }
 
     public Vector<N3> getStdDevs() {
-        double xyStdDev = Math.log10(-0.1 * (ta.get() - 1) + 0.7) + 1.1;
+        double xyStdDev = -0.002468 * Math.pow(ta.get(), 3) + 0.046 * Math.pow(ta.get(), 2) - 0.29 * (ta.get()) + 1;
         if (Double.isNaN(xyStdDev)) xyStdDev = 0.1; // ta >= 7
         xyStdDev = Math.max(xyStdDev, 0.1);
         xyStdDev = Math.min(xyStdDev, 0.9);

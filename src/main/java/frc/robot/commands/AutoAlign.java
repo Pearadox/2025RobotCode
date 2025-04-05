@@ -205,7 +205,7 @@ public class AutoAlign {
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
         this.horizDisplacement = offset.getX();
 
-        if (offset.getX() < 1 && Math.abs(reefStrafeSpeedController.getError()) > 0.5) {
+        if (offset.getX() < 0.55 && Math.abs(reefStrafeSpeedController.getError()) > 0.05) {
             return 0;
         }
 

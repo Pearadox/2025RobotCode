@@ -189,6 +189,10 @@ public class EndEffector extends SubsystemBase {
         setLastRot();
     }
 
+    public void holdAlgae() {
+        endEffector.set(EndEffectorConstants.ALGAE_PULL_SPEED);
+    }
+
     public void stopCoral() {
         stop();
         isHoldingCoral = true;
