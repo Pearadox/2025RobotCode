@@ -219,6 +219,7 @@ public class AutoAlign {
         }
 
         isAligned();
+        isAlignedTest();
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
         Logger.recordOutput("Align/ty", tz);
@@ -313,7 +314,7 @@ public class AutoAlign {
     }
 
     public boolean isAlignedTest() {
-        boolean isAligned = Math.abs(reefForwardSpeedController.getError()) < 0.49
+        boolean isAligned = Math.abs(reefForwardSpeedController.getError()) < 0.49 // 0.49
                 && reefRotationSpeedController.getError() < AlignConstants.ALIGN_ROT_TOLERANCE_DEGREES;
 
         Logger.recordOutput("Align/Error/isAlignedTest", isAligned);
