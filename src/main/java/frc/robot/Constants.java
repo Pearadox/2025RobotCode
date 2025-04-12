@@ -282,10 +282,10 @@ public class Constants {
         public static final int PORT = 9;
 
         // to adjust
-        public static final Frequency SCROLL_FREQ = Percent.per(Second).of(100);
+        public static final Frequency SCROLL_FREQ = Percent.per(Second).of(125);
         public static final Time BLINK_PERIOD = Seconds.of(0.5);
         public static final Time BLINKING_DURATION = BLINK_PERIOD.times(2);
         public static final Dimensionless BLINK_BRIGHTNESS = Percent.of(50);
-        public static final Time BREATHE_PERIOD = Seconds.of(1);
+        public static final Time BREATHE_PERIOD = Seconds.of(.40);
     }
 }

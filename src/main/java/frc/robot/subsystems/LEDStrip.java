@@ -3,6 +3,7 @@ package frc.robot.subsystems;
 import static edu.wpi.first.units.Units.*;
 
 import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
 import edu.wpi.first.wpilibj.DriverStation;
@@ -13,6 +14,7 @@ import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
 import frc.robot.RobotContainer;
+import frc.robot.util.SmarterDashboard;
 import java.util.function.BooleanSupplier;
 
 public class LEDStrip extends SubsystemBase {
@@ -28,7 +30,7 @@ public class LEDStrip extends SubsystemBase {
     }
 
     private static final Color kRavenBlack = new Color("#101820");
-    private static final Color kDynamoOrange = new Color("#FF6A00");
+    private static final Color kDynamoOrange = new Color("#FF2700");
     private static final Color kSpaceCityBlue = new Color("#92C3F1");
 
     public LEDStrip() {
@@ -43,17 +45,17 @@ public class LEDStrip extends SubsystemBase {
         if (DriverStation.isDisabled()) {
             setGradient(LEDConstants.SCROLL_FREQ, kDynamoOrange, kDynamoOrange, kSpaceCityBlue);
         } else {
-            setGradient(
-                    Percent.per(Second)
-                            .of(100
-                                    + (50
-                                            * Math.sqrt(Math.pow(RobotContainer.driverController.getLeftX(), 2)
-                                                    + Math.pow(RobotContainer.driverController.getLeftY(), 2)))),
-                    kDynamoOrange,
-                    kDynamoOrange,
-                    kSpaceCityBlue);
+            // setGradient(Percent.per(Second).of(getRate()), kDynamoOrange, kDynamoOrange, kSpaceCityBlue);
+            setBreathing(kDynamoOrange);
         }
         led.setData(ledBuffer);
+
+        SmarterDashboard.putNumber("LED/Rate", getRate());
+    }
+
+    public double getRate() {
+        return Math.sqrt(Math.pow(RobotContainer.driverController.getLeftX(), 2)
+                + Math.pow(RobotContainer.driverController.getLeftY(), 2));
     }
 
     public Command defaultCommand(BooleanSupplier isCoralSupplier) {
@@ -67,7 +69,8 @@ public class LEDStrip extends SubsystemBase {
     }
 
     public Command success() {
-        return new RunCommand(() -> setBlinking(Color.kGreen), this).withTimeout(LEDConstants.BLINKING_DURATION);
+        return new RunCommand(() -> setBlinking(LEDConstants.BLINK_PERIOD, Color.kGreen), this)
+                .withTimeout(LEDConstants.BLINKING_DURATION);
     }
 
     private void setCoralOrAlgae(BooleanSupplier isCoralSupplier) {
@@ -94,10 +97,9 @@ public class LEDStrip extends SubsystemBase {
         led.setData(ledBuffer);
     }
 
-    private void setBlinking(Color color) {
-        LEDPattern blinkPattern = LEDPattern.solid(color)
-                .blink(LEDConstants.BLINK_PERIOD.div(2.0))
-                .atBrightness(LEDConstants.BLINK_BRIGHTNESS);
+    private void setBlinking(Time period, Color color) {
+        LEDPattern blinkPattern =
+                LEDPattern.solid(color).blink(period.div(2.0)).atBrightness(LEDConstants.BLINK_BRIGHTNESS);
         blinkPattern.applyTo(ledBuffer);
         led.setData(ledBuffer);
     }
