@@ -124,11 +124,12 @@ public class EndEffector extends SubsystemBase {
                     algaeIn();
                     holdSpeed = true;
                 }
-                holdPos = endEffector.getPosition().getValueAsDouble();
+                // holdPos = endEffector.getPosition().getValueAsDouble();
                 isHoldingCoral = false;
             } else if (RobotContainer.driverController.getRightBumperButton()) {
                 if (isCoral) {
                     coralOut();
+                    
                 } else if (!isCoral) {
                     algaeOut();
                 }
