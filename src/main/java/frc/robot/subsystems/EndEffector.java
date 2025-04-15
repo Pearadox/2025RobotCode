@@ -135,7 +135,7 @@ public class EndEffector extends SubsystemBase {
 
                 holdSpeed = false;
                 isHoldingCoral = false;
-            } else if (RobotContainer.opController.getRightTriggerAxis() > 0.5) {
+            } else if (RobotContainer.driverController.getRightTriggerAxis() > 0.5) {
                 fastOut();
             } else {
                 if (!holdSpeed) {

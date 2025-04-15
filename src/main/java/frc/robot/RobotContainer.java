@@ -13,6 +13,9 @@ import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.networktables.NetworkTable;
+import edu.wpi.first.networktables.NetworkTableEntry;
+import edu.wpi.first.networktables.NetworkTableInstance;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.XboxController;
@@ -94,6 +97,8 @@ public class RobotContainer {
 
     private final JoystickButton slowmode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
     private final JoystickButton climbAlign_Y = new JoystickButton(driverController, XboxController.Button.kY.value);
+    private final JoystickButton playSoundX = new JoystickButton(driverController, XboxController.Button.kX.value);
+    private final JoystickButton interruptSoundB = new JoystickButton(driverController, XboxController.Button.kB.value);
 
     // private final JoystickButton zeroElevator_LB =
     // new JoystickButton(opController, XboxController.Button.kBack.value);
@@ -153,6 +158,12 @@ public class RobotContainer {
 
     public static final PoseEstimation poseEstimation = new PoseEstimation();
 
+    NetworkTableInstance instance = NetworkTableInstance.getDefault();
+    NetworkTable table = instance.getTable("SoundControl");
+    NetworkTableEntry _playSound = table.getEntry("playSound");
+    NetworkTableEntry _interruptSound = table.getEntry("interruptSound");
+    NetworkTableEntry _soundOnline = table.getEntry("soundOnline");
+
     public RobotContainer() {
         setDefaultCommands();
         registerNamedCommands();
@@ -168,6 +179,10 @@ public class RobotContainer {
         new EventTrigger("LevelFour")
                 .onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
+
+        _playSound.setDefaultBoolean(false);
+        _interruptSound.setDefaultBoolean(false);
+        _soundOnline.setBoolean(false); // explicitly set to false - the Rio will start up before the RPi
     }
 
     private void configureBindings() {
@@ -391,6 +406,14 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> endEffector.setAlgae())));
 
         drivetrain.registerTelemetry(logger::telemeterize);
+
+        playSoundX
+                .onTrue(new InstantCommand(() -> _playSound.setBoolean(true)).ignoringDisable(true))
+                .onFalse(new InstantCommand(() -> _playSound.setBoolean(false)).ignoringDisable(true));
+
+        interruptSoundB
+                .onTrue(new InstantCommand(() -> _interruptSound.setBoolean(true)).ignoringDisable(true))
+                .onFalse(new InstantCommand(() -> _interruptSound.setBoolean(false)).ignoringDisable(true));
     }
 
     public Command getAutonomousCommand() {
