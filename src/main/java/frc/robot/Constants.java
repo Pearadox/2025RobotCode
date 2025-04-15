@@ -269,8 +269,8 @@ public class Constants {
         public static final double PULL_SPEED = -0.3;
 
         public static final double PUSH_SPEED = 0.6; // 0.3
-        public static final double ALGAE_PULL_SPEED = 0.8;
-        public static final double ALGAE_PUSH_SPEED = -1.0;
+        public static final double ALGAE_PULL_SPEED = -0.15;
+        public static final double ALGAE_PUSH_SPEED = 0.5;
 
         public static final double HOLD_SPEED = -0.075;
 

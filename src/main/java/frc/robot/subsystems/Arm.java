@@ -31,7 +31,7 @@ public class Arm extends SubsystemBase {
 
     private VoltageOut voltageRequest = new VoltageOut(0);
 
-    private boolean isCoral = true;
+    private boolean isCoral = false;
     private boolean isAligning = false;
     private double lastAngle = 0;
 

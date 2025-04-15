@@ -31,7 +31,7 @@ public class Elevator extends SubsystemBase {
     private double elevatorOffset = 0.0;
     private TalonFXConfiguration talonFXConfigs = new TalonFXConfiguration();
 
-    private boolean isCoral = true;
+    private boolean isCoral = false;
     private boolean isAligning = false;
     private boolean isZeroing = false;
 
