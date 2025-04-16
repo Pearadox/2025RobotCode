@@ -266,13 +266,13 @@ public class Constants {
     public static final class EndEffectorConstants {
         public static final int END_EFFECTOR_ID = 23;
 
-        public static final double PULL_SPEED = -0.3;
+        public static final double PULL_SPEED = -0.324;
 
-        public static final double PUSH_SPEED = 0.6; // 0.3
-        public static final double ALGAE_PULL_SPEED = -0.15;
-        public static final double ALGAE_PUSH_SPEED = 0.5;
+        public static final double PUSH_SPEED = 0.624; // 0.3
+        public static final double ALGAE_PULL_SPEED = -0.148;
+        public static final double ALGAE_PUSH_SPEED = 0.148;
 
-        public static final double HOLD_SPEED = -0.075;
+        public static final double HOLD_SPEED = -0.07;
 
         public static final int END_SENSOR_CHANNEL = 0;
     }

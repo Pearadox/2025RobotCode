@@ -129,7 +129,7 @@ public class EndEffector extends SubsystemBase {
             } else if (RobotContainer.driverController.getRightBumperButton()) {
                 if (isCoral) {
                     coralOut();
-                    
+
                 } else if (!isCoral) {
                     algaeOut();
                 }
