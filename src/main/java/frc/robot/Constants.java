@@ -211,10 +211,10 @@ public class Constants {
         public static final double UPDATE_FREQ = 50;
 
         public static final double kG = 0.0; // 0.35;
-        public static final double kS = 0.0; // 0.15;
-        public static final double kV = 0.0; // 0.2
+        public static final double kS = 0.15; // 0.15;
+        public static final double kV = 7.2; // 0.2
         public static final double kA = 0.0; // 0.07
-        public static final double kP = 0.0; // 0.3
+        public static final double kP = 0.4; // 0.3
         public static final double kI = 0.0;
         public static final double kD = 0.0; // 0.05
 
@@ -292,13 +292,12 @@ public class Constants {
     public static class SimulationConstants {
         public static final boolean SIMULATE_GRAVITY = true;
 
-        public static final double ARM_GEARING = 15;
-        public static final double ARM_MASS = Units.lbsToKilograms(4);
+        public static final double ARM_MASS = Units.lbsToKilograms(8);
         public static final double ARM_LENGTH = Units.inchesToMeters(12);
         public static final double ARM_MOI = SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS);
-        public static final double MIN_ANGLE = Units.degreesToRadians(-180);
-        public static final double MAX_ANGLE = Units.degreesToRadians(180);
-        public static final double STARTING_ANGLE = Units.degreesToRadians(-90);
+        public static final double MIN_ANGLE = Double.NEGATIVE_INFINITY;
+        public static final double MAX_ANGLE = Double.POSITIVE_INFINITY;
+        public static final double STARTING_ANGLE = Units.degreesToRadians(-96);
 
         // joint of ee to bottom of coral
         public static final double CAM_LENGTH = Units.inchesToMeters(14.5);

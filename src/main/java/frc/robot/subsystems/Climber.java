@@ -19,8 +19,6 @@ public class Climber extends SubsystemBase {
     private static final Climber CLIMBER = new Climber();
     private TalonFXConfiguration talonFXConfigs;
 
-    private static final Arm ARM = Arm.getInstance();
-
     private double setpoint = ClimbConstants.CLIMB_SETPOINT;
     private double climberOffset = 0;
 

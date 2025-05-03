@@ -27,8 +27,10 @@ import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Arm.ArmMode;
+import frc.robot.subsystems.Arm.Arm;
+import frc.robot.subsystems.Arm.Arm.ArmMode;
+import frc.robot.subsystems.Arm.ArmIOReal;
+import frc.robot.subsystems.Arm.ArmIOSim;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator.Elevator;
@@ -42,7 +44,7 @@ public class RobotContainer {
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
     private Elevator elevator;
-    public static final Arm arm = Arm.getInstance();
+    private Arm arm;
     public static final EndEffector endEffector = EndEffector.getInstance();
     public static final Climber climber = Climber.getInstance();
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
@@ -110,8 +112,10 @@ public class RobotContainer {
     public RobotContainer() {
         if (Robot.isReal()) {
             elevator = new Elevator(new ElevatorIOReal());
+            arm = new Arm(new ArmIOReal());
         } else {
             elevator = new Elevator(new ElevatorIOSim());
+            arm = new Arm(new ArmIOSim());
         }
 
         setDefaultCommands();
@@ -437,7 +441,7 @@ public class RobotContainer {
                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX()) * MaxAngularRate)));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
-        arm.setDefaultCommand(new ArmHold());
+        arm.setDefaultCommand(new ArmHold(arm));
         // climber.setDefaultCommand(new ClimbCommand());
         // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
     }

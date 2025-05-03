@@ -76,7 +76,7 @@ public class MechVisualizer {
     }
 
     public void updateElevatorHeight(double heightMeters) {
-        // heightMeters += Units.inchesToMeters(39);
+        heightMeters += Units.inchesToMeters(39);
         elevator2d.setLength(heightMeters);
         // ProjectileIntakeSim.getInstance().updateElevatorHeight(heightMeters);
     }

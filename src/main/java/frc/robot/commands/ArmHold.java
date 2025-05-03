@@ -1,13 +1,13 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Arm;
+import frc.robot.subsystems.Arm.Arm;
 
 public class ArmHold extends Command {
+    private Arm arm;
 
-    private Arm arm = Arm.getInstance();
-
-    public ArmHold() {
+    public ArmHold(Arm arm) {
+        this.arm = arm;
         addRequirements(arm);
     }
 

@@ -6,7 +6,6 @@ package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.Slot0Configs;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -17,7 +16,8 @@ import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Arm.ArmMode;
+import frc.robot.subsystems.Arm.Arm;
+import frc.robot.subsystems.Arm.Arm.ArmMode;
 import frc.robot.util.SmarterDashboard;
 
 public class EndEffector extends SubsystemBase {
@@ -25,8 +25,6 @@ public class EndEffector extends SubsystemBase {
     private static final EndEffector END_EFFECTOR = new EndEffector();
 
     private static final LEDStrip leds = LEDStrip.getInstance();
-
-    private static final Arm ARM = Arm.getInstance();
 
     public static EndEffector getInstance() {
         return END_EFFECTOR;
@@ -175,9 +173,9 @@ public class EndEffector extends SubsystemBase {
 
     // intakes
     public void coralOut() {
-        if (ARM.getArmMode() == ArmMode.L2 || ARM.getArmMode() == ArmMode.Stowed) {
+        if (Arm.getArmMode() == ArmMode.L2 || Arm.getArmMode() == ArmMode.Stowed) {
             endEffector.set(0.1);
-        } else if (ARM.getArmMode() == ArmMode.L3) {
+        } else if (Arm.getArmMode() == ArmMode.L3) {
             endEffector.set(0.3);
         } else endEffector.set(EndEffectorConstants.PUSH_SPEED);
         setLastRot();
@@ -205,13 +203,6 @@ public class EndEffector extends SubsystemBase {
 
     public void stop() {
         endEffector.set(0);
-    }
-
-    public void passiveCoral() {
-        PositionVoltage request = new PositionVoltage(0).withSlot(0);
-
-        endEffector.setControl(request.withPosition(
-                endEffector.getPosition().getValueAsDouble() + (RobotContainer.arm.deltaArmAngle() / 360)));
     }
 
     public boolean hasCoral() {

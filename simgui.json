@@ -46,11 +46,11 @@
     },
     "transitory": {
       "AdvantageKit": {
-        "Elevator": {
+        "Arm": {
           "open": true
         },
         "RealOutputs": {
-          "Elevator": {
+          "Arm": {
             "open": true
           },
           "open": true
@@ -58,6 +58,9 @@
         "open": true
       }
     }
+  },
+  "NetworkTables Info": {
+    "visible": true
   },
   "Plot": {
     "Plot <0>": {
