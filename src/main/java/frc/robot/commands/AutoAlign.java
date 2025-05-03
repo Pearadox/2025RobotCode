@@ -144,7 +144,7 @@ public class AutoAlign {
         // 3D transform of the robot in the coordinate system of the primary in-view AprilTag
         // (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
         double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
-        double tx = targetRelativeRobotPose[0];
+        double tx = targetRelativeRobotPose.length > 0 ? targetRelativeRobotPose[0] : 0;
         double txError = tx - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
@@ -199,7 +199,7 @@ public class AutoAlign {
     public double getAlignForwardSpeedPercent(double setPoint, int tagID, String llName) {
 
         double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
-        double tz = targetRelativeRobotPose[2];
+        double tz = targetRelativeRobotPose.length > 2 ? targetRelativeRobotPose[2] : 0;
         double tzError = tz - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));

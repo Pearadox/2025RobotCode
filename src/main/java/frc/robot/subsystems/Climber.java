@@ -19,7 +19,6 @@ public class Climber extends SubsystemBase {
     private static final Climber CLIMBER = new Climber();
     private TalonFXConfiguration talonFXConfigs;
 
-    private static final Elevator ELEVATOR = Elevator.getInstance();
     private static final Arm ARM = Arm.getInstance();
 
     private double setpoint = ClimbConstants.CLIMB_SETPOINT;
@@ -84,13 +83,13 @@ public class Climber extends SubsystemBase {
         climberOffset -= 10;
     }
 
-    public void prepClimber() {
-        if (climbState != 0) {
-            ELEVATOR.setElevatorStowedMode();
-            ARM.setAlgae();
-            ARM.setStowed();
-        }
-    }
+    // public void prepClimber() {
+    //     if (climbState != 0) {
+    //         ELEVATOR.setElevatorStowedMode();
+    //         ARM.setAlgae();
+    //         ARM.setStowed();
+    //     }
+    // }
 
     public void zeroClimber() {
         climbMotor.setPosition(0);
@@ -143,7 +142,7 @@ public class Climber extends SubsystemBase {
 
     public void incrementClimbState() {
         climbState = Math.min(2, climbState + 1);
-        prepClimber();
+        // prepClimber();
         setClimbPosition();
     }
 

@@ -13,6 +13,7 @@ import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class Constants {
 
@@ -118,7 +119,6 @@ public class Constants {
     }
 
     public static final class ElevatorConstants {
-
         public static final int ELEVATOR_ID = 21;
         public static final int ELEVATOR_FOLLOWER_ID = 20;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;
@@ -287,5 +287,36 @@ public class Constants {
         public static final Time BLINKING_DURATION = BLINK_PERIOD.times(2);
         public static final Dimensionless BLINK_BRIGHTNESS = Percent.of(50);
         public static final Time BREATHE_PERIOD = Seconds.of(1);
+    }
+
+    public static class SimulationConstants {
+        public static final boolean SIMULATE_GRAVITY = true;
+
+        public static final double ARM_GEARING = 15;
+        public static final double ARM_MASS = Units.lbsToKilograms(4);
+        public static final double ARM_LENGTH = Units.inchesToMeters(12);
+        public static final double ARM_MOI = SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS);
+        public static final double MIN_ANGLE = Units.degreesToRadians(-180);
+        public static final double MAX_ANGLE = Units.degreesToRadians(180);
+        public static final double STARTING_ANGLE = Units.degreesToRadians(-90);
+
+        // joint of ee to bottom of coral
+        public static final double CAM_LENGTH = Units.inchesToMeters(14.5);
+
+        // joint of ee to top plane of coral
+        public static final double EE_TO_CORAL_HEIGHT = Units.inchesToMeters(2.5);
+        public static final double EE_TO_CORAL_WIDTH = Units.inchesToMeters(4.25);
+        public static final double CORAL_LENGTH = Units.inchesToMeters(11.875);
+
+        public static final double CARRIAGE_MASS_KG = 4.2;
+        public static final double DRUM_RADIUS_METERS = Units.inchesToMeters(ElevatorConstants.PULLEY_DIAMETER / 2.0);
+        public static final double MIN_HEIGHT = Units.inchesToMeters(0);
+        public static final double MAX_HEIGHT = MIN_HEIGHT + Units.inchesToMeters(ElevatorConstants.BARGE_HEIGHT + 1);
+        public static final double STARTING_HEIGHT = MIN_HEIGHT;
+
+        // new EE viz
+        public static final double PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET = Units.degreesToRadians(-20.2531597269);
+        public static final double PIVOT_TO_MIDDLE_OF_CORAL_RADIUS = Units.inchesToMeters(23.249031544);
+        public static final double PIVOT_ANGLE_TO_CORAL_ANGLE = Units.degreesToRadians(243.986);
     }
 }

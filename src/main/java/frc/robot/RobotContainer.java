@@ -31,7 +31,9 @@ import frc.robot.subsystems.Arm;
 import frc.robot.subsystems.Arm.ArmMode;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIOReal;
+import frc.robot.subsystems.Elevator.ElevatorIOSim;
 import frc.robot.subsystems.EndEffector;
 import frc.robot.util.vision.PoseEstimation;
 
@@ -39,7 +41,7 @@ public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
     private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
 
-    public static final Elevator elevator = Elevator.getInstance();
+    private Elevator elevator;
     public static final Arm arm = Arm.getInstance();
     public static final EndEffector endEffector = EndEffector.getInstance();
     public static final Climber climber = Climber.getInstance();
@@ -106,6 +108,12 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+        if (Robot.isReal()) {
+            elevator = new Elevator(new ElevatorIOReal());
+        } else {
+            elevator = new Elevator(new ElevatorIOSim());
+        }
+
         setDefaultCommands();
         registerNamedCommands();
         autoChooser = AutoBuilder.buildAutoChooser("2R_EF-L4");
@@ -238,6 +246,11 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> endEffector.setAlgae())));
 
         climberAdjustUp_PovUp
+                .onTrue(new InstantCommand(() -> {
+                    elevator.setElevatorStowedMode();
+                    arm.setAlgae();
+                    arm.setStowed();
+                }))
                 .whileTrue(new RunCommand(() -> climber.climberUp()))
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberAdjustDown_PovDown
@@ -423,7 +436,7 @@ public class RobotContainer {
                         * drivetrain.getSpeedMultipler())
                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX()) * MaxAngularRate)));
 
-        elevator.setDefaultCommand(new ElevatorHold());
+        elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold());
         // climber.setDefaultCommand(new ClimbCommand());
         // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
