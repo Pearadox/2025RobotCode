@@ -8,6 +8,8 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -29,15 +31,23 @@ import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.Arm.Arm;
 import frc.robot.subsystems.Arm.Arm.ArmMode;
+import frc.robot.subsystems.Arm.ArmIO;
 import frc.robot.subsystems.Arm.ArmIOReal;
 import frc.robot.subsystems.Arm.ArmIOSim;
 import frc.robot.subsystems.Climber;
 import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.Elevator.Elevator;
+import frc.robot.subsystems.Elevator.ElevatorIO;
 import frc.robot.subsystems.Elevator.ElevatorIOReal;
 import frc.robot.subsystems.Elevator.ElevatorIOSim;
-import frc.robot.subsystems.EndEffector;
+import frc.robot.subsystems.EndEffector.EndEffector;
+import frc.robot.subsystems.EndEffector.EndEffectorIO;
+import frc.robot.subsystems.EndEffector.EndEffectorIOReal;
+import frc.robot.subsystems.EndEffector.EndEffectorIOSim;
+import frc.robot.util.simulation.MapleSimSwerveDrivetrain;
 import frc.robot.util.vision.PoseEstimation;
+import org.ironmaple.simulation.SimulatedArena;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
     private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
@@ -45,7 +55,7 @@ public class RobotContainer {
 
     private Elevator elevator;
     private Arm arm;
-    public static final EndEffector endEffector = EndEffector.getInstance();
+    private EndEffector endEffector;
     public static final Climber climber = Climber.getInstance();
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
@@ -84,6 +94,11 @@ public class RobotContainer {
     private final Trigger strafe_Triggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
 
+    private final JoystickButton csDropLB =
+            new JoystickButton(driverController, XboxController.Button.kLeftStick.value);
+    private final JoystickButton csDropRB =
+            new JoystickButton(driverController, XboxController.Button.kRightStick.value);
+
     // Op Controller
     private final JoystickButton homeElevator_Start =
             new JoystickButton(opController, XboxController.Button.kStart.value);
@@ -110,12 +125,28 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
-        if (Robot.isReal()) {
-            elevator = new Elevator(new ElevatorIOReal());
-            arm = new Arm(new ArmIOReal());
-        } else {
-            elevator = new Elevator(new ElevatorIOSim());
-            arm = new Arm(new ArmIOSim());
+        switch (Constants.currentMode) {
+            case REAL: // Real robot, instantiate hardware IO implementations
+                elevator = new Elevator(new ElevatorIOReal());
+                arm = new Arm(new ArmIOReal());
+                endEffector = new EndEffector(new EndEffectorIOReal());
+                break;
+
+            case SIM: // Sim robot, instantiate physics sim IO implementations
+                elevator = new Elevator(new ElevatorIOSim());
+                arm = new Arm(new ArmIOSim());
+                endEffector = new EndEffector(new EndEffectorIOSim(
+                        () -> MapleSimSwerveDrivetrain.getSimulatedPose(), // drivetrain.getState().Pose,
+                        () -> drivetrain.getState().Speeds,
+                        () -> elevator.getElevatorPositionMeters(),
+                        () -> arm.getArmAngleRadsToHorizontal()));
+                break;
+
+            default: // Replayed robot, disable IO implementations
+                elevator = new Elevator(new ElevatorIO() {});
+                arm = new Arm(new ArmIO() {});
+                endEffector = new EndEffector(new EndEffectorIO() {});
+                break;
         }
 
         setDefaultCommands();
@@ -133,6 +164,8 @@ public class RobotContainer {
         new EventTrigger("LevelFour")
                 .onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
+
+        DriverStation.silenceJoystickConnectionWarning(Robot.isSimulation());
     }
 
     private void configureBindings() {
@@ -271,6 +304,11 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> elevator.setAligning(true))))
                 .onFalse(new InstantCommand(() -> arm.setAligning(false))
                         .andThen(new InstantCommand(() -> elevator.setAligning(false))));
+
+        // if (Constants.currentMode == Constants.Mode.SIM) {
+        //     csDropLB.onTrue(new InstantCommand(() -> dropCoralFromStation(false)).ignoringDisable(true));
+        //     csDropRB.onTrue(new InstantCommand(() -> dropCoralFromStation(true)).ignoringDisable(true));
+        // }
 
         drivetrain.registerTelemetry(logger::telemeterize);
     }
@@ -444,5 +482,21 @@ public class RobotContainer {
         arm.setDefaultCommand(new ArmHold(arm));
         // climber.setDefaultCommand(new ClimbCommand());
         // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
+    }
+
+    public void resetSimulation() {
+        if (Constants.currentMode != Constants.Mode.SIM) return;
+
+        drivetrain.resetPose(new Pose2d(10.118, 1.18, new Rotation2d()));
+        SimulatedArena.getInstance().resetFieldForAuto();
+    }
+
+    public void displaySimFieldToAdvantageScope() {
+        if (Constants.currentMode != Constants.Mode.SIM) return;
+
+        Logger.recordOutput(
+                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        Logger.recordOutput(
+                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
     }
 }

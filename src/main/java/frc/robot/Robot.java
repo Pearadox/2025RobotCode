@@ -22,19 +22,26 @@ public class Robot extends LoggedRobot {
     public Robot() {
         Logger.recordMetadata("2025RobotCode", "Comp Bot Code"); // Set a metadata value
 
-        boolean isReplay = false;
-        if (isReal()) { // REAL
-            Logger.addDataReceiver(new WPILOGWriter("/media/sda1/")); // Log to a USB stick ("/U/logs")
-            Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-        } else if (!isReplay) { // SIM
-            Logger.addDataReceiver(new NT4Publisher()); // Publish data to NetworkTables
-        } else { // REPLAY
-            setUseTiming(false); // Run as fast as possible
-            String logPath = // "/media/sda1/";
-                    LogFileUtil.findReplayLog(); // Pull the replay log from AdvantageScope (or prompt the user)
-            Logger.setReplaySource(new WPILOGReader(logPath)); // Read replay log
-            Logger.addDataReceiver(
-                    new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim"))); // Save outputs to a new log
+        // Set up data receivers & replay source
+        switch (Constants.currentMode) {
+            case REAL:
+                // Running on a real robot, log to a USB stick ("/U/logs")
+                Logger.addDataReceiver(new WPILOGWriter());
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+
+            case SIM:
+                // Running a physics simulator, log to NT
+                Logger.addDataReceiver(new NT4Publisher());
+                break;
+
+            case REPLAY:
+                // Replaying a log, set up replay source
+                setUseTiming(false); // Run as fast as possible
+                String logPath = LogFileUtil.findReplayLog();
+                Logger.setReplaySource(new WPILOGReader(logPath));
+                Logger.addDataReceiver(new WPILOGWriter(LogFileUtil.addPathSuffix(logPath, "_sim")));
+                break;
         }
 
         Logger.start();
@@ -49,7 +56,9 @@ public class Robot extends LoggedRobot {
     }
 
     @Override
-    public void disabledInit() {}
+    public void disabledInit() {
+        m_robotContainer.resetSimulation();
+    }
 
     @Override
     public void disabledPeriodic() {}
@@ -98,6 +107,8 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationPeriodic() {
+        // ProjectileIntakeSim.getInstance().periodic();
         MechVisualizer.getInstance().periodic();
+        m_robotContainer.displaySimFieldToAdvantageScope();
     }
 }

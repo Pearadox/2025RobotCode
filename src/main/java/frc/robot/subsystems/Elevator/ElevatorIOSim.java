@@ -106,7 +106,7 @@ public class ElevatorIOSim implements ElevatorIO {
                                 / (2.0 * Math.PI))
                         * ElevatorConstants.GEAR_RATIO);
 
-        MechVisualizer.getInstance().updateElevatorHeight(elevatorSim.getPositionMeters());
+        // MechVisualizer.getInstance().updateElevatorHeight(elevatorSim.getPositionMeters());
     }
 
     private static double getMotorRotations(double linearDisplacement) {

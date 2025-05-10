@@ -4,6 +4,7 @@
 
 package frc.robot.subsystems.Elevator;
 
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ElevatorConstants;
@@ -13,7 +14,7 @@ import org.littletonrobotics.junction.Logger;
 public class Elevator extends SubsystemBase {
     private double elevatorOffset = 0.0;
 
-    private boolean isCoral = false;
+    private boolean isCoral = true;
     private boolean isAligning = false;
     private boolean isZeroing = false;
 
@@ -42,6 +43,8 @@ public class Elevator extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Elevator", inputs);
+
+        MechVisualizer.getInstance().updateElevatorHeight(getElevatorPositionMeters());
 
         SmarterDashboard.putNumber("Elevator/Offset", elevatorOffset);
         SmarterDashboard.putString("Elevator Mode", elevatorMode.toString());
@@ -131,6 +134,10 @@ public class Elevator extends SubsystemBase {
 
     public double getElevatorPositionInches() {
         return getElevatorPositionRots() * ElevatorConstants.kRotationToInches;
+    }
+
+    public double getElevatorPositionMeters() {
+        return Units.inchesToMeters(getElevatorPositionInches());
     }
 
     public double getElevatorVelocityInchesPerSecond() {

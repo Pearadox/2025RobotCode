@@ -12,7 +12,6 @@ import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.SimulationConstants;
-import frc.robot.subsystems.Elevator.MechVisualizer;
 
 public class ArmIOSim implements ArmIO {
     private SingleJointedArmSim armSim = new SingleJointedArmSim(
@@ -84,7 +83,7 @@ public class ArmIOSim implements ArmIO {
 
     @Override
     public void runPosition(double setpoint, double feedforward) {
-        pivot.setControl(new PositionVoltage(-setpoint).withFeedForward(feedforward));
+        pivot.setControl(new PositionVoltage(setpoint).withFeedForward(feedforward));
     }
 
     private void updateSim() {
@@ -100,6 +99,6 @@ public class ArmIOSim implements ArmIO {
         pivotMotorSimState.setRotorVelocity(
                 Units.radiansToRotations(armSim.getVelocityRadPerSec() * ArmConstants.ARM_GEAR_RATIO));
 
-        MechVisualizer.getInstance().updateArmAngle(armSim.getAngleRads());
+        // MechVisualizer.getInstance().updateArmAngle(armSim.getAngleRads());
     }
 }

@@ -7,15 +7,32 @@ import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.units.measure.Dimensionless;
 import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
+import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import java.util.Arrays;
+import java.util.List;
 
 public class Constants {
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
+
+    public static enum Mode {
+        /** Running on a real robot. */
+        REAL,
+
+        /** Running a physics simulator. */
+        SIM,
+
+        /** Replaying from a log file. */
+        REPLAY
+    }
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
@@ -56,6 +73,28 @@ public class Constants {
 
         public static final Translation2d[] BLUE_CAGES = {BLUE_FAR_CAGE, BLUE_MID_CAGE, BLUE_CLOSE_CAGE};
         public static final Translation2d[] RED_CAGES = {RED_FAR_CAGE, RED_MID_CAGE, RED_CLOSE_CAGE};
+
+        public static final Translation2d BLUE_REEF_CENTER = new Translation2d(4.5, 4);
+
+        public static final Translation2d BLUE_NPS_CORAL_STATION =
+                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
+        public static final Translation2d BLUE_PS_CORAL_STATION =
+                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
+
+        public static final Translation2d RED_NPS_CORAL_STATION =
+                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
+        public static final Translation2d RED_PS_CORAL_STATION =
+                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
+
+        public static final List<Pose2d> CORAL_STATIONS = Arrays.asList(
+                new Pose2d(BLUE_NPS_CORAL_STATION, new Rotation2d(125)),
+                new Pose2d(BLUE_PS_CORAL_STATION, new Rotation2d(-125)),
+                new Pose2d(RED_NPS_CORAL_STATION, new Rotation2d(-125)),
+                new Pose2d(RED_PS_CORAL_STATION, new Rotation2d(125)));
+
+        // the top of the branch (L4) is ~2" behind the april tag
+        public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
+        public static final double L4_HEIGHT = Units.inchesToMeters(72);
     }
 
     public static final class DriveConstants {
@@ -269,6 +308,8 @@ public class Constants {
         public static final double PULL_SPEED = -0.3;
 
         public static final double PUSH_SPEED = 0.6; // 0.3
+        public static final double L3_PUSH_SPEED = 0.3; // 0.3
+        public static final double L2_PUSH_SPEED = 0.1; // 0.3
         public static final double ALGAE_PULL_SPEED = 0.8;
         public static final double ALGAE_PUSH_SPEED = -1.0;
 
@@ -314,8 +355,8 @@ public class Constants {
         public static final double STARTING_HEIGHT = MIN_HEIGHT;
 
         // new EE viz
-        public static final double PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET = Units.degreesToRadians(-20.2531597269);
+        public static final double PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET = Units.degreesToRadians(20.2531597269);
         public static final double PIVOT_TO_MIDDLE_OF_CORAL_RADIUS = Units.inchesToMeters(23.249031544);
-        public static final double PIVOT_ANGLE_TO_CORAL_ANGLE = Units.degreesToRadians(243.986);
+        public static final double PIVOT_ANGLE_TO_CORAL_ANGLE = Units.degreesToRadians(-243.986);
     }
 }

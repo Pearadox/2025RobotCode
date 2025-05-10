@@ -7,6 +7,8 @@ package frc.robot.subsystems.Arm;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.SimulationConstants;
+import frc.robot.subsystems.Elevator.MechVisualizer;
 import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
@@ -38,6 +40,8 @@ public class Arm extends SubsystemBase {
     public void periodic() {
         io.updateInputs(inputs);
         Logger.processInputs("Arm", inputs);
+
+        MechVisualizer.getInstance().updateArmAngle(getArmAngleRadsToHorizontal());
 
         SmarterDashboard.putNumber("Arm/Angle degrees", getArmAngleDegrees());
         SmarterDashboard.putNumber("Arm/Adjust", armAdjust);
@@ -153,6 +157,11 @@ public class Arm extends SubsystemBase {
 
     public double getArmAngleDegrees() {
         return Units.rotationsToDegrees(getPivotPosition());
+    }
+
+    public double getArmAngleRadsToHorizontal() {
+        return Units.rotationsToRadians(inputs.positionRots / ArmConstants.ARM_GEAR_RATIO)
+                + SimulationConstants.STARTING_ANGLE;
     }
 
     public double getFeedforwardVolts() {

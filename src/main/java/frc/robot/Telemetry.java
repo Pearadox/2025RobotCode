@@ -105,6 +105,7 @@ public class Telemetry {
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
 
+        // for some reason, if i try to log multiple Pose2d objects, advantagekit just explodes
         Logger.recordOutput("Telemetry/Pose", state.Pose);
         Logger.recordOutput("Telemetry/Speeds", state.Speeds);
         Logger.recordOutput("Telemetry/Module States", state.ModuleStates);
