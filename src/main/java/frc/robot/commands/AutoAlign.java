@@ -1,6 +1,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -9,6 +10,7 @@ import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
+import frc.robot.Constants;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
@@ -30,6 +32,8 @@ public class AutoAlign {
             new PIDController(AlignConstants.REEF_Forward_kP, AlignConstants.REEF_kI, AlignConstants.REEF_kD);
     private PIDController reefRotationSpeedController =
             new PIDController(AlignConstants.ROT_REEF_kP, AlignConstants.ROT_REEF_kI, AlignConstants.ROT_REEF_kD);
+
+    private Debouncer isAlignedDebouncer = new Debouncer(0.2);
 
     private double alignSpeedStrafe = 0;
     private double alignSpeedRotation = 0;
@@ -242,7 +246,9 @@ public class AutoAlign {
 
         alignSpeedForward =
                 reefStrafeSpeedController.calculate(robotTranslation2d.getX(), targetTranslation2d.getX()) / 2;
-        alignSpeedForward += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+        alignSpeedForward += AlignConstants.ALIGN_KS
+                * Math.signum(alignSpeedStrafe)
+                * (Constants.currentMode == Constants.Mode.SIM ? 2 : 1);
 
         // Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
         // Logger.recordOutput("Align/Forward/CageTranslation2d", targetTranslation2d);
@@ -319,7 +325,10 @@ public class AutoAlign {
 
         Logger.recordOutput("Align/Error/isAlignedTest", isAligned);
 
-        return isAligned;
+        boolean isAlignedDebounced = isAlignedDebouncer.calculate(isAligned);
+        Logger.recordOutput("Align/Error/isAlignedTestDebounced", isAlignedDebounced);
+
+        return isAlignedDebounced;
     }
 
     // private double getArmAngleRads() {

@@ -6,6 +6,7 @@ package frc.robot.subsystems.Arm;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.SimulationConstants;
 import frc.robot.subsystems.Elevator.MechVisualizer;
@@ -70,6 +71,10 @@ public class Arm extends SubsystemBase {
                 setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
             } else if (armMode == ArmMode.L3) {
                 setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
+
+                if (Constants.currentMode == Constants.Mode.SIM) {
+                    setpoint += 1;
+                }
             } else if (armMode == ArmMode.L4) {
                 if (isAligning) {
                     // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;

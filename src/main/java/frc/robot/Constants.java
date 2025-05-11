@@ -154,7 +154,7 @@ public class Constants {
 
         public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
         // from the arm's pivot point to floor
-        public static final double ELEVATOR_STARTING_HEIGHT = Units.inchesToMeters(39);
+        public static final double ELEVATOR_STARTING_HEIGHT = 1.0023799104; // Units.inchesToMeters(39);
     }
 
     public static final class ElevatorConstants {
@@ -357,6 +357,11 @@ public class Constants {
         // new EE viz
         public static final double PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET = Units.degreesToRadians(20.2531597269);
         public static final double PIVOT_TO_MIDDLE_OF_CORAL_RADIUS = Units.inchesToMeters(23.249031544);
-        public static final double PIVOT_ANGLE_TO_CORAL_ANGLE = Units.degreesToRadians(-243.986);
+        public static final double PIVOT_ANGLE_TO_CORAL_ANGLE = Units.degreesToRadians(-243.986 + 15);
+        public static final double CORAL_Y_OFFSET = 0.02;
+
+        public static final double ARM_CAD_ZERO_Z = AlignConstants.ELEVATOR_STARTING_HEIGHT;
+        public static final double CLIMBER_CAD_ZERO_Y = Units.inchesToMeters(13.5);
+        public static final double CLIMBER_CAD_ZERO_Z = Units.inchesToMeters(9);
     }
 }

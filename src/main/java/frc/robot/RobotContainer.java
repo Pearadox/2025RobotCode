@@ -44,6 +44,8 @@ import frc.robot.subsystems.EndEffector.EndEffector;
 import frc.robot.subsystems.EndEffector.EndEffectorIO;
 import frc.robot.subsystems.EndEffector.EndEffectorIOReal;
 import frc.robot.subsystems.EndEffector.EndEffectorIOSim;
+import frc.robot.subsystems.Vision.Vision;
+import frc.robot.subsystems.Vision.VisionIOQuestNavSim;
 import frc.robot.util.simulation.MapleSimSwerveDrivetrain;
 import frc.robot.util.vision.PoseEstimation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -56,6 +58,7 @@ public class RobotContainer {
     private Elevator elevator;
     private Arm arm;
     private EndEffector endEffector;
+    private Vision vision;
     public static final Climber climber = Climber.getInstance();
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
@@ -93,11 +96,6 @@ public class RobotContainer {
 
     private final Trigger strafe_Triggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
-
-    private final JoystickButton csDropLB =
-            new JoystickButton(driverController, XboxController.Button.kLeftStick.value);
-    private final JoystickButton csDropRB =
-            new JoystickButton(driverController, XboxController.Button.kRightStick.value);
 
     // Op Controller
     private final JoystickButton homeElevator_Start =
@@ -140,6 +138,9 @@ public class RobotContainer {
                         () -> drivetrain.getState().Speeds,
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
+                vision = new Vision(
+                        drivetrain::addVisionMeasurement,
+                        new VisionIOQuestNavSim(MapleSimSwerveDrivetrain::getSimulatedPose));
                 break;
 
             default: // Replayed robot, disable IO implementations
@@ -151,7 +152,7 @@ public class RobotContainer {
 
         setDefaultCommands();
         registerNamedCommands();
-        autoChooser = AutoBuilder.buildAutoChooser("2R_EF-L4");
+        autoChooser = AutoBuilder.buildAutoChooser("2B_IJ-CS-KL-CS-KL");
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 

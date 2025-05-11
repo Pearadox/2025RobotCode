@@ -18,7 +18,6 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.Timer;
 import frc.lib.drivers.PearadoxTalonFX;
-import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.Constants.FieldConstants;
@@ -37,18 +36,18 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private TalonFXSimState endEffectorSimState;
 
     // must be within 6 inches of the intake
-    private static final double TRANSLATIONAL_TOLERANCE_METERS = Units.inchesToMeters(12);
+    private static final double TRANSLATIONAL_TOLERANCE_METERS = Units.inchesToMeters(16);
     // any rotation is fine
     private static final double ROTATIONAL_TOLERANCE_RADIANS = Double.POSITIVE_INFINITY;
 
     private boolean hasCoral = true;
 
     private Timer intakingTimer = new Timer();
-    private static final double INTAKING_TIME = 0.75;
+    private static final double INTAKING_TIME = 0.5;
 
     // cooldown between shooting and rerunning the intake
     private Timer shootingTimer = new Timer();
-    private static final double SHOOTING_TIME = 0.75;
+    private static final double SHOOTING_TIME = 1.25;
     private boolean disableIntake = false;
 
     private Timer droppingTimer = new Timer();
@@ -96,23 +95,24 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
     @Override
     public void updateInputs(EndEffectorIOInputs inputs) {
-        intakeCoralProjectiles();
-        visualizeHeldCoral();
-        autoDropNearCS();
+        endEffectorSimState.setSupplyVoltage(12);
 
         inputs.positionRots = endEffector.getPosition().getValueAsDouble();
         inputs.velocityRps = endEffector.getVelocity().getValueAsDouble();
 
         inputs.appliedVolts = endEffector.getMotorVoltage().getValueAsDouble();
 
-        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble() * (hasCoral ? 10.0 : 0.1);
+        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble() * (hasCoral ? 1.0 : 0.1);
         inputs.supplyCurrent = endEffector.getSupplyCurrent().getValueAsDouble();
 
-        if (inputs.appliedVolts <= -1.0) {
+        if (inputs.appliedVolts <= -0.5) {
             intakeCoralProjectiles();
-        } else if (inputs.appliedVolts >= 1.0) {
+            autoDropNearCS();
+        } else if (inputs.appliedVolts >= 0.5) {
             shootCoral();
         }
+
+        visualizeHeldCoral();
     }
 
     @Override
@@ -183,23 +183,18 @@ public class EndEffectorIOSim implements EndEffectorIO {
     }
 
     private Transform3d getEndEffectorTransform() {
-        // not entirely working
-        return new Transform3d(
-                new Translation3d(SimulationConstants.PIVOT_TO_MIDDLE_OF_CORAL_RADIUS, 0, 0) // EE is 12in from pivot
-                        .rotateBy(new Rotation3d(
-                                0,
-                                -armAngleSupplier.getAsDouble()
-                                        - SimulationConstants.PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET,
-                                0)) // rotate around pivot
-                        .plus(new Translation3d(
-                                0,
-                                0,
-                                elevatorHeightSupplier.getAsDouble()
-                                        + AlignConstants.ELEVATOR_STARTING_HEIGHT)), // robot to pivot translation
-                new Rotation3d(
-                        0,
-                        -Math.PI - armAngleSupplier.getAsDouble() - SimulationConstants.PIVOT_ANGLE_TO_CORAL_ANGLE,
-                        0)); // constant rotation
+        double armAngle = armAngleSupplier.getAsDouble();
+        double elevatorHeight = elevatorHeightSupplier.getAsDouble();
+
+        Translation3d pivotToEE = new Translation3d(SimulationConstants.PIVOT_TO_MIDDLE_OF_CORAL_RADIUS, 0, 0)
+                .rotateBy(new Rotation3d(0, -armAngle - SimulationConstants.PIVOT_TO_MIDDLE_OF_CORAL_ANG_OFFSET, 0))
+                .plus(new Translation3d(
+                        0, SimulationConstants.CORAL_Y_OFFSET, elevatorHeight + SimulationConstants.ARM_CAD_ZERO_Z));
+
+        Rotation3d rotation =
+                new Rotation3d(0, -Math.PI - armAngle - SimulationConstants.PIVOT_ANGLE_TO_CORAL_ANGLE, 0);
+
+        return new Transform3d(pivotToEE, rotation);
     }
 
     private Pose3d getEndEffectorPose() {
@@ -245,11 +240,11 @@ public class EndEffectorIOSim implements EndEffectorIO {
             return;
         }
 
-        Pose2d robotPose = poseSupplier.get();
-        Pose2d nearestCS = robotPose.nearest(FieldConstants.CORAL_STATIONS);
-        Transform2d diff = robotPose.minus(nearestCS);
+        Pose3d eePose = getEndEffectorPose();
+        Pose2d nearestCS = eePose.toPose2d().nearest(FieldConstants.CORAL_STATIONS);
+        Transform2d diff = eePose.toPose2d().minus(nearestCS);
 
-        if (diff.getTranslation().getNorm() > TRANSLATIONAL_TOLERANCE_METERS * 2) return;
+        if (diff.getTranslation().getNorm() > TRANSLATIONAL_TOLERANCE_METERS) return;
 
         if (droppingTimer.get() > DROP_COOLDOWN) {
             droppingTimer.stop();
@@ -259,7 +254,6 @@ public class EndEffectorIOSim implements EndEffectorIO {
         }
 
         droppingTimer.restart();
-        System.out.println("drop");
 
         SimulatedArena.getInstance()
                 .addGamePieceProjectile(new ReefscapeCoralOnFly(
