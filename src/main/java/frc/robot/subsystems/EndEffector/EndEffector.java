@@ -2,7 +2,7 @@
 // Open Source Software; you can modify and/or share it under the terms of
 // the WPILib BSD license file in the root directory of this project.
 
-package frc.robot.subsystems.EndEffector;
+package frc.robot.subsystems.endeffector;
 
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.filter.Debouncer.DebounceType;
@@ -10,8 +10,8 @@ import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.Arm.Arm;
-import frc.robot.subsystems.Arm.Arm.ArmMode;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.Arm.ArmMode;
 import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 

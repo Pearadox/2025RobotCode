@@ -5,7 +5,7 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Climber;
+import frc.robot.subsystems.climber.Climber;
 
 // Command to run the roller with joystick inputs
 public class ClimbCommand extends Command {

@@ -1,4 +1,4 @@
-package frc.robot.subsystems.EndEffector;
+package frc.robot.subsystems.endeffector;
 
 import static edu.wpi.first.units.Units.*;
 
