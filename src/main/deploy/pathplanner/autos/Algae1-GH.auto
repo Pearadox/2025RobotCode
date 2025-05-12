@@ -53,13 +53,7 @@
           }
         },
         {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.2
-          }
-        },
-        {
-          "type": "parallel",
+          "type": "race",
           "data": {
             "commands": [
               {
@@ -84,15 +78,82 @@
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "LevelFour"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "GH_BARGE"
           }
         },
         {
+          "type": "named",
+          "data": {
+            "name": "Algae Outtake"
+          }
+        },
+        {
           "type": "path",
           "data": {
             "pathName": "BARGE_BACK"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LevelThree"
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Auto Align Mid"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Algae Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LevelFour"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "IJ_BARGE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Algae Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "BARGE_BACK"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LevelStation"
           }
         }
       ]

@@ -8,7 +8,10 @@ import edu.wpi.first.apriltag.AprilTagFields;
 import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.math.geometry.Rotation3d;
+import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.math.numbers.N3;
 import edu.wpi.first.math.util.Units;
@@ -52,7 +55,7 @@ public class Constants {
         public static final double FIELD_LENGTH = Units.inchesToMeters(690.876);
         public static final double FIELD_WIDTH = Units.inchesToMeters(317);
 
-        public static final int[] BLUE_REEF_TAG_IDS = {18, 19, 20, 21, 17, 22};
+        public static final int[] BLUE_REEF_TAG_IDS = {18, 19, 20, 21, 22, 17};
         public static final int[] BLUE_CORAL_STATION_TAG_IDS = {12, 13};
         public static final int[] RED_REEF_TAG_IDS = {7, 6, 11, 10, 9, 8};
         public static final int[] RED_CORAL_STATION_TAG_IDS = {1, 2};
@@ -95,6 +98,33 @@ public class Constants {
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
         public static final double L4_HEIGHT = Units.inchesToMeters(72);
+
+        public static final Pose3d[] REEF_TAG_POSES = new Pose3d[RED_REEF_TAG_IDS.length + BLUE_REEF_TAG_IDS.length];
+
+        static {
+            int i = 0;
+            for (int tag : FieldConstants.RED_REEF_TAG_IDS) {
+                REEF_TAG_POSES[i++] =
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get();
+            }
+            for (int tag : FieldConstants.BLUE_REEF_TAG_IDS) {
+                REEF_TAG_POSES[i++] =
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get();
+            }
+        }
+
+        public static final Transform3d HIGH_ALGAE_TRANSFORM =
+                new Transform3d(Units.inchesToMeters(-6), 0, Units.inchesToMeters(39.575), Rotation3d.kZero);
+        public static final Transform3d LOW_ALGAE_TRANSFORM =
+                new Transform3d(Units.inchesToMeters(-6), 0, Units.inchesToMeters(23.675), Rotation3d.kZero);
+
+        public static final Pose3d[] REEF_ALGAE_POSES = new Pose3d[REEF_TAG_POSES.length];
+
+        static {
+            for (int i = 0; i < REEF_ALGAE_POSES.length; i++) {
+                REEF_ALGAE_POSES[i] = REEF_TAG_POSES[i].plus(i % 2 == 0 ? HIGH_ALGAE_TRANSFORM : LOW_ALGAE_TRANSFORM);
+            }
+        }
     }
 
     public static final class DriveConstants {

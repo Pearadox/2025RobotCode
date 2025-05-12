@@ -467,6 +467,7 @@ public class RobotContainer {
 
         NamedCommands.registerCommand(
                 "Algae Intake", new RunCommand(() -> endEffector.algaeIn()).until(() -> endEffector.hasCoral()));
+        NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.algaeOut()));
     }
 
     public void setDefaultCommands() {

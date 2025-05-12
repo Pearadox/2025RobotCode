@@ -22,12 +22,15 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SimulationConstants;
+import java.util.ArrayList;
 import java.util.HashSet;
+import java.util.List;
 import java.util.Set;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
+import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
 
@@ -37,10 +40,9 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
     // must be within 6 inches of the intake
     private static final double TRANSLATIONAL_TOLERANCE_METERS = Units.inchesToMeters(16);
-    // any rotation is fine
-    private static final double ROTATIONAL_TOLERANCE_RADIANS = Double.POSITIVE_INFINITY;
 
     private boolean hasCoral = true;
+    private boolean hasAlgae = false;
 
     private Timer intakingTimer = new Timer();
     private static final double INTAKING_TIME = 0.5;
@@ -54,6 +56,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private static final double DROP_COOLDOWN = 1.5;
 
     private Pose3d intookGamePiecePrevPose = Pose3d.kZero;
+    private List<Pose3d> stagedAlgae = new ArrayList<>(List.of(FieldConstants.REEF_ALGAE_POSES));
 
     private Supplier<Pose2d> poseSupplier;
     private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
@@ -102,17 +105,19 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
         inputs.appliedVolts = endEffector.getMotorVoltage().getValueAsDouble();
 
-        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble() * (hasCoral ? 1.0 : 0.1);
+        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble() * (hasCoral || hasAlgae ? 1.0 : 0.1);
         inputs.supplyCurrent = endEffector.getSupplyCurrent().getValueAsDouble();
 
         if (inputs.appliedVolts <= -0.5) {
             intakeCoralProjectiles();
             autoDropNearCS();
+            shootAlgae();
         } else if (inputs.appliedVolts >= 0.5) {
             shootCoral();
+            intakeAlgae();
         }
 
-        visualizeHeldCoral();
+        visualizeHeldGamePiece();
     }
 
     @Override
@@ -133,14 +138,14 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
         if (disableIntake || hasCoral) return; // max 1 coral
 
-        Pose3d intakePose = getEndEffectorPose(); // the end effector is the intake
+        Pose3d intakePose = getHeldCoralPose(); // the end effector is the intake
         Set<GamePieceProjectile> gamePieceProjectiles =
                 SimulatedArena.getInstance().gamePieceLaunched();
         Set<GamePieceProjectile> toRemove = new HashSet<>();
 
         for (GamePieceProjectile gamePiece : gamePieceProjectiles) {
             if (gamePiece instanceof ReefscapeCoralOnFly) {
-                if (checkCoralPlacement(intakePose.minus(gamePiece.getPose3d()))) {
+                if (checkTolerance(intakePose.minus(gamePiece.getPose3d()))) {
                     toRemove.add(gamePiece);
                     break; // max 1 coral
                 }
@@ -156,33 +161,48 @@ public class EndEffectorIOSim implements EndEffectorIO {
         }
     }
 
-    private static boolean checkCoralPlacement(Transform3d difference) {
-        boolean poseWithinTolerance = difference.getTranslation().getNorm() < TRANSLATIONAL_TOLERANCE_METERS
-                && Math.abs(difference.getRotation().getX()) < ROTATIONAL_TOLERANCE_RADIANS
-                && Math.abs(difference.getRotation().getY()) < ROTATIONAL_TOLERANCE_RADIANS
-                && Math.abs(difference.getRotation().getZ()) < ROTATIONAL_TOLERANCE_RADIANS;
-        return poseWithinTolerance;
+    private static boolean checkTolerance(Transform3d difference) {
+        return difference.getTranslation().getNorm() < TRANSLATIONAL_TOLERANCE_METERS;
     }
 
-    private void visualizeHeldCoral() {
+    private void visualizeHeldGamePiece() {
         Logger.recordOutput("FieldSimulation/Pose", new Pose3d(poseSupplier.get()));
+        Logger.recordOutput("FieldSimulation/Staged Algae", stagedAlgae.toArray(Pose3d[]::new));
 
-        if (intakingTimer.isRunning()) {
-            if (intakingTimer.get() > INTAKING_TIME) {
-                intakingTimer.stop();
-                intakingTimer.reset();
+        if (hasCoral) {
+            if (intakingTimer.isRunning()) {
+                if (intakingTimer.get() > INTAKING_TIME) {
+                    intakingTimer.stop();
+                    intakingTimer.reset();
+                }
+                Logger.recordOutput(
+                        "FieldSimulation/Held Coral",
+                        intookGamePiecePrevPose.interpolate(getHeldCoralPose(), intakingTimer.get() / INTAKING_TIME));
+            } else {
+                Logger.recordOutput("FieldSimulation/Held Coral", getHeldCoralPose());
             }
-            Logger.recordOutput(
-                    "FieldSimulation/Held Coral",
-                    intookGamePiecePrevPose.interpolate(getEndEffectorPose(), intakingTimer.get() / INTAKING_TIME));
-        } else if (hasCoral) {
-            Logger.recordOutput("FieldSimulation/Held Coral", getEndEffectorPose());
         } else {
             Logger.recordOutput("FieldSimulation/Held Coral", Pose3d.kZero);
         }
+
+        if (hasAlgae) {
+            if (intakingTimer.isRunning()) {
+                if (intakingTimer.get() > INTAKING_TIME) {
+                    intakingTimer.stop();
+                    intakingTimer.reset();
+                }
+                Logger.recordOutput(
+                        "FieldSimulation/Held Algae",
+                        intookGamePiecePrevPose.interpolate(getHeldAlgaePose(), intakingTimer.get() / INTAKING_TIME));
+            } else {
+                Logger.recordOutput("FieldSimulation/Held Algae", getHeldAlgaePose());
+            }
+        } else {
+            Logger.recordOutput("FieldSimulation/Held Algae", Pose3d.kZero);
+        }
     }
 
-    private Transform3d getEndEffectorTransform() {
+    private Transform3d getHeldCoralTransform() {
         double armAngle = armAngleSupplier.getAsDouble();
         double elevatorHeight = elevatorHeightSupplier.getAsDouble();
 
@@ -197,16 +217,16 @@ public class EndEffectorIOSim implements EndEffectorIO {
         return new Transform3d(pivotToEE, rotation);
     }
 
-    private Pose3d getEndEffectorPose() {
+    private Pose3d getHeldCoralPose() {
         Pose3d robotPose = new Pose3d(poseSupplier.get());
-        return robotPose.transformBy(getEndEffectorTransform());
+        return robotPose.transformBy(getHeldCoralTransform());
     }
 
     private void shootCoral() {
         if (!hasCoral) return;
         // if (shootingTimer.get() > 0) return;
 
-        Transform3d eeTransform = getEndEffectorTransform();
+        Transform3d eeTransform = getHeldCoralTransform();
 
         SimulatedArena.getInstance()
                 .addGamePieceProjectile(new ReefscapeCoralOnFly(
@@ -240,7 +260,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
             return;
         }
 
-        Pose3d eePose = getEndEffectorPose();
+        Pose3d eePose = getHeldCoralPose();
         Pose2d nearestCS = eePose.toPose2d().nearest(FieldConstants.CORAL_STATIONS);
         Transform2d diff = eePose.toPose2d().minus(nearestCS);
 
@@ -271,5 +291,83 @@ public class EndEffectorIOSim implements EndEffectorIO {
                         MetersPerSecond.of(1),
                         // The coral is ejected at this angle
                         Degrees.of(-55)));
+    }
+
+    private Transform3d getHeldAlgaeTransform() {
+        double armAngle = armAngleSupplier.getAsDouble();
+        double elevatorHeight = elevatorHeightSupplier.getAsDouble();
+
+        Translation3d pivotToEE = new Translation3d(SimulationConstants.PIVOT_TO_MIDDLE_OF_CORAL_RADIUS, 0, 0)
+                .rotateBy(new Rotation3d(0, -armAngle, 0))
+                .plus(new Translation3d(0, 0, elevatorHeight + SimulationConstants.ARM_CAD_ZERO_Z));
+
+        Rotation3d rotation = new Rotation3d(0, -armAngle, 0);
+
+        return new Transform3d(pivotToEE, rotation);
+    }
+
+    private Pose3d getHeldAlgaePose() {
+        Pose3d robotPose = new Pose3d(poseSupplier.get());
+        return robotPose.transformBy(getHeldAlgaeTransform());
+    }
+
+    private void intakeAlgae() {
+        // cooldown between shooting and restarting the intake
+        // so you don't immediately reintake what you just launched
+        if (shootingTimer.get() > SHOOTING_TIME) {
+            shootingTimer.stop();
+            shootingTimer.reset();
+            disableIntake = false;
+        } else if (shootingTimer.get() > 0) {
+            disableIntake = true;
+        }
+
+        if (disableIntake || hasAlgae) return; // max 1 algae
+
+        Pose3d intakePose = getHeldAlgaePose(); // the end effector is the intake
+        Set<Pose3d> toRemove = new HashSet<>();
+
+        for (Pose3d algae : stagedAlgae) {
+            if (checkTolerance(intakePose.minus(algae))) {
+                toRemove.add(algae);
+                break; // max 1 algae
+            }
+        }
+
+        for (Pose3d gamePiece : toRemove) {
+            stagedAlgae.remove(gamePiece);
+            intookGamePiecePrevPose = gamePiece;
+            hasAlgae = true;
+            intakingTimer.restart();
+            break; // max 1 algae
+        }
+    }
+
+    private void shootAlgae() {
+        if (!hasAlgae) return;
+        // if (shootingTimer.get() > 0) return;
+
+        Transform3d eeTransform = getHeldAlgaeTransform();
+
+        SimulatedArena.getInstance()
+                .addGamePieceProjectile(new ReefscapeAlgaeOnFly(
+                        // Obtain robot position from drive simulation
+                        poseSupplier.get().getTranslation(),
+                        // The scoring mechanism is installed at this position on the robot
+                        eeTransform.getTranslation().toTranslation2d(),
+                        // Obtain robot speed from drive simulation
+                        chassisSpeedsSupplier.get(),
+                        // Obtain robot facing from drive simulation
+                        poseSupplier.get().getRotation(),
+                        // The height at which the coral is ejected
+                        eeTransform.getMeasureZ(),
+                        // The initial speed of the coral
+                        MetersPerSecond.of(2.910),
+                        // The coral is ejected at this angle
+                        eeTransform.getRotation().getMeasureAngle().unaryMinus()));
+
+        hasAlgae = false;
+        disableIntake = true;
+        shootingTimer.restart();
     }
 }
