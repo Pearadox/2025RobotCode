@@ -1,0 +1,175 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop EE"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PushForward2B_IJ"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "PushBackward2B_IJ"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop EE"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LevelFour"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2B_IJ"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Align_IJ-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS-KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Left"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "Align_KL-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Intake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "CS-KL"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "KL-BackUp"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}
