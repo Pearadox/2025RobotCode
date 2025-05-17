@@ -13,6 +13,7 @@ import com.ctre.phoenix6.controls.Follower;
 import com.ctre.phoenix6.controls.MotionMagicVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.signals.GravityTypeValue;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
@@ -103,7 +104,7 @@ public class Elevator extends SubsystemBase {
         var slot1Configs = talonFXConfigs.Slot1;
         slot1Configs.kG = ElevatorConstants.kG; // add enough Gravity Gain just before motor starts moving
         slot1Configs.kS = ElevatorConstants.kS; // Add 0.1 V output to overcome static friction
-        slot1Configs.kV = ElevatorConstants.kV * 0.25; // A velocity target of 1 rps results in 0.1 V output
+        slot1Configs.kV = ElevatorConstants.kV; // A velocity target of 1 rps results in 0.1 V output
         slot1Configs.kA = ElevatorConstants.kA; // An acceleration of 1 rps/s requires 0.01 V output
         slot1Configs.kP = ElevatorConstants.kP; // A position error of 2.5 rotations results in 12 V output, prev 4.8
         slot1Configs.kI = ElevatorConstants.kI; // no output for integrated error
@@ -211,13 +212,23 @@ public class Elevator extends SubsystemBase {
         // }
 
         if (elevatorMode == ElevatorMode.STOWED) {
+            // if (isCoral) {
             setpoint = ElevatorConstants.STOWED_ROT + elevatorOffset;
+            // } else {
+            // setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            // ;
+            // }
         } else if (elevatorMode == ElevatorMode.STATION) {
-            setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            if (isAligning) {
+                setpoint = ElevatorConstants.OBSTRUCTED_STATION_ROT + elevatorOffset;
+            } else {
+                setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
+            }
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
                 setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
@@ -227,7 +238,11 @@ public class Elevator extends SubsystemBase {
                     setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
 
                 } else {
-                    setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                    if (DriverStation.isAutonomous()) {
+                        setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset - 0.4;
+                    } else {
+                        setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                    }
                 }
             }
         } else if (!isCoral) {
@@ -257,6 +272,7 @@ public class Elevator extends SubsystemBase {
 
         if (!isZeroing) {
             elevator.setControl(motionMagicRequest.withPosition(setpoint).withSlot(isLowering ? 1 : 0));
+            // elevator.setControl(new VoltageOut(elevatorOffset));
         } else {
             homeElevator();
         }

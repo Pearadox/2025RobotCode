@@ -7,13 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Stop EE"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "LevelFour"
+            "name": "HoldCoral"
           }
         },
         {
@@ -25,7 +19,7 @@
         {
           "type": "named",
           "data": {
-            "name": "Auto Align Left"
+            "name": "Auto Align Right"
           }
         },
         {
