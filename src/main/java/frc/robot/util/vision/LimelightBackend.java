@@ -106,15 +106,11 @@ public class LimelightBackend extends VisionBackend {
     }
 
     public Vector<N3> getStdDevs() {
-        double xyStdDev = -0.002468 * Math.pow(ta.get(), 3) + 0.046 * Math.pow(ta.get(), 2) - 0.29 * (ta.get()) + 1;
-        if (Double.isNaN(xyStdDev)) xyStdDev = 0.1; // ta >= 7
+        double xyStdDev = ta.get() < 1 ? Math.log(-(ta.get() - 1)) + 1 : 0.1;
         xyStdDev = Math.max(xyStdDev, 0.1);
         xyStdDev = Math.min(xyStdDev, 0.9);
 
-        double loggedTa = ta.get();
-
-        SmarterDashboard.putNumber("Vision/" + llName + "/StdDev", xyStdDev);
-        SmarterDashboard.putNumber("Vision/" + llName + "/ta", loggedTa);
+        SmarterDashboard.putNumber("Vision/STDS", xyStdDev);
         return VecBuilder.fill(xyStdDev, xyStdDev, 0.999999);
     }
 }

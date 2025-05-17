@@ -7,7 +7,7 @@
         {
           "type": "named",
           "data": {
-            "name": "HoldCoral"
+            "name": "Stop EE"
           }
         },
         {
@@ -44,6 +44,12 @@
           "type": "path",
           "data": {
             "pathName": "Align_EF-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
           }
         },
         {
@@ -86,6 +92,12 @@
           "type": "path",
           "data": {
             "pathName": "CD-CS"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Station"
           }
         },
         {

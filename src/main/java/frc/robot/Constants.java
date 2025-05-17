@@ -18,13 +18,16 @@ public class Constants {
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
-        public static final String LL_B_NAME = "limelight-front";
+        public static final String LL_B_NAME = "limelight-front"; // TODO: limelight names & offsets
 
         public static final Vector<N3> LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
         public static final Vector<N3> MEGATAG2_LIMELIGHT_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
 
         public static final double AMBIGUITY_FILTER = 0.3;
         public static final double DISTANCE_FILTER = FieldConstants.FIELD_LENGTH / 2;
+
+        // // : determine questnav std dev (likely lower than this)
+        // public static final Vector<N3> QUESTNAV_STD_DEV = VecBuilder.fill(.7, .7, .9999999);
 
         // TODO: use andymark field layout for fit events
         public static AprilTagFieldLayout aprilTagLayout = AprilTagFieldLayout.loadField(AprilTagFields.kDefaultField);
@@ -63,7 +66,7 @@ public class Constants {
         public static final double DEFAULT_DEADBAND = 0.07;
         public static final double DRIVER_ALIGNING_DEADBAND = 0.15;
 
-        public static final double SLOW_MODE_SPEED = 0.3;
+        public static final double SLOW_MODE_SPEED = 0.5;
     }
 
     public static final class AlignConstants {
@@ -72,7 +75,7 @@ public class Constants {
         // public static final double ALIGN_STRAFE_KI = 0.001;
         // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
 
-        public static final double ALIGN_KS = 0.02; // 0.009
+        public static final double ALIGN_KS = 0.009;
 
         // tx and ty tolerances with setpoint
         public static final double ALIGN_TOLERANCE_PIXELS = 0.5;
@@ -87,8 +90,8 @@ public class Constants {
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
-        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
-        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
+        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05;
+        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03;
         public static final double REEF_ALIGN_TZ = -0; // target relative
 
         public static final double STATION_ALIGN_TX = 0.07;
@@ -103,6 +106,9 @@ public class Constants {
         public static final double ROT_REEF_kP = 0.02; // Tune all PID values
         public static final double ROT_REEF_kI = 0;
         public static final double ROT_REEF_kD = 0;
+
+        // public static final PathConstraints PATH_CONSTRAINTS =
+        //         new PathConstraints(3.0, 4.0, Units.degreesToRadians(540), Units.degreesToRadians(720));
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
@@ -127,18 +133,21 @@ public class Constants {
 
         public static final int UPDATE_FREQ = 50;
 
-        public static final double MM_CRUISE_VELCOCITY_UP = 100;
-        public static final double MM_ACCELERATION_UP = 200;
+        // public static final double MAX_VELOCITY_MPS = 2.0; //
+        // public static final double MAX_ACCELERATION_MPS2 = 8.0; // not used currently
 
-        public static final double MM_CRUISE_VELCOCITY_DOWN = 1;
-        public static final double MM_ACCELERATION_DOWN = 1;
+        public static final double MM_CRUISE_VELCOCITY_UP = 100; //
+        public static final double MM_ACCELERATION_UP = 100; //
 
-        public static final double TICKS_PER_REV = 4000;
-        public static final double GEAR_RATIO = 3;
-        public static final double PULLEY_DIAMETER = 2.005;
+        public static final double MM_CRUISE_VELCOCITY_DOWN = 1; //
+        public static final double MM_ACCELERATION_DOWN = 1; //
+
+        public static final double TICKS_PER_REV = 4000; //
+        public static final double GEAR_RATIO = 3; //
+        public static final double PULLEY_DIAMETER = 2.005; // should be chain pitch * number of teeth / pi
         public static final double kRotationToInches = PULLEY_DIAMETER * Math.PI / GEAR_RATIO;
 
-        // Inches
+        // the following are in inches
         public static final double STOWED_HEIGHT = 0;
         public static final double STATION_HEIGHT =
                 15; // Home Field is 1in higher than official field - official is 15.4
@@ -150,7 +159,7 @@ public class Constants {
         public static final double ALGAE_LOW_HEIGHT = 6.4; // 6.7
         public static final double ALGAE_HIGH_HEIGHT = 16;
 
-        public static final double BARGE_HEIGHT = 32; // 33
+        public static final double BARGE_HEIGHT = 33;
 
         public static final double MAX_ELEVATOR_HEIGHT = 34;
 
@@ -158,8 +167,6 @@ public class Constants {
 
         public static final double LEVEL_TWO_ROT = LEVEL_TWO_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STATION_ROT = STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
-        public static final double OBSTRUCTED_STATION_ROT =
-                STATION_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER) - 1.26;
         public static final double LEVEL_THREE_ROT = LEVEL_THREE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double LEVEL_FOUR_ROT = LEVEL_FOUR_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double ALGAE_LOW_ROT = ALGAE_LOW_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
@@ -168,7 +175,16 @@ public class Constants {
         public static final double BARGE_ROT = BARGE_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
         public static final double STOWED_ROT = STOWED_HEIGHT * GEAR_RATIO / (Math.PI * PULLEY_DIAMETER);
 
+        // public static final double STATION_ROT = 3.868;
+        // public static final double LEVEL_TWO_ROT = 3.868;
+        // public static final double LEVEL_THREE_ROT = 10;
+        // public static final double LEVEL_FOUR_ROT = 15.0;
+        // public static final double MAX_ELEVATOR_ROT = 15.5; // 15.65
+        // public static final double STOWED_ROT = 0;
+
         public static final double ELEVATOR_OFFSET = 0.075;
+
+        // TODO: change all of these values to match true elevator gains
 
         public static final double kG = 0.29; // 0.3
         public static final double kS = 0.11; // 0
@@ -190,7 +206,7 @@ public class Constants {
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT =
-                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3 - 0.19; // was -78 //79.08 // -66
+                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3; // was -78 //79.08 // -66
 
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08
@@ -204,11 +220,12 @@ public class Constants {
         // public static final double ARM_CLIMB = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
         public static final double ARM_L4_BEHIND_CORAL = 22.057; // rots
-        public static final double ARM_STATION_BEHIND_CORAL = Units.degreesToRotations(-15) * ARM_GEAR_RATIO - 1.63;
 
         public static final double ARM_ADJUST_INCREMENT = 0.1;
 
         public static final double UPDATE_FREQ = 50;
+
+        // TODO: tune pid
 
         public static final double kG = 0.0; // 0.35;
         public static final double kS = 0.0; // 0.15;
@@ -233,7 +250,8 @@ public class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final int PIVOT_ID = 40;
+        // CANID for pivot
+        public static final int PIVOT_ID = 40; // real CANID
 
         // public static final int PIVOT_GEAR_RATIO = 60;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;

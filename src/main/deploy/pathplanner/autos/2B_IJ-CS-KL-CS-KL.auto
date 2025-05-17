@@ -77,6 +77,12 @@
           }
         },
         {
+          "type": "wait",
+          "data": {
+            "waitTime": 0.3
+          }
+        },
+        {
           "type": "named",
           "data": {
             "name": "Outtake"

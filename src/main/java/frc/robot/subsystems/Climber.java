@@ -1,3 +1,7 @@
+// Copyright (c) FIRST and other WPILib contributors.
+// Open Source Software; you can modify and/or share it under the terms of
+// the WPILib BSD license file in the root directory of this project.
+
 package frc.robot.subsystems;
 
 import com.ctre.phoenix6.BaseStatusSignal;
@@ -23,10 +27,6 @@ public class Climber extends SubsystemBase {
     private static final Arm ARM = Arm.getInstance();
 
     private double setpoint = ClimbConstants.CLIMB_SETPOINT;
-    private double climberOffset = 0;
-
-    private int climbState = 1;
-    private String climbStateString = "unpowered";
 
     public static Climber getInstance() {
         return CLIMBER;
@@ -52,7 +52,7 @@ public class Climber extends SubsystemBase {
         slot0Configs.kS = 0;
         slot0Configs.kV = 0;
         slot0Configs.kA = 0;
-        slot0Configs.kP = 0.25;
+        slot0Configs.kP = 0.35;
         slot0Configs.kI = 0;
         slot0Configs.kD = 0;
 
@@ -61,9 +61,6 @@ public class Climber extends SubsystemBase {
 
     @Override
     public void periodic() {
-
-        updateClimStateString();
-
         SmarterDashboard.putNumber("Climber/Position", climbMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Climber/Pos", climbMotor.getPosition().getValueAsDouble());
         Logger.recordOutput("Climber/Volts", climbMotor.getMotorVoltage().getValueAsDouble());
@@ -71,84 +68,44 @@ public class Climber extends SubsystemBase {
                 "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
         Logger.recordOutput(
                 "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
-
-        SmarterDashboard.putNumber("Climber/State", climbState);
-        SmarterDashboard.putString("Climber/StateStr", climbStateString);
+        // if (RobotContainer.opController.getPOV() == 0) {
+        //     runClimb(ClimbConstants.CLIMB_VALUE, 0);
+        // } else if (RobotContainer.opController.getPOV() == 180) {
+        //     runClimb(-ClimbConstants.CLIMB_VALUE, 0);
+        // } else {
+        //     runClimb(0, 0);
+        // }
     }
 
-    public void climberAdjustUp() {
-        climberOffset += 10; // in rotations
-    }
+    /** This is a method that makes the roller spin */
+    // public void runClimb(double forward, double reverse) {
+    //     Logger.recordOutput("Climber/Percent Speed", forward - reverse);
+    //     climbMotor.set(forward - reverse);
+    // }
 
-    public void climberAdjustDown() {
-        climberOffset -= 10;
+    public void deployClimber() {
+        climbMotor.set(0.7);
     }
 
     public void prepClimber() {
-        if (climbState != 0) {
-            ELEVATOR.setElevatorStowedMode();
-            ARM.setAlgae();
-            ARM.setStowed();
-        }
+        ELEVATOR.setElevatorStowedMode();
+        ARM.setAlgae();
+        ARM.setStowed();
+        climbMotor.set(-0.7);
     }
 
     public void zeroClimber() {
         climbMotor.setPosition(0);
-        climberOffset = 0;
     }
 
     public void stop() {
         climbMotor.set(0);
     }
 
-    public void updateClimStateString() {
-        if (climbState == 2) {
-            climbStateString = "Climbing!";
-        } else if (climbState == 1) {
-            climbStateString = "Deployed (Vertical)";
-        } else if (climbState == 0) {
-            climbStateString = "Retracted (Stowed)";
-        }
-    }
-
-    public void setClimbPosition() {
-        if (climbState == 2) {
-            climbClimber();
-        } else if (climbState == 1) {
-            deployClimber();
-        } else if (climbState == 0) {
-            retractClimber();
-        }
-    }
-
     public void retractClimber() {
-        climbMotor.setControl(new PositionVoltage(-290 + climberOffset)); // -230 // -150 // -270
-    }
-
-    public void climberDown() {
-        climbMotor.set(-0.8);
-    }
-
-    public void climberUp() {
-        climbMotor.set(0.8);
-    }
-
-    public void deployClimber() {
-        climbMotor.setControl(new PositionVoltage(0 + climberOffset));
-    }
-
-    public void climbClimber() {
-        climbMotor.setControl(new PositionVoltage(-195 + climberOffset));
-    }
-
-    public void incrementClimbState() {
-        climbState = Math.min(2, climbState + 1);
-        prepClimber();
-        setClimbPosition();
-    }
-
-    public void decrementClimbState() {
-        climbState = Math.max(0, climbState - 1);
-        setClimbPosition();
+        ELEVATOR.setElevatorStowedMode();
+        ARM.setAlgae();
+        ARM.setStowed();
+        climbMotor.setControl(new PositionVoltage(-270)); // -230 // -150
     }
 }

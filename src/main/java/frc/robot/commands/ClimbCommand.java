@@ -23,7 +23,7 @@ public class ClimbCommand extends Command {
     // Runs every cycle while the command is scheduled (~50 times per second)
     @Override
     public void execute() {
-        climber.setClimbPosition();
+        climber.stop();
         // Run the roller motor at the desired speed
         // climbSubsystem.runClimb(forward.getAsDouble(), reverse.getAsDouble());
     }
