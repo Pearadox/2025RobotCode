@@ -35,6 +35,9 @@ import frc.robot.subsystems.arm.ArmIO;
 import frc.robot.subsystems.arm.ArmIOReal;
 import frc.robot.subsystems.arm.ArmIOSim;
 import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOReal;
+import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
@@ -59,7 +62,7 @@ public class RobotContainer {
     private Arm arm;
     private EndEffector endEffector;
     private Vision vision;
-    public static final Climber climber = Climber.getInstance();
+    private Climber climber;
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
     public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
 
@@ -128,6 +131,7 @@ public class RobotContainer {
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
                 endEffector = new EndEffector(new EndEffectorIOReal());
+                climber = new Climber(new ClimberIOReal());
                 break;
 
             case SIM: // Sim robot, instantiate physics sim IO implementations
@@ -141,12 +145,14 @@ public class RobotContainer {
                 vision = new Vision(
                         drivetrain::addVisionMeasurement,
                         new VisionIOQuestNavSim(MapleSimSwerveDrivetrain::getSimulatedPose));
+                climber = new Climber(new ClimberIOSim());
                 break;
 
             default: // Replayed robot, disable IO implementations
                 elevator = new Elevator(new ElevatorIO() {});
                 arm = new Arm(new ArmIO() {});
                 endEffector = new EndEffector(new EndEffectorIO() {});
+                climber = new Climber(new ClimberIO() {});
                 break;
         }
 

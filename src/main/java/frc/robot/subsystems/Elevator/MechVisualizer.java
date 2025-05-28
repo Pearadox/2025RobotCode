@@ -7,6 +7,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.SimulationConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
@@ -22,6 +23,17 @@ public class MechVisualizer {
             new LoggedMechanismLigament2d("Elevator", SimulationConstants.MIN_HEIGHT, elevatorAngle));
     private LoggedMechanismLigament2d arm = elevator2d.append(
             new LoggedMechanismLigament2d("Arm", Units.inchesToMeters(16.5), 0, 5, new Color8Bit(Color.kYellow)));
+
+    private LoggedMechanismRoot2d climbRoot = mech2d.getRoot(
+            "Climb Root",
+            Units.inchesToMeters(22.5) + SimulationConstants.CLIMBER_CAD_ZERO_Y,
+            SimulationConstants.CLIMBER_CAD_ZERO_Z);
+    private LoggedMechanismLigament2d climber = climbRoot.append(new LoggedMechanismLigament2d(
+            "Climber",
+            ClimbConstants.CLIMBER_LENGTH,
+            ClimbConstants.STARTING_ANGLE,
+            3,
+            new Color8Bit(Color.kLightSteelBlue)));
 
     private LoggedMechanismLigament2d ee23a = arm.append(new LoggedMechanismLigament2d(
             "EE23a", Units.inchesToMeters(5.6102), 180 - 109.295, 7, new Color8Bit(Color.kDarkSeaGreen)));
@@ -63,6 +75,7 @@ public class MechVisualizer {
 
     private double heightMeters = 0.0;
     private double armAngleRads = 0.0;
+    private double climbAngRads = 0.0;
 
     private static final MechVisualizer instance = new MechVisualizer();
 
@@ -76,7 +89,7 @@ public class MechVisualizer {
         SmartDashboard.putData("Elevator Sim", mech2d);
         Logger.recordOutput("FieldSimulation/Mechanism Visualizer", mech2d);
 
-        double climberRoll = 0; // Math.sin(System.currentTimeMillis() / 1000.0) * Math.PI * 2;
+        // double climberRoll = 0; // Math.sin(System.currentTimeMillis() / 1000.0) * Math.PI * 2;
 
         Logger.recordOutput("FieldSimulation/Components", new Transform3d[] {
             new Transform3d(0, 0, heightMeters, new Rotation3d()),
@@ -89,7 +102,7 @@ public class MechVisualizer {
                     0,
                     SimulationConstants.CLIMBER_CAD_ZERO_Y,
                     SimulationConstants.CLIMBER_CAD_ZERO_Z,
-                    new Rotation3d(climberRoll, 0, 0))
+                    new Rotation3d(-climbAngRads, 0, 0))
         });
     }
 
@@ -101,5 +114,10 @@ public class MechVisualizer {
     public void updateArmAngle(double angleRads) {
         this.armAngleRads = angleRads;
         arm.setAngle(Units.radiansToDegrees(angleRads) - elevatorAngle);
+    }
+
+    public void updateClimberRoll(double angleRads) {
+        this.climbAngRads = angleRads;
+        climber.setAngle(Units.radiansToDegrees(climbAngRads));
     }
 }

@@ -299,6 +299,14 @@ public class Constants {
 
         public static final double CLIMB_ROTS = -126.0;
         public static final double CLIMB_SETPOINT = -210.0;
+
+        public static final double CLIMBER_LENGTH = Units.inchesToMeters(8);
+        public static final double MASS_KG = Units.lbsToKilograms(3);
+        public static final double MOI = MASS_KG * CLIMBER_LENGTH * CLIMBER_LENGTH; // most of the mass is the barb
+        public static final double GEAR_RATIO = 100;
+        public static final double MIN_ANGLE = Units.degreesToRadians(90);
+        public static final double MAX_ANGLE = Units.degreesToRadians(180);
+        public static final double STARTING_ANGLE = MIN_ANGLE;
     }
 
     public static final class IntakeConstants {

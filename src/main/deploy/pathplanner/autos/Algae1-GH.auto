@@ -96,15 +96,15 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "BARGE_BACK"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "LevelThree"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "2B_IJ"
           }
         },
         {

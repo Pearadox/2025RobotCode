@@ -1,76 +1,41 @@
 package frc.robot.subsystems.climber;
 
-import com.ctre.phoenix6.BaseStatusSignal;
-import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
-import com.ctre.phoenix6.signals.NeutralModeValue;
+import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
-import frc.lib.drivers.PearadoxTalonFX;
-import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ClimbConstants;
+import frc.robot.subsystems.elevator.MechVisualizer;
 import frc.robot.util.SmarterDashboard;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-/** Class to run the rollers over CAN */
 public class Climber extends SubsystemBase {
-    // private final SparkMax climbMotor;
-    private final PearadoxTalonFX climbMotor;
-
-    private static final Climber CLIMBER = new Climber();
-    private TalonFXConfiguration talonFXConfigs;
-
-    private double setpoint = ClimbConstants.CLIMB_SETPOINT;
+    @AutoLogOutput
     private double climberOffset = 0;
 
+    @AutoLogOutput
     private int climbState = 1;
+
+    @AutoLogOutput
     private String climbStateString = "unpowered";
 
-    public static Climber getInstance() {
-        return CLIMBER;
-    }
+    private ClimberIO io;
+    private final ClimberIOInputsAutoLogged inputs = new ClimberIOInputsAutoLogged();
 
-    public Climber() {
-        climbMotor = new PearadoxTalonFX(ClimbConstants.CLIMB_MOTOR_ID, NeutralModeValue.Brake, 50, false);
-
-        BaseStatusSignal.setUpdateFrequencyForAll(
-                ArmConstants.UPDATE_FREQ,
-                climbMotor.getPosition(),
-                climbMotor.getMotorVoltage(),
-                climbMotor.getTorqueCurrent(),
-                climbMotor.getSupplyCurrent(),
-                climbMotor.getStatorCurrent());
-
-        climbMotor.optimizeBusUtilization();
-
-        talonFXConfigs = new TalonFXConfiguration();
-
-        var slot0Configs = talonFXConfigs.Slot0;
-        slot0Configs.kG = 0;
-        slot0Configs.kS = 0;
-        slot0Configs.kV = 0;
-        slot0Configs.kA = 0;
-        slot0Configs.kP = 0.25;
-        slot0Configs.kI = 0;
-        slot0Configs.kD = 0;
-
-        climbMotor.getConfigurator().apply(slot0Configs);
+    public Climber(ClimberIO io) {
+        this.io = io;
     }
 
     @Override
     public void periodic() {
+        io.updateInputs(inputs);
+        Logger.processInputs("Climber", inputs);
 
         updateClimStateString();
 
-        SmarterDashboard.putNumber("Climber/Position", climbMotor.getPosition().getValueAsDouble());
-        Logger.recordOutput("Climber/Pos", climbMotor.getPosition().getValueAsDouble());
-        Logger.recordOutput("Climber/Volts", climbMotor.getMotorVoltage().getValueAsDouble());
-        Logger.recordOutput(
-                "Climber/Supply Current", climbMotor.getSupplyCurrent().getValueAsDouble());
-        Logger.recordOutput(
-                "Climber/Supply Current", climbMotor.getStatorCurrent().getValueAsDouble());
-
         SmarterDashboard.putNumber("Climber/State", climbState);
         SmarterDashboard.putString("Climber/StateStr", climbStateString);
+
+        MechVisualizer.getInstance().updateClimberRoll(getAngleRads());
     }
 
     public void climberAdjustUp() {
@@ -81,21 +46,13 @@ public class Climber extends SubsystemBase {
         climberOffset -= 10;
     }
 
-    // public void prepClimber() {
-    //     if (climbState != 0) {
-    //         ELEVATOR.setElevatorStowedMode();
-    //         ARM.setAlgae();
-    //         ARM.setStowed();
-    //     }
-    // }
-
     public void zeroClimber() {
-        climbMotor.setPosition(0);
+        io.zeroPosition();
         climberOffset = 0;
     }
 
     public void stop() {
-        climbMotor.set(0);
+        io.setSpeed(0);
     }
 
     public void updateClimStateString() {
@@ -119,33 +76,37 @@ public class Climber extends SubsystemBase {
     }
 
     public void retractClimber() {
-        climbMotor.setControl(new PositionVoltage(-290 + climberOffset)); // -230 // -150 // -270
+        io.runPosition(-290 + climberOffset);
     }
 
     public void climberDown() {
-        climbMotor.set(-0.8);
+        io.setSpeed(-0.8);
     }
 
     public void climberUp() {
-        climbMotor.set(0.8);
+        io.setSpeed(0.8);
     }
 
     public void deployClimber() {
-        climbMotor.setControl(new PositionVoltage(0 + climberOffset));
+        io.runPosition(0 + climberOffset);
     }
 
     public void climbClimber() {
-        climbMotor.setControl(new PositionVoltage(-195 + climberOffset));
+        io.runPosition(-195 + climberOffset);
     }
 
     public void incrementClimbState() {
         climbState = Math.min(2, climbState + 1);
-        // prepClimber();
         setClimbPosition();
     }
 
     public void decrementClimbState() {
         climbState = Math.max(0, climbState - 1);
         setClimbPosition();
+    }
+
+    public double getAngleRads() {
+        return Units.rotationsToRadians(inputs.positionRots / ClimbConstants.GEAR_RATIO)
+                + ClimbConstants.STARTING_ANGLE;
     }
 }

@@ -10,10 +10,10 @@ import frc.robot.subsystems.climber.Climber;
 // Command to run the roller with joystick inputs
 public class ClimbCommand extends Command {
     // private final CANRollerSubsystem rollerSubsystem;
-    private Climber climber = Climber.getInstance();
+    private Climber climber;
 
-    public ClimbCommand() {
-
+    public ClimbCommand(Climber climber) {
+        this.climber = climber;
         addRequirements(climber);
     }
 
