@@ -18,6 +18,8 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 
 /** Add your docs here. */
 public class AutoAlign {

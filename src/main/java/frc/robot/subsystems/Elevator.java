@@ -21,6 +21,7 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
+import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
 
 public class Elevator extends SubsystemBase {
@@ -233,9 +234,9 @@ public class Elevator extends SubsystemBase {
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 if (isAligning) {
-                    // setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
-                    // setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
-                    setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                    setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
+                    //setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
+                    //setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
 
                 } else {
                     if (DriverStation.isAutonomous()) {

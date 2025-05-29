@@ -20,6 +20,7 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
 
 public class Arm extends SubsystemBase {
@@ -160,8 +161,8 @@ public class Arm extends SubsystemBase {
                 setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
             } else if (armMode == ArmMode.L4) {
                 if (isAligning) {
-                    // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                    setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
+                    setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
+                    // setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
 
                 } else {
                     setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
