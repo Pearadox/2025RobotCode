@@ -160,6 +160,10 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L3) {
                 setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
             } else if (armMode == ArmMode.L4) {
+                setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
+
+                // Commented as of 5/31/25 to test with IK
+                /*
                 if (isAligning) {
                     setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
                     // setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
@@ -167,6 +171,7 @@ public class Arm extends SubsystemBase {
                 } else {
                     setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
                 }
+                */
             }
         } else if (!isCoral) {
             if (armMode == ArmMode.Stowed) {

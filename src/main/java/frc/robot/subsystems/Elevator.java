@@ -233,6 +233,16 @@ public class Elevator extends SubsystemBase {
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
+
+                if (DriverStation.isAutonomous()) {
+                    setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset - 0.4;
+                } else {
+                    setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
+                }
+
+                // Commented as of 5/31/25 for IK testing
+
+                /*
                 if (isAligning) {
                     setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
                     //setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
@@ -245,6 +255,7 @@ public class Elevator extends SubsystemBase {
                         setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
                     }
                 }
+                */
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {

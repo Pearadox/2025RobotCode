@@ -10,6 +10,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
@@ -18,8 +20,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
-import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ElevatorConstants;
 
 /** Add your docs here. */
 public class AutoAlign {
@@ -324,52 +324,52 @@ public class AutoAlign {
         return isAligned;
     }
 
-    // Code after this line is untested (IK stuff)
-    
-     private double getArmAngleRads() {
-         Logger.recordOutput("Align/Math/tz", horizDisplacement);
-         double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
-         Logger.recordOutput("Align/Math/deltaX", deltaX);
-         return Math.acos(deltaX / AlignConstants.PIVOT_TO_CORAL_RADIUS);
-     }
+    // Code after this line is untested (IK stuff), subject to change
 
-     public double getArmAngleRots() {
-         double armAngleRads = getArmAngleRads();
-         double armAngleRots;
-         if (Double.isNaN(armAngleRads)) {
-             armAngleRots = ArmConstants.ARM_L4_BEHIND_CORAL;
-         } else {
-             armAngleRots = Units.radiansToRotations(armAngleRads
-                             + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET
-                             - AlignConstants.ARM_STARTING_ANGLE)
-                     * ArmConstants.ARM_GEAR_RATIO;
-         }
-         Logger.recordOutput("Align/Math/Arm Rads from x-axis", armAngleRads);
-         Logger.recordOutput("Align/Math/Arm Degs from x-axis", Units.radiansToDegrees(armAngleRads));
-         Logger.recordOutput("Align/Math/Arm Rots", armAngleRots);
-         return armAngleRots;
-     }
+    private double getArmAngleRads() {
+        Logger.recordOutput("Align/Math/tz", horizDisplacement);
+        double deltaX = Math.abs(horizDisplacement) + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG;
+        Logger.recordOutput("Align/Math/deltaX", deltaX);
+        return Math.acos(deltaX / AlignConstants.PIVOT_TO_CORAL_RADIUS);
+    }
 
-     private double getElevatorHeightMeters() {
-         double armAngleRads = getArmAngleRads();
-         if (Double.isNaN(armAngleRads)) {
-             return Double.NaN;
-         } else {
-             return AlignConstants.L4_HEIGHT - AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(armAngleRads);
-         }
-     }
+    public double getArmAngleRots() {
+        double armAngleRads = getArmAngleRads();
+        double armAngleRots;
+        if (Double.isNaN(armAngleRads)) {
+            armAngleRots = ArmConstants.ARM_L4_BEHIND_CORAL;
+        } else {
+            armAngleRots = Units.radiansToRotations(armAngleRads
+                            + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET
+                            - AlignConstants.ARM_STARTING_ANGLE)
+                    * ArmConstants.ARM_GEAR_RATIO;
+        }
+        Logger.recordOutput("Align/Math/Arm Rads from x-axis", armAngleRads);
+        Logger.recordOutput("Align/Math/Arm Degs from x-axis", Units.radiansToDegrees(armAngleRads));
+        Logger.recordOutput("Align/Math/Arm Rots", armAngleRots);
+        return armAngleRots;
+    }
 
-     public double getElevatorHeightRots() {
-         double heightMeters = getElevatorHeightMeters();
-         if (Double.isNaN(heightMeters)) {
-             return ElevatorConstants.BARGE_ROT;
-         }
+    private double getElevatorHeightMeters() {
+        double armAngleRads = getArmAngleRads();
+        if (Double.isNaN(armAngleRads)) {
+            return Double.NaN;
+        } else {
+            return AlignConstants.L4_HEIGHT - AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(armAngleRads);
+        }
+    }
 
-         double height = Units.metersToInches(heightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT);
-         double rots = height * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+    public double getElevatorHeightRots() {
+        double heightMeters = getElevatorHeightMeters();
+        if (Double.isNaN(heightMeters)) {
+            return ElevatorConstants.LEVEL_FOUR_ROT;
+        }
 
-         Logger.recordOutput("Align/Math/Elev Height (m)", height);
-         Logger.recordOutput("Align/Math/Elev Rots", rots);
-         return rots;
+        double height = Units.metersToInches(heightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT);
+        double rots = height * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+
+        Logger.recordOutput("Align/Math/Elev Height (m)", height);
+        Logger.recordOutput("Align/Math/Elev Rots", rots);
+        return rots;
     }
 }
