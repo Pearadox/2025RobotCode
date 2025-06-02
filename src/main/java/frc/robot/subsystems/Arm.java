@@ -19,7 +19,9 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
 
@@ -156,11 +158,17 @@ public class Arm extends SubsystemBase {
                     setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
                 }
             } else if (armMode == ArmMode.L2) {
-                setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
+                // setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_TWO_HEIGHT) + armAdjust;
+
             } else if (armMode == ArmMode.L3) {
-                setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
+                // setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_THREE_HEIGHT) + armAdjust;
+
             } else if (armMode == ArmMode.L4) {
-                setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
+                // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_FOUR_HEIGHT) + armAdjust;
+
 
                 // Commented as of 5/31/25 to test with IK
                 /*

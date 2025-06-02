@@ -115,6 +115,8 @@ public class Constants {
         public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
         // from the arm's pivot point to floor
         public static final double ELEVATOR_STARTING_HEIGHT = Units.inchesToMeters(39);
+
+        public static final double CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED = Units.inchesToMeters(12); //PLACEHOLDER
     }
 
     public static final class ElevatorConstants {

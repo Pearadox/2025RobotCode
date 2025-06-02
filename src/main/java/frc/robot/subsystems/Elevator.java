@@ -19,6 +19,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.RobotContainer;
@@ -228,16 +229,21 @@ public class Elevator extends SubsystemBase {
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-                setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+                //setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_TWO_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED);
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-                setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+                //setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_THREE_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED);
+                
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
 
                 if (DriverStation.isAutonomous()) {
-                    setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset - 0.4;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED)
+                        + elevatorOffset - 0.4;
                 } else {
-                    setpoint = RobotContainer.align.getElevatorHeightRots() + elevatorOffset;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED)
+                         + elevatorOffset;
                 }
 
                 // Commented as of 5/31/25 for IK testing
