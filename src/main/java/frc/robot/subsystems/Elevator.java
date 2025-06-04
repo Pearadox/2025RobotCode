@@ -230,19 +230,19 @@ public class Elevator extends SubsystemBase {
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
                 //setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
-                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_TWO_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED);
+                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_TWO_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED);
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 //setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
-                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_THREE_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED);
+                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_THREE_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED);
                 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
 
                 if (DriverStation.isAutonomous()) {
-                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED)
+                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
                         + elevatorOffset - 0.4;
                 } else {
-                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED)
+                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
                          + elevatorOffset;
                 }
 

@@ -158,7 +158,7 @@ public class RobotContainer {
 
         reefAlignCenter_PovDown.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
                 .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                                arm.getTZForArmSpacing(arm), align.getReefAlignTag(), VisionConstants.LL_NAME)
                         * MaxSpeed)
                 .withVelocityY(align.getAlignStrafeSpeedPercent(
                                 AlignConstants.REEF_ALIGN_MID_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
@@ -168,7 +168,7 @@ public class RobotContainer {
 
         reefAlignLeft_PovLeft.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
                 .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                                arm.getTZForArmSpacing(arm), align.getReefAlignTag(), VisionConstants.LL_NAME)
                         * MaxSpeed)
                 .withVelocityY(align.getAlignStrafeSpeedPercent(
                                 AlignConstants.REEF_ALIGN_LEFT_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
@@ -179,7 +179,7 @@ public class RobotContainer {
         reefAlignRight_PovRight.whileTrue(
                 drivetrain.applyRequest(() -> robotOrientedDrive
                         .withVelocityX(align.getAlignForwardSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
+                                        arm.getTZForArmSpacing(arm), align.getReefAlignTag(), VisionConstants.LL_NAME)
                                 * MaxSpeed)
                         .withVelocityY(align.getAlignStrafeSpeedPercent(
                                         AlignConstants.REEF_ALIGN_RIGHT_TX,

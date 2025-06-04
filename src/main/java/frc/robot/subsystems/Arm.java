@@ -159,15 +159,15 @@ public class Arm extends SubsystemBase {
                 }
             } else if (armMode == ArmMode.L2) {
                 // setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_TWO_HEIGHT) + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_TWO_HEIGHT) + armAdjust;
 
             } else if (armMode == ArmMode.L3) {
                 // setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_THREE_HEIGHT) + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_THREE_HEIGHT) + armAdjust;
 
             } else if (armMode == ArmMode.L4) {
                 // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.CENTER_TO_APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_FOUR_HEIGHT) + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_FOUR_HEIGHT) + armAdjust;
 
 
                 // Commented as of 5/31/25 to test with IK
@@ -279,4 +279,21 @@ public class Arm extends SubsystemBase {
     //     return Math.acos((dist + ArmConstants.ARM_LENGTH * Math.cos(0)) / ArmConstants.ARM_LENGTH); //TODO Current
     // Angle Setpoint
     // }
+
+
+    // IK stuff - roger
+    public double getTZForArmSpacing(Arm arm) {
+        ArmMode armMode = arm.getArmMode();
+
+        switch (armMode) {
+            case L2:
+                return AlignConstants.SPACING_TZ;
+            case L3:
+                return AlignConstants.SPACING_TZ;
+            case L4:
+                return 0.0;
+            default:
+                return 0.0;
+        }
+    }
 }
