@@ -6,7 +6,7 @@ package frc.robot;
 
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
-import frc.robot.subsystems.elevator.MechVisualizer;
+// import frc.robot.subsystems.elevator.MechVisualizer;
 import org.littletonrobotics.junction.LogFileUtil;
 import org.littletonrobotics.junction.LoggedRobot;
 import org.littletonrobotics.junction.Logger;
@@ -52,12 +52,12 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
-        RobotContainer.poseEstimation.periodic(0);
+        // RobotContainer.poseEstimation.periodic(0);
     }
 
     @Override
     public void disabledInit() {
-        m_robotContainer.resetSimulation();
+        // m_robotContainer.resetSimulation();
     }
 
     @Override
@@ -108,7 +108,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void simulationPeriodic() {
         // ProjectileIntakeSim.getInstance().periodic();
-        MechVisualizer.getInstance().periodic();
-        m_robotContainer.displaySimFieldToAdvantageScope();
+        // MechVisualizer.getInstance().periodic();
+        // m_robotContainer.displaySimFieldToAdvantageScope();
     }
 }
