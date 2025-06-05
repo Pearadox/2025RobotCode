@@ -112,15 +112,18 @@ public class Constants {
         public static final double PIVOT_TO_CORAL_RADIUS = Units.inchesToMeters(23.4106654653);
         public static final double ARM_TO_CORAL_ANGULAR_OFFSET = Units.degreesToRadians(34.8693502919);
 
-        public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
+        public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-84);
         // from the arm's pivot point to floor
         public static final double ELEVATOR_STARTING_HEIGHT = Units.inchesToMeters(39);
 
-        public static final double APRILTAG_DISTANCE_WHEN_ALIGNED = Units.inchesToMeters(12); //PLACEHOLDER
-        public static final double APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING = Units.inchesToMeters(12); //PLACEHOLDER
+        public static final double ELAVATOR_L4_HEIGHT_REAL = Units.inchesToMeters(72);
+        public static final double ELAVATOR_L3_HEIGHT_REAL = Units.inchesToMeters(48);
+        public static final double ELAVATOR_L2_HEIGHT_REAL = Units.inchesToMeters(32);
 
-        public static final double SPACING_TZ = 1.0; //PLACEHOLDER
+        public static final double APRILTAG_DISTANCE_WHEN_ALIGNED = Units.inchesToMeters(17.75); // PLACEHOLDER
+        public static final double APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING = Units.inchesToMeters(19.75); // PLACEHOLDER
 
+        public static final double SPACING_TZ = Units.inchesToMeters(2); // PLACEHOLDER
     }
 
     public static final class ElevatorConstants {

@@ -21,7 +21,6 @@ import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.ElevatorConstants;
 import frc.robot.RobotContainer;
 import frc.robot.util.SmarterDashboard;
 
@@ -159,16 +158,23 @@ public class Arm extends SubsystemBase {
                 }
             } else if (armMode == ArmMode.L2) {
                 // setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_TWO_HEIGHT) + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING,
+                                AlignConstants.ELAVATOR_L2_HEIGHT_REAL)
+                        + armAdjust;
 
             } else if (armMode == ArmMode.L3) {
                 // setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_THREE_HEIGHT) + armAdjust;
+                setpoint = RobotContainer.align.getArmAngleRots(
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING,
+                                AlignConstants.ELAVATOR_L3_HEIGHT_REAL)
+                        + armAdjust;
 
             } else if (armMode == ArmMode.L4) {
                 // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, ElevatorConstants.LEVEL_FOUR_HEIGHT) + armAdjust;
-
+                setpoint = RobotContainer.align.getArmAngleRots(
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, AlignConstants.ELAVATOR_L4_HEIGHT_REAL)
+                        + armAdjust;
 
                 // Commented as of 5/31/25 to test with IK
                 /*
@@ -279,21 +285,4 @@ public class Arm extends SubsystemBase {
     //     return Math.acos((dist + ArmConstants.ARM_LENGTH * Math.cos(0)) / ArmConstants.ARM_LENGTH); //TODO Current
     // Angle Setpoint
     // }
-
-
-    // IK stuff - roger
-    public double getTZForArmSpacing(Arm arm) {
-        ArmMode armMode = arm.getArmMode();
-
-        switch (armMode) {
-            case L2:
-                return AlignConstants.SPACING_TZ;
-            case L3:
-                return AlignConstants.SPACING_TZ;
-            case L4:
-                return 0.0;
-            default:
-                return 0.0;
-        }
-    }
 }

@@ -229,21 +229,28 @@ public class Elevator extends SubsystemBase {
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-                //setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
-                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_TWO_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED);
+                // setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+                setpoint = RobotContainer.align.getElevatorHeightRots(
+                        AlignConstants.ELAVATOR_L2_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-                //setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
-                setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_THREE_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED);
-                
+                // setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+                setpoint = RobotContainer.align.getElevatorHeightRots(
+                        AlignConstants.ELAVATOR_L3_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
+
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
 
                 if (DriverStation.isAutonomous()) {
-                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
-                        + elevatorOffset - 0.4;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(
+                                    AlignConstants.ELAVATOR_L4_HEIGHT_REAL,
+                                    AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
+                            + elevatorOffset
+                            - 0.4;
                 } else {
-                    setpoint = RobotContainer.align.getElevatorHeightRots(ElevatorConstants.LEVEL_FOUR_HEIGHT, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
-                         + elevatorOffset;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(
+                                    AlignConstants.ELAVATOR_L4_HEIGHT_REAL,
+                                    AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
+                            + elevatorOffset;
                 }
 
                 // Commented as of 5/31/25 for IK testing
