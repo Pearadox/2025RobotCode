@@ -70,20 +70,20 @@ public class RobotContainer {
                         new VisionIOLimelight(camera1Name, drive::getRotation));
                 break;
 
-        //     case SIM:
-        //         // Sim robot, instantiate physics sim IO implementations
-        //         drive = new Drive(
-        //                 new GyroIO() {},
-        //                 new ModuleIOSim(TunerConstants.FrontLeft),
-        //                 new ModuleIOSim(TunerConstants.FrontRight),
-        //                 new ModuleIOSim(TunerConstants.BackLeft),
-        //                 new ModuleIOSim(TunerConstants.BackRight));
+            case SIM:
+                // Sim robot, instantiate physics sim IO implementations
+                drive = new Drive(
+                        new GyroIO() {},
+                        new ModuleIOSim(TunerConstants.FrontLeft),
+                        new ModuleIOSim(TunerConstants.FrontRight),
+                        new ModuleIOSim(TunerConstants.BackLeft),
+                        new ModuleIOSim(TunerConstants.BackRight));
 
-        //         vision = new Vision(
-        //                 drive::addVisionMeasurement,
-        //                 new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
-        //                 new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
-        //         break;
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOPhotonVisionSim(camera0Name, robotToCamera0, drive::getPose),
+                        new VisionIOPhotonVisionSim(camera1Name, robotToCamera1, drive::getPose));
+                break;
 
             default:
                 // Replayed robot, disable IO implementations
@@ -140,6 +140,7 @@ public class RobotContainer {
                                 () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())),
                                 drive)
                         .ignoringDisable(true));
+
     }
 
     /**
