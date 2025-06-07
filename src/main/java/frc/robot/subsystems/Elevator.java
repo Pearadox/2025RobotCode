@@ -231,25 +231,23 @@ public class Elevator extends SubsystemBase {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
                 // setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
                 setpoint = RobotContainer.align.getElevatorHeightRots(
-                        AlignConstants.ELAVATOR_L2_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
+                        AlignConstants.L2_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 // setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
                 setpoint = RobotContainer.align.getElevatorHeightRots(
-                        AlignConstants.ELAVATOR_L3_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
+                        AlignConstants.L3_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING);
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
 
                 if (DriverStation.isAutonomous()) {
                     setpoint = RobotContainer.align.getElevatorHeightRots(
-                                    AlignConstants.ELAVATOR_L4_HEIGHT_REAL,
-                                    AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
+                                    AlignConstants.L4_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
                             + elevatorOffset
                             - 0.4;
                 } else {
                     setpoint = RobotContainer.align.getElevatorHeightRots(
-                                    AlignConstants.ELAVATOR_L4_HEIGHT_REAL,
-                                    AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
+                                    AlignConstants.L4_HEIGHT_REAL, AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED)
                             + elevatorOffset;
                 }
 
@@ -292,6 +290,8 @@ public class Elevator extends SubsystemBase {
         //   default: setpoint = Math.max(lowest_rot, Math.min((ElevatorConstants.STOWED_ROT + elevatorOffset),
         // highest_rot));
         // }
+
+        setpoint = Math.max(setpoint, 0.0);
 
         isLowering = elevator.getPosition().getValueAsDouble() > setpoint;
 

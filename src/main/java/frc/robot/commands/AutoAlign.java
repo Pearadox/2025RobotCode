@@ -383,12 +383,7 @@ public class AutoAlign {
                         - Math.pow(branchX + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG, 2));
 
         if (Double.isNaN(elevatorHeightMeters)) {
-            return -1;
-        }
-
-        if (elevatorHeightMeters < 0) {
-            return (elevatorHeightMeters
-                    + (2 * AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(getArmAngleRads(branchX, branchY))));
+            return Double.NaN;
         }
 
         return elevatorHeightMeters;
@@ -396,19 +391,22 @@ public class AutoAlign {
 
     public double getElevatorHeightRots(double branchY, double branchX) {
         double elevatorHeightMeters = getElevatorHeightMeters(branchY, branchX);
-        Logger.recordOutput("Elevator Height Meters", elevatorHeightMeters);
+        Logger.recordOutput("Elevator/AlignElevatorHeight", elevatorHeightMeters);
+        Logger.recordOutput("Elevator/AlignElevatorIsNaN", Double.isNaN(elevatorHeightMeters));
         double rots = 0;
 
-        if (elevatorHeightMeters == -1) {
+        if (Double.isNaN(elevatorHeightMeters)) {
             return ElevatorConstants.LEVEL_FOUR_ROT;
+        }
+
+        if (RobotContainer.arm.getArmMode() == ArmMode.L2) {
+            elevatorHeightMeters = elevatorHeightMeters
+                    + 2 * AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(getArmAngleRads(branchX, branchY));
         }
 
         rots = Units.metersToInches(elevatorHeightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT)
                 * ElevatorConstants.GEAR_RATIO
                 / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
-        if (rots < 0) {
-            return -1;
-        }
 
         return rots;
     }
@@ -417,14 +415,8 @@ public class AutoAlign {
         double armAngle = Math.acos(
                 (branchX + AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG) / AlignConstants.PIVOT_TO_CORAL_RADIUS);
 
-        double elevatorHeightMeters = getElevatorHeightMeters(branchX, branchY);
-
         if (Double.isNaN(armAngle)) {
-            return -1;
-        }
-
-        if (elevatorHeightMeters < 0) {
-            return armAngle - (2 * armAngle);
+            return Double.NaN;
         }
 
         return armAngle;
@@ -432,16 +424,25 @@ public class AutoAlign {
 
     public double getArmAngleRots(double branchX, double branchY) {
         double armAngleRads = getArmAngleRads(branchX, branchY);
-        Logger.recordOutput("Arm/AlignDegrees", Units.radiansToDegrees(armAngleRads));
+        Logger.recordOutput(
+                "Arm/AlignDegreesFromHorizontal",
+                Units.radiansToDegrees(armAngleRads + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET));
+        Logger.recordOutput("Arm/AlignIsNaN", Double.isNaN(armAngleRads));
         double rots = 0;
 
-        if (armAngleRads == -1) {
+        if (Double.isNaN(armAngleRads)) {
             return ArmConstants.ARM_LEVEL_4_ROT;
         }
 
-        rots = Units.radiansToRotations(
-                        (armAngleRads - AlignConstants.ARM_STARTING_ANGLE + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET))
+        if (RobotContainer.arm.getArmMode() == ArmMode.L2) {
+            armAngleRads = armAngleRads - 2 * armAngleRads;
+        }
+
+        rots = Units.radiansToRotations((armAngleRads
+                        + (-1 * AlignConstants.ARM_STARTING_ANGLE)
+                        + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET))
                 * ArmConstants.ARM_GEAR_RATIO;
+
         return rots;
     }
 
@@ -453,7 +454,7 @@ public class AutoAlign {
             case L2:
                 return AlignConstants.SPACING_TZ;
             case L3:
-                return AlignConstants.SPACING_TZ;
+                return 0.0;
             case L4:
                 return 0.0;
             default:

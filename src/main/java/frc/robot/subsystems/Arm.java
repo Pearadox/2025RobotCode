@@ -159,21 +159,19 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L2) {
                 // setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
                 setpoint = RobotContainer.align.getArmAngleRots(
-                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING,
-                                AlignConstants.ELAVATOR_L2_HEIGHT_REAL)
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING, AlignConstants.L2_HEIGHT_REAL)
                         + armAdjust;
 
             } else if (armMode == ArmMode.L3) {
                 // setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
                 setpoint = RobotContainer.align.getArmAngleRots(
-                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING,
-                                AlignConstants.ELAVATOR_L3_HEIGHT_REAL)
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED_SPACING, AlignConstants.L3_HEIGHT_REAL)
                         + armAdjust;
 
             } else if (armMode == ArmMode.L4) {
                 // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
                 setpoint = RobotContainer.align.getArmAngleRots(
-                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, AlignConstants.ELAVATOR_L4_HEIGHT_REAL)
+                                AlignConstants.APRILTAG_DISTANCE_WHEN_ALIGNED, AlignConstants.L4_HEIGHT_REAL)
                         + armAdjust;
 
                 // Commented as of 5/31/25 to test with IK
