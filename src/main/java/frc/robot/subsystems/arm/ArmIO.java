@@ -1,10 +1,10 @@
-package frc.robot.subsystems.endeffector;
+package frc.robot.subsystems.arm;
 
 import org.littletonrobotics.junction.AutoLog;
 
-public interface EndEffectorIO {
+public interface ArmIO {
     @AutoLog
-    public static class EndEffectorIOInputs {
+    public static class ArmIOInputs {
         public double positionRots = 0.0;
         public double velocityRps = 0.0;
 
@@ -14,7 +14,7 @@ public interface EndEffectorIO {
         public double supplyCurrent = 0.0;
     }
 
-    public default void updateInputs(EndEffectorIOInputs inputs) {}
+    public default void updateInputs(ArmIOInputsAutoLogged inputs) {}
 
-    public default void setSpeed(double speed) {}
+    public default void runPosition(double setpoint, double feedforward) {}
 }
