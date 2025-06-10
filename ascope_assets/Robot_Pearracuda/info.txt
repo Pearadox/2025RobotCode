@@ -1,0 +1,6 @@
+model.glb   = base + stationary portions of subsystems
+model_0.glb = elevator stage 1
+model_1.glb = arm
+model_2.glb = climber
+
+Learn more here: https://docs.advantagescope.org/more-features/custom-assets/
