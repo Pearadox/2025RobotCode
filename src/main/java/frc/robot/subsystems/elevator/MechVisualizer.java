@@ -35,6 +35,7 @@ public class MechVisualizer {
             3,
             new Color8Bit(Color.kLightSteelBlue)));
 
+    // End effector segments (derived from CAD)
     private LoggedMechanismLigament2d ee23a = arm.append(new LoggedMechanismLigament2d(
             "EE23a", Units.inchesToMeters(5.6102), 180 - 109.295, 7, new Color8Bit(Color.kDarkSeaGreen)));
     private LoggedMechanismLigament2d ee34a = ee23a.append(new LoggedMechanismLigament2d(
@@ -53,25 +54,10 @@ public class MechVisualizer {
     private LoggedMechanismLigament2d ee45b2 = ee45b1.append(new LoggedMechanismLigament2d(
             "EE45b2", Units.inchesToMeters(5.1181 / 2), 0, 7, new Color8Bit(Color.kSkyBlue)));
 
-    // private LoggedMechanismLigament2d coral1 = ee45b1.append(new LoggedMechanismLigament2d(
-    //         "CORAL1", SimulationConstants.CORAL_LENGTH / 2, 90, 10, new Color8Bit(Color.kPapayaWhip)));
-    // private LoggedMechanismLigament2d coral2 = ee45b1.append(new LoggedMechanismLigament2d(
-    //         "CORAL2", SimulationConstants.CORAL_LENGTH / 2, -90, 10, new Color8Bit(Color.kAntiqueWhite)));
-
     private LoggedMechanismLigament2d coral1a = ee45a1.append(new LoggedMechanismLigament2d(
             "CORAL1a", SimulationConstants.CORAL_LENGTH / 2.0, 90, 8, new Color8Bit(Color.kPapayaWhip)));
     private LoggedMechanismLigament2d coral2a = ee45a1.append(new LoggedMechanismLigament2d(
             "CORAL2a", SimulationConstants.CORAL_LENGTH / 2.0, -90, 8, new Color8Bit(Color.kAntiqueWhite)));
-
-    // private LoggedMechanismLigament2d coral3 = coral2.append(new LoggedMechanismLigament2d(
-    //         "CORAL3", Units.inchesToMeters(23.4106654653), 180 - 278.855350292, 1, new Color8Bit(Color.kCyan)));
-    // private LoggedMechanismLigament2d coral4 = ee45b1.append(new LoggedMechanismLigament2d(
-    //         "CORAL4", Units.inchesToMeters(23.249031544), 180 - 354.239159727, 1, new Color8Bit(Color.kRed)));
-
-    // private LoggedMechanismLigament2d coral3a = coral1a.append(new LoggedMechanismLigament2d(
-    //         "CORAL3a", Units.inchesToMeters(23.4106654653), 180 + 278.855350292, 1, new Color8Bit(Color.kCyan)));
-    // private LoggedMechanismLigament2d coral4a = ee45a1.append(new LoggedMechanismLigament2d(
-    //         "CORAL4a", Units.inchesToMeters(23.249031544), 180 + 354.239159727, 1, new Color8Bit(Color.kRed)));
 
     private double heightMeters = 0.0;
     private double armAngleRads = 0.0;
@@ -89,8 +75,6 @@ public class MechVisualizer {
         SmartDashboard.putData("Elevator Sim", mech2d);
         Logger.recordOutput("FieldSimulation/Mechanism Visualizer", mech2d);
 
-        // double climberRoll = 0; // Math.sin(System.currentTimeMillis() / 1000.0) * Math.PI * 2;
-
         Logger.recordOutput("FieldSimulation/Components", new Transform3d[] {
             new Transform3d(0, 0, heightMeters, new Rotation3d()),
             new Transform3d(
@@ -102,7 +86,7 @@ public class MechVisualizer {
                     0,
                     SimulationConstants.CLIMBER_CAD_ZERO_Y,
                     SimulationConstants.CLIMBER_CAD_ZERO_Z,
-                    new Rotation3d(-climbAngRads, 0, 0))
+                    new Rotation3d(-climbAngRads + SimulationConstants.CLIMBER_CAD_ANG_OFFSET, 0, 0))
         });
     }
 
@@ -118,6 +102,6 @@ public class MechVisualizer {
 
     public void updateClimberRoll(double angleRads) {
         this.climbAngRads = angleRads;
-        climber.setAngle(Units.radiansToDegrees(climbAngRads));
+        climber.setAngle(180 - Units.radiansToDegrees(climbAngRads));
     }
 }

@@ -13,7 +13,7 @@ public class Climber extends SubsystemBase {
     private double climberOffset = 0;
 
     @AutoLogOutput
-    private int climbState = 1;
+    private int climbState = 0;
 
     @AutoLogOutput
     private String climbStateString = "unpowered";
@@ -30,12 +30,12 @@ public class Climber extends SubsystemBase {
         io.updateInputs(inputs);
         Logger.processInputs("Climber", inputs);
 
+        MechVisualizer.getInstance().updateClimberRoll(getAngleRads());
+
         updateClimStateString();
 
         SmarterDashboard.putNumber("Climber/State", climbState);
         SmarterDashboard.putString("Climber/StateStr", climbStateString);
-
-        MechVisualizer.getInstance().updateClimberRoll(getAngleRads());
     }
 
     public void climberAdjustUp() {
@@ -106,7 +106,6 @@ public class Climber extends SubsystemBase {
     }
 
     public double getAngleRads() {
-        return Units.rotationsToRadians(inputs.positionRots / ClimbConstants.GEAR_RATIO)
-                + ClimbConstants.STARTING_ANGLE;
+        return Units.rotationsToRadians(inputs.positionRots / ClimbConstants.GEAR_RATIO) + ClimbConstants.ZERO_ANGLE;
     }
 }

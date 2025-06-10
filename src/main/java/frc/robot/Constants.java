@@ -303,10 +303,11 @@ public class Constants {
         public static final double CLIMBER_LENGTH = Units.inchesToMeters(8);
         public static final double MASS_KG = Units.lbsToKilograms(3);
         public static final double MOI = MASS_KG * CLIMBER_LENGTH * CLIMBER_LENGTH; // most of the mass is the barb
-        public static final double GEAR_RATIO = 100;
-        public static final double MIN_ANGLE = Units.degreesToRadians(90);
-        public static final double MAX_ANGLE = Units.degreesToRadians(180);
+        public static final double GEAR_RATIO = 290.0 * 4.0;
+        public static final double MIN_ANGLE = Units.degreesToRadians(0);
+        public static final double MAX_ANGLE = Units.degreesToRadians(90);
         public static final double STARTING_ANGLE = MIN_ANGLE;
+        public static final double ZERO_ANGLE = MAX_ANGLE;
     }
 
     public static final class IntakeConstants {
@@ -401,5 +402,6 @@ public class Constants {
         public static final double ARM_CAD_ZERO_Z = AlignConstants.ELEVATOR_STARTING_HEIGHT;
         public static final double CLIMBER_CAD_ZERO_Y = Units.inchesToMeters(13.5);
         public static final double CLIMBER_CAD_ZERO_Z = Units.inchesToMeters(9);
+        public static final double CLIMBER_CAD_ANG_OFFSET = Units.degreesToRadians(65);
     }
 }

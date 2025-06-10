@@ -6,7 +6,6 @@ import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
 import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -161,8 +160,6 @@ public class RobotContainer {
         autoChooser = AutoBuilder.buildAutoChooser("2B_IJ-CS-KL-CS-KL");
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
-
-        PathfindingCommand.warmupCommand().schedule();
 
         // Event Markers
         new EventTrigger("LevelStation")

@@ -29,7 +29,7 @@ public class ClimberIOSim extends ClimberIOReal {
         climberSim.update(0.02);
 
         climberSimState.setRawRotorPosition(
-                Units.radiansToRotations(climberSim.getAngleRads() - ClimbConstants.STARTING_ANGLE)
+                Units.radiansToRotations(climberSim.getAngleRads() - ClimbConstants.ZERO_ANGLE)
                         * ClimbConstants.GEAR_RATIO);
 
         climberSimState.setRotorVelocity(
