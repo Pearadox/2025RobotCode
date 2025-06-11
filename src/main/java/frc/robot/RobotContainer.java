@@ -18,12 +18,15 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 import com.pathplanner.lib.auto.AutoBuilder;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.GenericHID;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.button.CommandXboxController;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
+import frc.robot.Constants.AlignConstants;
+import frc.robot.commands.AutoAlign;
 import frc.robot.commands.DriveCommands;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.drive.Drive;
@@ -46,6 +49,7 @@ public class RobotContainer {
     // Subsystems
     private final Vision vision;
     private final Drive drive;
+    public static AutoAlign align;
 
     // Controller
     private final CommandXboxController controller = new CommandXboxController(0);
@@ -110,6 +114,8 @@ public class RobotContainer {
         autoChooser.addOption("Drive SysId (Dynamic Forward)", drive.sysIdDynamic(SysIdRoutine.Direction.kForward));
         autoChooser.addOption("Drive SysId (Dynamic Reverse)", drive.sysIdDynamic(SysIdRoutine.Direction.kReverse));
 
+        align = new AutoAlign(() -> drive.getPose());
+
         // Configure the button bindings
         configureButtonBindings();
     }
@@ -141,6 +147,42 @@ public class RobotContainer {
                                 drive)
                         .ignoringDisable(true));
 
+        controller
+                .povDown()
+                .whileTrue(DriveCommands.alignCommand(
+                        drive,
+                        () -> align.get_xVelocity(),
+                        () -> align.get_yVelocity(),
+                        () -> align.get_angularVelocity(),
+                        AlignConstants.REEF_ALIGN_MID_TX,
+                        true));
+        controller
+                .povLeft()
+                .whileTrue(DriveCommands.alignCommand(
+                        drive,
+                        () -> align.get_xVelocity(),
+                        () -> align.get_yVelocity(),
+                        () -> align.get_angularVelocity(),
+                        AlignConstants.REEF_ALIGN_LEFT_TX,
+                        true));
+        controller
+                .povRight()
+                .whileTrue(DriveCommands.alignCommand(
+                        drive,
+                        () -> align.get_xVelocity(),
+                        () -> align.get_yVelocity(),
+                        () -> align.get_angularVelocity(),
+                        AlignConstants.REEF_ALIGN_RIGHT_TX,
+                        true));
+        controller
+                .povUp()
+                .whileTrue(DriveCommands.alignCommand(
+                        drive,
+                        () -> align.get_xVelocity(),
+                        () -> align.get_yVelocity(),
+                        () -> align.get_angularVelocity(),
+                        AlignConstants.STATION_ALIGN_TX,
+                        false));
     }
 
     /**
@@ -150,5 +192,13 @@ public class RobotContainer {
      */
     public Command getAutonomousCommand() {
         return autoChooser.get();
+    }
+
+    public static boolean isRedAlliance() {
+        var alliance = DriverStation.getAlliance();
+        if (alliance.isPresent()) {
+            return alliance.get() == DriverStation.Alliance.Red;
+        }
+        return false;
     }
 }
