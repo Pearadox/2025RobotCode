@@ -4,8 +4,6 @@
 
 package frc.robot.subsystems.endeffector;
 
-import edu.wpi.first.math.filter.Debouncer;
-import edu.wpi.first.math.filter.Debouncer.DebounceType;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.EndEffectorConstants;
@@ -16,8 +14,6 @@ import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
-    private Debouncer debouncer;
-
     private boolean isCoral = true;
     private boolean isHoldingCoral = true;
     private boolean isHoldingAlgae = false;
@@ -30,8 +26,6 @@ public class EndEffector extends SubsystemBase {
 
     public EndEffector(EndEffectorIO io) {
         this.io = io;
-
-        debouncer = new Debouncer(0.125, DebounceType.kRising);
 
         SmarterDashboard.putNumber("EE/EE Speed", isCoral ? -0.15 : 0.1);
     }
@@ -131,7 +125,7 @@ public class EndEffector extends SubsystemBase {
     }
 
     public boolean hasCoral() {
-        return debouncer.calculate(inputs.statorCurrent > 30);
+        return inputs.hasCoral;
     }
 
     public boolean getHolding() {

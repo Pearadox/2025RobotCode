@@ -22,14 +22,10 @@ import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.EndEffectorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.SimulationConstants;
-import java.util.ArrayList;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import frc.robot.util.simulation.AlgaeHandler;
 import java.util.function.DoubleSupplier;
 import java.util.function.Supplier;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.gamepieces.GamePieceProjectile;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeAlgaeOnFly;
 import org.ironmaple.simulation.seasonspecific.reefscape2025.ReefscapeCoralOnFly;
 import org.littletonrobotics.junction.Logger;
@@ -44,19 +40,19 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private boolean hasCoral = true;
     private boolean hasAlgae = false;
 
+    // interpolates the game piece position from its original location to the robot
     private Timer intakingTimer = new Timer();
     private static final double INTAKING_TIME = 0.5;
 
     // cooldown between shooting and rerunning the intake
     private Timer shootingTimer = new Timer();
     private static final double SHOOTING_TIME = 1.25;
-    private boolean disableIntake = false;
 
+    // cooldown for dropping coral at the coral station
     private Timer droppingTimer = new Timer();
     private static final double DROP_COOLDOWN = 1.5;
 
     private Pose3d intookGamePiecePrevPose = Pose3d.kZero;
-    private List<Pose3d> stagedAlgae = new ArrayList<>(List.of(FieldConstants.REEF_ALGAE_POSES));
 
     private Supplier<Pose2d> poseSupplier;
     private Supplier<ChassisSpeeds> chassisSpeedsSupplier;
@@ -105,14 +101,16 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
         inputs.appliedVolts = endEffector.getMotorVoltage().getValueAsDouble();
 
-        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble() * (hasCoral || hasAlgae ? 1.0 : 0.1);
+        inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble();
         inputs.supplyCurrent = endEffector.getSupplyCurrent().getValueAsDouble();
 
-        if (inputs.appliedVolts <= -0.5) {
+        inputs.hasCoral = this.hasCoral;
+
+        if (inputs.appliedVolts <= -0.5) { // rollers spinning clockwise
             intakeCoralProjectiles();
             autoDropNearCS();
             shootAlgae();
-        } else if (inputs.appliedVolts >= 0.5) {
+        } else if (inputs.appliedVolts >= 0.5) { // rollers spinning counterclockwise
             shootCoral();
             intakeAlgae();
         }
@@ -128,36 +126,24 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private void intakeCoralProjectiles() {
         // cooldown between shooting and restarting the intake
         // so you don't immediately reintake what you just launched
-        if (shootingTimer.get() > SHOOTING_TIME) {
-            shootingTimer.stop();
-            shootingTimer.reset();
-            disableIntake = false;
-        } else if (shootingTimer.get() > 0) {
-            disableIntake = true;
-        }
+        if (!checkAndResetTimer(shootingTimer, SHOOTING_TIME)) return;
 
-        if (disableIntake || hasCoral) return; // max 1 coral
+        if (hasCoral) return; // max 1 coral
 
         Pose3d intakePose = getHeldCoralPose(); // the end effector is the intake
-        Set<GamePieceProjectile> gamePieceProjectiles =
-                SimulatedArena.getInstance().gamePieceLaunched();
-        Set<GamePieceProjectile> toRemove = new HashSet<>();
 
-        for (GamePieceProjectile gamePiece : gamePieceProjectiles) {
+        var iterator = SimulatedArena.getInstance().gamePieceLaunched().iterator();
+        while (iterator.hasNext()) {
+            var gamePiece = iterator.next();
             if (gamePiece instanceof ReefscapeCoralOnFly) {
                 if (checkTolerance(intakePose.minus(gamePiece.getPose3d()))) {
-                    toRemove.add(gamePiece);
-                    break; // max 1 coral
+                    iterator.remove();
+                    intookGamePiecePrevPose = gamePiece.getPose3d();
+                    hasCoral = true;
+                    intakingTimer.restart();
+                    break;
                 }
             }
-        }
-
-        for (GamePieceProjectile gamePiece : toRemove) {
-            gamePieceProjectiles.remove(gamePiece);
-            intookGamePiecePrevPose = gamePiece.getPose3d();
-            hasCoral = true;
-            intakingTimer.restart();
-            break; // max 1 coral
         }
     }
 
@@ -166,40 +152,22 @@ public class EndEffectorIOSim implements EndEffectorIO {
     }
 
     private void visualizeHeldGamePiece() {
-        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(poseSupplier.get()));
-        Logger.recordOutput("FieldSimulation/Staged Algae", stagedAlgae.toArray(Pose3d[]::new));
+        Logger.recordOutput(
+                "FieldSimulation/Held Coral", hasCoral ? interpolateHeldPose(getHeldCoralPose()) : Pose3d.kZero);
+        Logger.recordOutput(
+                "FieldSimulation/Held Algae", hasAlgae ? interpolateHeldPose(getHeldAlgaePose()) : Pose3d.kZero);
+    }
 
-        if (hasCoral) {
-            if (intakingTimer.isRunning()) {
-                if (intakingTimer.get() > INTAKING_TIME) {
-                    intakingTimer.stop();
-                    intakingTimer.reset();
-                }
-                Logger.recordOutput(
-                        "FieldSimulation/Held Coral",
-                        intookGamePiecePrevPose.interpolate(getHeldCoralPose(), intakingTimer.get() / INTAKING_TIME));
+    private Pose3d interpolateHeldPose(Pose3d targetPose) {
+        if (intakingTimer.isRunning()) {
+            if (intakingTimer.get() > INTAKING_TIME) {
+                intakingTimer.stop();
+                intakingTimer.reset();
             } else {
-                Logger.recordOutput("FieldSimulation/Held Coral", getHeldCoralPose());
+                return intookGamePiecePrevPose.interpolate(targetPose, intakingTimer.get() / INTAKING_TIME);
             }
-        } else {
-            Logger.recordOutput("FieldSimulation/Held Coral", Pose3d.kZero);
         }
-
-        if (hasAlgae) {
-            if (intakingTimer.isRunning()) {
-                if (intakingTimer.get() > INTAKING_TIME) {
-                    intakingTimer.stop();
-                    intakingTimer.reset();
-                }
-                Logger.recordOutput(
-                        "FieldSimulation/Held Algae",
-                        intookGamePiecePrevPose.interpolate(getHeldAlgaePose(), intakingTimer.get() / INTAKING_TIME));
-            } else {
-                Logger.recordOutput("FieldSimulation/Held Algae", getHeldAlgaePose());
-            }
-        } else {
-            Logger.recordOutput("FieldSimulation/Held Algae", Pose3d.kZero);
-        }
+        return targetPose;
     }
 
     private Transform3d getHeldCoralTransform() {
@@ -224,7 +192,6 @@ public class EndEffectorIOSim implements EndEffectorIO {
 
     private void shootCoral() {
         if (!hasCoral) return;
-        // if (shootingTimer.get() > 0) return;
 
         Transform3d eeTransform = getHeldCoralTransform();
 
@@ -246,50 +213,47 @@ public class EndEffectorIOSim implements EndEffectorIO {
                         eeTransform.getRotation().getMeasureAngle().unaryMinus()));
 
         hasCoral = false;
-        disableIntake = true;
         shootingTimer.restart();
     }
 
+    // Drops a coral projectile from the coral station
     private void autoDropNearCS() {
-        if (hasCoral) {
-            return;
-        }
+        // don't drop if the robot has a coral
+        if (hasCoral) return;
 
+        // don't drop if the robot is moving
         ChassisSpeeds speeds = chassisSpeedsSupplier.get();
         if (Math.abs(speeds.vxMetersPerSecond + speeds.vyMetersPerSecond + speeds.omegaRadiansPerSecond) > 0.1) {
             return;
         }
 
+        // don't drop if the robot is too far from the station
         Pose3d eePose = getHeldCoralPose();
         Pose2d nearestCS = eePose.toPose2d().nearest(FieldConstants.CORAL_STATIONS);
         Transform2d diff = eePose.toPose2d().minus(nearestCS);
 
         if (diff.getTranslation().getNorm() > TRANSLATIONAL_TOLERANCE_METERS) return;
 
-        if (droppingTimer.get() > DROP_COOLDOWN) {
-            droppingTimer.stop();
-            droppingTimer.reset();
-        } else if (droppingTimer.get() > 0) {
-            return;
-        }
+        // don't drop if it's been too soon since the last drop
+        if (!checkAndResetTimer(droppingTimer, DROP_COOLDOWN)) return;
 
         droppingTimer.restart();
 
         SimulatedArena.getInstance()
                 .addGamePieceProjectile(new ReefscapeCoralOnFly(
-                        // Obtain robot position from drive simulation
+                        // Coral Station Translation
                         nearestCS.getTranslation(),
-                        // The scoring mechanism is installed at this position on the robot
+                        // No additional offset
                         Translation2d.kZero,
-                        // Obtain robot speed from drive simulation
+                        // No additional velocity (the coral station isn't moving)
                         new ChassisSpeeds(),
-                        // Obtain robot facing from drive simulation
+                        // Coral station yaw
                         nearestCS.getRotation().plus(Rotation2d.k180deg),
                         // The height at which the coral is ejected
                         Meters.of(1),
                         // The initial speed of the coral
                         MetersPerSecond.of(1),
-                        // The coral is ejected at this angle
+                        // The coral is ejected at this angle (the chute's pitch)
                         Degrees.of(-55)));
     }
 
@@ -314,39 +278,28 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private void intakeAlgae() {
         // cooldown between shooting and restarting the intake
         // so you don't immediately reintake what you just launched
-        if (shootingTimer.get() > SHOOTING_TIME) {
-            shootingTimer.stop();
-            shootingTimer.reset();
-            disableIntake = false;
-        } else if (shootingTimer.get() > 0) {
-            disableIntake = true;
-        }
+        // if (shootingTimer.get() > SHOOTING_TIME) {
+        //     shootingTimer.stop();
+        //     shootingTimer.reset();
+        //     disableIntake = false;
+        // } else if (shootingTimer.get() > 0) {
+        //     disableIntake = true;
+        // }
 
-        if (disableIntake || hasAlgae) return; // max 1 algae
+        if (!checkAndResetTimer(shootingTimer, SHOOTING_TIME)) return;
 
-        Pose3d intakePose = getHeldAlgaePose(); // the end effector is the intake
-        Set<Pose3d> toRemove = new HashSet<>();
+        if (hasAlgae) return; // max 1 algae
 
-        for (Pose3d algae : stagedAlgae) {
-            if (checkTolerance(intakePose.minus(algae))) {
-                toRemove.add(algae);
-                break; // max 1 algae
-            }
-        }
-
-        for (Pose3d gamePiece : toRemove) {
-            stagedAlgae.remove(gamePiece);
-            intookGamePiecePrevPose = gamePiece;
+        AlgaeHandler.getInstance().intake(getHeldAlgaePose()).ifPresent(algae -> {
+            intookGamePiecePrevPose =
+                    new Pose3d(algae.getTranslation(), getHeldAlgaePose().getRotation());
             hasAlgae = true;
             intakingTimer.restart();
-            break; // max 1 algae
-        }
+        });
     }
 
     private void shootAlgae() {
         if (!hasAlgae) return;
-        // if (shootingTimer.get() > 0) return;
-
         Transform3d eeTransform = getHeldAlgaeTransform();
 
         SimulatedArena.getInstance()
@@ -367,7 +320,17 @@ public class EndEffectorIOSim implements EndEffectorIO {
                         eeTransform.getRotation().getMeasureAngle().unaryMinus()));
 
         hasAlgae = false;
-        disableIntake = true;
         shootingTimer.restart();
+    }
+
+    private static boolean checkAndResetTimer(Timer timer, double duration) {
+        if (timer.get() > duration) {
+            timer.stop();
+            timer.reset();
+            return true;
+        } else if (timer.get() > 0) {
+            return false;
+        }
+        return true; // Timer not started
     }
 }

@@ -8,6 +8,7 @@ import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
@@ -48,6 +49,7 @@ import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOQuestNavSim;
+import frc.robot.util.simulation.AlgaeHandler;
 import frc.robot.util.simulation.MapleSimSwerveDrivetrain;
 import frc.robot.util.vision.PoseEstimation;
 import org.ironmaple.simulation.SimulatedArena;
@@ -287,18 +289,18 @@ public class RobotContainer {
                 .andThen(new InstantCommand(() -> endEffector.setAlgae())));
 
         climberAdjustUp_PovUp
-                .onTrue(new InstantCommand(() -> {
-                    elevator.setElevatorStowedMode();
-                    arm.setAlgae();
-                    arm.setStowed();
-                }))
                 .whileTrue(new RunCommand(() -> climber.climberUp()))
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberAdjustDown_PovDown
                 .whileTrue(new RunCommand(() -> climber.climberDown()))
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberStateInc_PovLeft.onTrue(new InstantCommand(() -> climber.decrementClimbState()));
-        climberStateDec_PovRight.onTrue(new InstantCommand(() -> climber.incrementClimbState()));
+        climberStateDec_PovRight.onTrue(new InstantCommand(() -> {
+            elevator.setElevatorStowedMode();
+            arm.setAlgae();
+            arm.setStowed();
+            climber.incrementClimbState();
+        }));
 
         elevatorAdjust.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
@@ -499,9 +501,12 @@ public class RobotContainer {
     public void displaySimFieldToAdvantageScope() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
+        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(MapleSimSwerveDrivetrain.getSimulatedPose()));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
         Logger.recordOutput(
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput(
+                "FieldSimulation/Staged Algae", AlgaeHandler.getInstance().periodic());
     }
 }

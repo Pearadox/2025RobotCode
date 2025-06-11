@@ -125,6 +125,12 @@ public class Constants {
                 REEF_ALGAE_POSES[i] = REEF_TAG_POSES[i].plus(i % 2 == 0 ? HIGH_ALGAE_TRANSFORM : LOW_ALGAE_TRANSFORM);
             }
         }
+
+        public static final double BARGE_X = FIELD_LENGTH / 2.0;
+        public static final double BARGE_WIDTH = Units.inchesToMeters(40) / 2.0;
+        public static final double BARGE_HEIGHT = Units.inchesToMeters(74 + 8);
+        public static final double BARGE_HEIGHT_TOLERANCE = Units.inchesToMeters(12);
+        public static final double EE_TOLERANCE = Units.inchesToMeters(16);
     }
 
     public static final class DriveConstants {
