@@ -10,6 +10,7 @@ import frc.robot.RobotContainer;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
+import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class AutoAlign {
@@ -92,10 +93,13 @@ public class AutoAlign {
     public void updateControllerOutputs() {
         Translation2d currentToTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
         distanceError = currentToTarget.getNorm();
-        Rotation2d directionToTarget = currentToTarget.getAngle();
+        Rotation2d directionToTarget = currentToTarget.getAngle().plus(Rotation2d.k180deg);
 
         double translationMagnitude = translationController.calculate(0, distanceError);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
+
+        Logger.recordOutput("Align/Tmag", translationMagnitude);
+        Logger.recordOutput("Align/dire", directionToTarget);
 
         rotationOutput = rotationController.calculate(
                 currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
@@ -107,16 +111,19 @@ public class AutoAlign {
         angularVelocity = rotationOutput;
     }
 
+    @AutoLogOutput
     public double get_xVelocity() {
-        return xVelocity;
+        return xVelocity + 0.1 * Math.signum(xVelocity);
     }
 
+    @AutoLogOutput
     public double get_yVelocity() {
-        return yVelocity;
+        return yVelocity + 0.1 * Math.signum(yVelocity);
     }
 
+    @AutoLogOutput
     public double get_angularVelocity() {
-        return angularVelocity;
+        return angularVelocity + 0.1 * Math.signum(angularVelocity);
     }
 
     public void setTagIDs(boolean isReef) {
@@ -125,6 +132,7 @@ public class AutoAlign {
         } else {
             tagIDs = isReef ? FieldConstants.BLUE_REEF_TAG_IDS : FieldConstants.BLUE_CORAL_STATION_TAG_IDS;
         }
+        System.out.println(tagIDs);
     }
 
     public void setBranchTx(double tx) {
