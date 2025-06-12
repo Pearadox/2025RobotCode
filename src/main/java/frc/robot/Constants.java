@@ -125,6 +125,12 @@ public class Constants {
                 REEF_ALGAE_POSES[i] = REEF_TAG_POSES[i].plus(i % 2 == 0 ? HIGH_ALGAE_TRANSFORM : LOW_ALGAE_TRANSFORM);
             }
         }
+
+        public static final double BARGE_X = FIELD_LENGTH / 2.0;
+        public static final double BARGE_WIDTH = Units.inchesToMeters(40) / 2.0;
+        public static final double BARGE_HEIGHT = Units.inchesToMeters(74 + 8);
+        public static final double BARGE_HEIGHT_TOLERANCE = Units.inchesToMeters(12);
+        public static final double EE_TOLERANCE = Units.inchesToMeters(16);
     }
 
     public static final class DriveConstants {
@@ -303,10 +309,11 @@ public class Constants {
         public static final double CLIMBER_LENGTH = Units.inchesToMeters(8);
         public static final double MASS_KG = Units.lbsToKilograms(3);
         public static final double MOI = MASS_KG * CLIMBER_LENGTH * CLIMBER_LENGTH; // most of the mass is the barb
-        public static final double GEAR_RATIO = 100;
-        public static final double MIN_ANGLE = Units.degreesToRadians(90);
-        public static final double MAX_ANGLE = Units.degreesToRadians(180);
+        public static final double GEAR_RATIO = 290.0 * 4.0;
+        public static final double MIN_ANGLE = Units.degreesToRadians(0);
+        public static final double MAX_ANGLE = Units.degreesToRadians(90);
         public static final double STARTING_ANGLE = MIN_ANGLE;
+        public static final double ZERO_ANGLE = MAX_ANGLE;
     }
 
     public static final class IntakeConstants {
@@ -401,5 +408,6 @@ public class Constants {
         public static final double ARM_CAD_ZERO_Z = AlignConstants.ELEVATOR_STARTING_HEIGHT;
         public static final double CLIMBER_CAD_ZERO_Y = Units.inchesToMeters(13.5);
         public static final double CLIMBER_CAD_ZERO_Z = Units.inchesToMeters(9);
+        public static final double CLIMBER_CAD_ANG_OFFSET = Units.degreesToRadians(65);
     }
 }
