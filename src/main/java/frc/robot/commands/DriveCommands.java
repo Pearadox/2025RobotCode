@@ -28,9 +28,6 @@ import edu.wpi.first.wpilibj.DriverStation.Alliance;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
-import edu.wpi.first.wpilibj2.command.InstantCommand;
-import edu.wpi.first.wpilibj2.command.RunCommand;
-import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
 import java.text.DecimalFormat;
 import java.text.NumberFormat;
@@ -65,43 +62,6 @@ public class DriveCommands {
                 .transformBy(new Transform2d(linearMagnitude, 0.0, new Rotation2d()))
                 .getTranslation();
     }
-
-    public static Command alignCommand(
-            Drive drive,
-            DoubleSupplier xSupplier,
-            DoubleSupplier ySupplier,
-            DoubleSupplier thetaSupplier,
-            double tx,
-            boolean isReef) {
-
-        return new InstantCommand(() -> {
-                    RobotContainer.align.setTagIDs(isReef);
-                    RobotContainer.align.setBranchTx(tx);
-                })
-                .andThen(DriveCommands.joystickDrive(drive, xSupplier, ySupplier, thetaSupplier, true)
-                        .alongWith(new RunCommand(() -> RobotContainer.align.updateFieldRelativeAlignSpeeds())));
-    }
-
-    //     public Command reefAlignLeft(Drive drive) {
-    //         return reefAlign(drive, AlignConstants.REEF_ALIGN_LEFT_TX);
-    //     }
-
-    //     public Command reefAlignMid(Drive drive) {
-    //         return reefAlign(drive, AlignConstants.REEF_ALIGN_MID_TX);
-    //     }
-
-    //     public Command reefAlignRight(Drive drive) {
-    //         return reefAlign(drive, AlignConstants.REEF_ALIGN_RIGHT_TX);
-    //     }
-
-    //     public Command stationAlign(Drive drive) {
-    //         return DriveCommands.joystickDrive(
-    //                 drive,
-    //                 () -> getAlignForwardSpeedPercent(AlignConstants.STATION_ALIGN_TZ, getStationAlignTag()),
-    //                 () -> getAlignStrafeSpeedPercent(AlignConstants.STATION_ALIGN_TX, getStationAlignTag()),
-    //                 () -> getAlignRotationSpeedPercent(getAlignAngleStation()),
-    //                 false);
-    //     }
 
     /** Field relative drive command using two joysticks (controlling linear and angular velocities). */
     public static Command joystickDrive(

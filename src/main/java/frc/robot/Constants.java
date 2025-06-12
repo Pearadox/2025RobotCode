@@ -165,7 +165,7 @@ public class Constants {
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
-        public static final double REEF_ALIGN_TZ = -0; // target relative
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(20);
 
         public static final double STATION_ALIGN_TX = 0.07;
         public static final double STATION_ALIGN_TZ = 0;
@@ -176,7 +176,8 @@ public class Constants {
 
         public static final double REEF_Forward_kP = 0.2; // Tune all PID values
 
-        public static final double ROT_REEF_kP = 0.02; // Tune all PID values
+        // for some reason, 0.02 is much too low in sim??
+        public static final double ROT_REEF_kP = Robot.isSimulation() ? Units.radiansToDegrees(0.02) : 0.02; 
         public static final double ROT_REEF_kI = 0;
         public static final double ROT_REEF_kD = 0;
 
