@@ -42,7 +42,7 @@ public class AutoAlign {
 
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
         rotationController.setTolerance(Units.degreesToRadians(3));
-        translationController.setTolerance(1);
+        translationController.setTolerance(Units.inchesToMeters(4));
     }
 
     private Pose2d getTagPose(int tagID) {
@@ -76,7 +76,8 @@ public class AutoAlign {
         currentPose = poseSupplier.get();
         int currentTagID = findClosestTag(tagIDs, currentPose);
         targetPose = getTagPose(currentTagID)
-                .transformBy(new Transform2d(new Translation2d(currentBranchTx, 0), new Rotation2d()));
+                .transformBy(new Transform2d(
+                        new Translation2d(Units.inchesToMeters(20), currentBranchTx), new Rotation2d()));
 
         updateControllerOutputs();
         updateVelocities();
@@ -85,15 +86,16 @@ public class AutoAlign {
         Logger.recordOutput("AutoAlign/RotationError", Math.toDegrees(rotationController.getError()));
         Logger.recordOutput("AutoAlign/TargetPose", targetPose);
         Logger.recordOutput("AutoAlign/CurrentBranchTag", currentTagID);
-        Logger.recordOutput("xVelocity", xVelocity);
-        Logger.recordOutput("yVelocity", yVelocity);
-        Logger.recordOutput("angularVelocity", angularVelocity);
+        Logger.recordOutput("AutoAlign/xVelocity", xVelocity);
+        Logger.recordOutput("AutoAlign/yVelocity", yVelocity);
+        Logger.recordOutput("AutoAlign/angularVelocity", angularVelocity);
     }
 
     public void updateControllerOutputs() {
         Translation2d currentToTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
         distanceError = currentToTarget.getNorm();
-        Rotation2d directionToTarget = currentToTarget.getAngle().plus(Rotation2d.k180deg);
+        Rotation2d directionToTarget = currentToTarget.getAngle();
+        if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
 
         double translationMagnitude = translationController.calculate(0, distanceError);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
@@ -109,6 +111,11 @@ public class AutoAlign {
         xVelocity = translationOutput.getX();
         yVelocity = translationOutput.getY();
         angularVelocity = rotationOutput;
+        if (isAligned()) {
+            xVelocity = 0;
+            yVelocity = 0;
+            angularVelocity = 0;
+        }
     }
 
     @AutoLogOutput
@@ -132,13 +139,13 @@ public class AutoAlign {
         } else {
             tagIDs = isReef ? FieldConstants.BLUE_REEF_TAG_IDS : FieldConstants.BLUE_CORAL_STATION_TAG_IDS;
         }
-        System.out.println(tagIDs);
     }
 
     public void setBranchTx(double tx) {
         currentBranchTx = tx;
     }
 
+    @AutoLogOutput(key = "AutoAlign/isAligned")
     public boolean isAligned() {
         return translationController.atSetpoint() && rotationController.atSetpoint();
     }

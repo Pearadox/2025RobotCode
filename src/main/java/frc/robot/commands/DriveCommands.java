@@ -75,11 +75,11 @@ public class DriveCommands {
             boolean isReef) {
 
         return new InstantCommand(() -> {
-                RobotContainer.align.setTagIDs(isReef);
-                RobotContainer.align.setBranchTx(tx);
-        }).andThen(DriveCommands.joystickDrive(drive, xSupplier, ySupplier, thetaSupplier)
-                .alongWith(new RunCommand(
-                        () -> RobotContainer.align.updateFieldRelativeAlignSpeeds())));
+                    RobotContainer.align.setTagIDs(isReef);
+                    RobotContainer.align.setBranchTx(tx);
+                })
+                .andThen(DriveCommands.joystickDrive(drive, xSupplier, ySupplier, thetaSupplier)
+                        .alongWith(new RunCommand(() -> RobotContainer.align.updateFieldRelativeAlignSpeeds())));
     }
 
     //     public Command reefAlignLeft(Drive drive) {
