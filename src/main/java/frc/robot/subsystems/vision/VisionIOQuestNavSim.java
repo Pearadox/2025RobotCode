@@ -15,15 +15,15 @@ public class VisionIOQuestNavSim implements VisionIO {
     @Override
     public void updateInputs(VisionIOInputs inputs) {
         inputs.connected = true;
-        inputs.poseObservations = new PoseObservation[] {
-            new PoseObservation(
-                    System.currentTimeMillis() * 1e-6,
-                    new Pose3d(updatePose()),
-                    0.1,
-                    1,
-                    1,
-                    PoseObservationType.QUESTNAV)
-        };
+        Pose2d pose = updatePose();
+        if (pose == null) {
+            inputs.poseObservations = new PoseObservation[0];
+        } else {
+            inputs.poseObservations = new PoseObservation[] {
+                new PoseObservation(
+                        System.currentTimeMillis() * 1e-6, new Pose3d(), 0.1, 1, 1, PoseObservationType.QUESTNAV)
+            };
+        }
     }
 
     // TODO

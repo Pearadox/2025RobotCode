@@ -2,8 +2,6 @@ package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
@@ -24,9 +22,9 @@ import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
@@ -38,7 +36,11 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOReal;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFXReal;
+import frc.robot.subsystems.drive.ModuleIOTalonFXSim;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOReal;
@@ -48,38 +50,23 @@ import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOQuestNavSim;
 import frc.robot.util.simulation.AlgaeHandler;
-import frc.robot.util.simulation.MapleSimSwerveDrivetrain;
-import frc.robot.util.vision.PoseEstimation;
 import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
-
+    private Drive drive;
     private Elevator elevator;
     private Arm arm;
     private EndEffector endEffector;
     private Vision vision;
     private Climber climber;
-    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
+    public static AutoAlign align;
 
-    public static final PoseEstimation poseEstimation = new PoseEstimation();
+    private SwerveDriveSimulation driveSimulation = null;
+
     //     public static final LEDStrip ledstrip = LEDStrip.getInstance();
-
-    private final SwerveRequest.FieldCentric fieldOrientedDrive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1)
-            .withRotationalDeadband(MaxAngularRate * 0.1)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final SwerveRequest.RobotCentric robotOrientedDrive = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1)
-            .withRotationalDeadband(MaxAngularRate * 0.1)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
-    private final Telemetry logger = new Telemetry(MaxSpeed);
 
     // Controller
     public static final XboxController driverController = new XboxController(0);
@@ -129,6 +116,13 @@ public class RobotContainer {
     public RobotContainer() {
         switch (Constants.currentMode) {
             case REAL: // Real robot, instantiate hardware IO implementations
+                drive = new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFXReal(TunerConstants.FrontRight),
+                        new ModuleIOTalonFXReal(TunerConstants.BackLeft),
+                        new ModuleIOTalonFXReal(TunerConstants.BackRight),
+                        (pose) -> {});
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
                 endEffector = new EndEffector(new EndEffectorIOReal());
@@ -136,16 +130,29 @@ public class RobotContainer {
                 break;
 
             case SIM: // Sim robot, instantiate physics sim IO implementations
+                driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new Rotation2d()));
+                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+
+                drive = new Drive(
+                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        new ModuleIOTalonFXSim(
+                                TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
+                        new ModuleIOTalonFXSim(
+                                TunerConstants.FrontRight, driveSimulation.getModules()[1]),
+                        new ModuleIOTalonFXSim(
+                                TunerConstants.BackLeft, driveSimulation.getModules()[2]),
+                        new ModuleIOTalonFXSim(
+                                TunerConstants.BackRight, driveSimulation.getModules()[3]),
+                        driveSimulation::setSimulationWorldPose);
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(
-                        () -> MapleSimSwerveDrivetrain.getSimulatedPose(), // drivetrain.getState().Pose,
-                        () -> drivetrain.getState().Speeds,
+                        () -> driveSimulation.getSimulatedDriveTrainPose(), // drivetrain.getState().Pose,
+                        () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
                 vision = new Vision(
-                        drivetrain::addVisionMeasurement,
-                        new VisionIOQuestNavSim(MapleSimSwerveDrivetrain::getSimulatedPose));
+                        drive::accept); // , new VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
                 break;
 
@@ -156,6 +163,8 @@ public class RobotContainer {
                 climber = new Climber(new ClimberIO() {});
                 break;
         }
+
+        align = new AutoAlign(drive::getPose);
 
         setDefaultCommands();
         registerNamedCommands();
@@ -176,81 +185,21 @@ public class RobotContainer {
 
     private void configureBindings() {
         // Driver Bindings
-        resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
+        // Reset gyro / odometry
+        final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
+                ? () -> drive.setPose(
+                        driveSimulation
+                                .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
+                : () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
+        resetHeading_Start.onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
 
-        // climbAlign_Y.whileTrue(drivetrain.applyRequest(
-        //         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        //                         * MaxSpeed
-        //                         * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        //                         * MaxSpeed
-        //                         * drivetrain.getSpeedMultipler()) // Drive left with negative
-        //                 // X (left)
-        //                 .withRotationalRate(align.getAlignRotationSpeedPercent(
-        //                                 (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
-        //                                         ? Rotation2d.kCW_90deg
-        //                                         : Rotation2d.kCCW_90deg)
-        //                         * MaxAngularRate) // Drive
-        //         // counterclockwise
-        //         // with negative X
-        //         // (left)
-        //         ));
-
-        stationAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag(), VisionConstants.LL_B_NAME)
-                        * MaxSpeed)
-                .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag(), VisionConstants.LL_B_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(
-                        align.getAlignRotationSpeedPercent(align.getAlignAngleStation()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
-
-        reefAlignCenter_PovDown.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                AlignConstants.REEF_ALIGN_MID_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
-
-        reefAlignLeft_PovLeft.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                AlignConstants.REEF_ALIGN_LEFT_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
-
-        reefAlignRight_PovRight.whileTrue(
-                drivetrain.applyRequest(() -> robotOrientedDrive
-                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                                * MaxSpeed)
-                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_RIGHT_TX,
-                                        align.getReefAlignTag(),
-                                        VisionConstants.LL_NAME)
-                                * MaxSpeed)
-                        .withRotationalRate(
-                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate))
-                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                );
-
-        slowMode_A.onTrue(new InstantCommand(() -> drivetrain.changeSpeedMultiplier()));
-        zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
-
-        strafe_Triggers.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-                .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
-                        * 0.1
-                        * MaxSpeed)
-                .withRotationalRate(-driverController.getRightX() * MaxAngularRate)));
+        reefAlignLeft_PovLeft.whileTrue(DriveCommands.alignCommand(
+                drive,
+                () -> align.get_xVelocity(),
+                () -> align.get_yVelocity(),
+                () -> align.get_angularVelocity(),
+                AlignConstants.REEF_ALIGN_LEFT_TX,
+                true));
 
         // Operator Bindings
         homeElevator_Start
@@ -315,8 +264,6 @@ public class RobotContainer {
         //     csDropLB.onTrue(new InstantCommand(() -> dropCoralFromStation(false)).ignoringDisable(true));
         //     csDropRB.onTrue(new InstantCommand(() -> dropCoralFromStation(true)).ignoringDisable(true));
         // }
-
-        drivetrain.registerTelemetry(logger::telemeterize);
     }
 
     public Command getAutonomousCommand() {
@@ -366,103 +313,103 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> elevator.zeroElevator()))
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        NamedCommands.registerCommand(
-                "Stop",
-                drivetrain
-                        .applyRequest(() -> robotOrientedDrive
-                                .withVelocityX(0)
-                                .withVelocityY(0)
-                                .withRotationalRate(0))
-                        .withTimeout(0.05));
+        // NamedCommands.registerCommand(
+        //         "Stop",
+        //         drivetrain
+        //                 .applyRequest(() -> robotOrientedDrive
+        //                         .withVelocityX(0)
+        //                         .withVelocityY(0)
+        //                         .withRotationalRate(0))
+        //                 .withTimeout(0.05));
 
-        NamedCommands.registerCommand(
-                "Auto Align Left",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(
-                                        () -> robotOrientedDrive
-                                                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_TZ,
-                                                                align.getReefAlignTag(),
-                                                                VisionConstants.LL_NAME)
-                                                        * MaxSpeed)
-                                                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_LEFT_TX,
-                                                                align.getReefAlignTag(),
-                                                                VisionConstants.LL_NAME)
-                                                        * MaxSpeed)
-                                                .withRotationalRate(
-                                                        align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                                * MaxAngularRate) // Drive counterclockwise with
-                                        // negative X (left)
-                                        )
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest())
-                                .withTimeout(3))
-                        .andThen(new WaitCommand(0.2)));
+        // NamedCommands.registerCommand(
+        //         "Auto Align Left",
+        //         new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+        //                 .andThen((drivetrain.applyRequest(
+        //                                 () -> robotOrientedDrive
+        //                                         .withVelocityX(align.getAlignForwardSpeedPercent(
+        //                                                         AlignConstants.REEF_ALIGN_TZ,
+        //                                                         align.getReefAlignTag(),
+        //                                                         VisionConstants.LL_NAME)
+        //                                                 * MaxSpeed)
+        //                                         .withVelocityY(align.getAlignStrafeSpeedPercent(
+        //                                                         AlignConstants.REEF_ALIGN_LEFT_TX,
+        //                                                         align.getReefAlignTag(),
+        //                                                         VisionConstants.LL_NAME)
+        //                                                 * MaxSpeed)
+        //                                         .withRotationalRate(
+        //                                                 align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+        //                                                         * MaxAngularRate) // Drive counterclockwise with
+        //                                 // negative X (left)
+        //                                 )
+        //                         // .alongWith(ledstrip.aligning(() -> align.isAligned()))
+        //                         )
+        //                         .until(() -> align.isAlignedTest())
+        //                         .withTimeout(3))
+        //                 .andThen(new WaitCommand(0.2)));
 
-        NamedCommands.registerCommand(
-                "Auto Align Mid",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_MID_TX,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate))
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest()))
-                        .andThen(new WaitCommand(0.2)));
+        // NamedCommands.registerCommand(
+        //         "Auto Align Mid",
+        //         new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+        //                 .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
+        //                                 .withVelocityX(align.getAlignForwardSpeedPercent(
+        //                                                 AlignConstants.REEF_ALIGN_TZ,
+        //                                                 align.getReefAlignTag(),
+        //                                                 VisionConstants.LL_NAME)
+        //                                         * MaxSpeed)
+        //                                 .withVelocityY(align.getAlignStrafeSpeedPercent(
+        //                                                 AlignConstants.REEF_ALIGN_MID_TX,
+        //                                                 align.getReefAlignTag(),
+        //                                                 VisionConstants.LL_NAME)
+        //                                         * MaxSpeed)
+        //                                 .withRotationalRate(
+        //                                         align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+        //                                                 * MaxAngularRate))
+        //                         // .alongWith(ledstrip.aligning(() -> align.isAligned()))
+        //                         )
+        //                         .until(() -> align.isAlignedTest()))
+        //                 .andThen(new WaitCommand(0.2)));
 
-        NamedCommands.registerCommand(
-                "Auto Align Right",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_RIGHT_TX,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate))
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest())
-                                .withTimeout(3)
-                                .andThen(new WaitCommand(0.2))));
+        // NamedCommands.registerCommand(
+        //         "Auto Align Right",
+        //         new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
+        //                 .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
+        //                                 .withVelocityX(align.getAlignForwardSpeedPercent(
+        //                                                 AlignConstants.REEF_ALIGN_TZ,
+        //                                                 align.getReefAlignTag(),
+        //                                                 VisionConstants.LL_NAME)
+        //                                         * MaxSpeed)
+        //                                 .withVelocityY(align.getAlignStrafeSpeedPercent(
+        //                                                 AlignConstants.REEF_ALIGN_RIGHT_TX,
+        //                                                 align.getReefAlignTag(),
+        //                                                 VisionConstants.LL_NAME)
+        //                                         * MaxSpeed)
+        //                                 .withRotationalRate(
+        //                                         align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
+        //                                                 * MaxAngularRate))
+        //                         // .alongWith(ledstrip.aligning(() -> align.isAligned()))
+        //                         )
+        //                         .until(() -> align.isAlignedTest())
+        //                         .withTimeout(3)
+        //                         .andThen(new WaitCommand(0.2))));
 
-        NamedCommands.registerCommand(
-                "Auto Align Station",
-                (drivetrain.applyRequest(() -> robotOrientedDrive
-                                .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TZ,
-                                                align.getStationAlignTag(),
-                                                VisionConstants.LL_B_NAME)
-                                        * MaxSpeed)
-                                .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TX,
-                                                align.getStationAlignTag(),
-                                                VisionConstants.LL_B_NAME)
-                                        * MaxSpeed)
-                                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
-                                        * MaxAngularRate)))
-                        // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                        .withTimeout(0.5));
+        // NamedCommands.registerCommand(
+        //         "Auto Align Station",
+        //         (drivetrain.applyRequest(() -> robotOrientedDrive
+        //                         .withVelocityX(-align.getAlignForwardSpeedPercent(
+        //                                         AlignConstants.STATION_ALIGN_TZ,
+        //                                         align.getStationAlignTag(),
+        //                                         VisionConstants.LL_B_NAME)
+        //                                 * MaxSpeed)
+        //                         .withVelocityY(-align.getAlignStrafeSpeedPercent(
+        //                                         AlignConstants.STATION_ALIGN_TX,
+        //                                         align.getStationAlignTag(),
+        //                                         VisionConstants.LL_B_NAME)
+        //                                 * MaxSpeed)
+        //                         .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
+        //                                 * MaxAngularRate)))
+        //                 // .alongWith(ledstrip.aligning(() -> align.isAligned()))
+        //                 .withTimeout(0.5));
 
         NamedCommands.registerCommand(
                 "Set Algae",
@@ -476,14 +423,12 @@ public class RobotContainer {
     }
 
     public void setDefaultCommands() {
-        drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> fieldOrientedDrive
-                .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                        * MaxSpeed
-                        * drivetrain.getSpeedMultipler())
-                .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                        * MaxSpeed
-                        * drivetrain.getSpeedMultipler())
-                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX()) * MaxAngularRate)));
+        drive.setDefaultCommand(DriveCommands.joystickDrive(
+                drive,
+                () -> -driverController.getLeftY(),
+                () -> -driverController.getLeftX(),
+                () -> -driverController.getRightX(),
+                true));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
@@ -494,14 +439,16 @@ public class RobotContainer {
     public void resetSimulation() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        drivetrain.resetPose(new Pose2d(10.118, 1.18, new Rotation2d()));
+        drive.setPose(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
+        AlgaeHandler.getInstance().reset();
     }
 
     public void displaySimFieldToAdvantageScope() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(MapleSimSwerveDrivetrain.getSimulatedPose()));
+        SimulatedArena.getInstance().simulationPeriodic();
+        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(driveSimulation.getSimulatedDriveTrainPose()));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
         Logger.recordOutput(
