@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
@@ -60,6 +59,12 @@ public class AutoAlign {
 
     @AutoLogOutput
     private Translation2d translationOutput = new Translation2d();
+
+    @AutoLogOutput
+    private String lastAlignCommand = "";
+
+    @AutoLogOutput
+    private String currentAlignCommand = "";
 
     @AutoLogOutput
     private double rotationOutput = 0;
@@ -125,7 +130,7 @@ public class AutoAlign {
     }
 
     public void updateVelocities() {
-        if (isAligned()) {
+        if (isAligned() && lastAlignCommand.equals(currentAlignCommand)) {
             xVelocity = 0;
             yVelocity = 0;
             angularVelocity = 0;
@@ -138,6 +143,8 @@ public class AutoAlign {
             yVelocity += 0.1 * Math.signum(yVelocity);
             angularVelocity += 0.1 * Math.signum(angularVelocity);
         }
+
+        lastAlignCommand = currentAlignCommand;
     }
 
     public void setTagIDs(boolean isReef) {
@@ -162,6 +169,10 @@ public class AutoAlign {
         rotationController.reset();
     }
 
+    public void setCurrentAlignCommand(String curCommand) {
+        currentAlignCommand = curCommand;
+    }
+
     private static Map<Integer, Pose3d> loadTagPositions() {
         Map<Integer, Pose3d> tagMap = new HashMap<>();
         for (int tag : FieldConstants.RED_REEF_TAG_IDS) {
@@ -173,8 +184,9 @@ public class AutoAlign {
         return tagMap;
     }
 
-    private Command getAlignCommand(Drive drive, boolean isReef, double tx) {
+    private Command getAlignCommand(Drive drive, boolean isReef, double tx, String curCommand) {
         return new InstantCommand(() -> {
+                    setCurrentAlignCommand(curCommand);
                     setTagIDs(isReef);
                     setBranchTx(tx);
                 })
@@ -184,18 +196,18 @@ public class AutoAlign {
     }
 
     public Command reefAlignLeft(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX);
+        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX, "Left Branch");
     }
 
     public Command reefAlignMid(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_MID_TX);
+        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_MID_TX, "Mid Reef");
     }
 
     public Command reefAlignRight(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_RIGHT_TX);
+        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_RIGHT_TX, "Right Branch");
     }
 
     public Command stationAlign(Drive drive) {
-        return getAlignCommand(drive, false, AlignConstants.STATION_ALIGN_TX);
+        return getAlignCommand(drive, false, AlignConstants.STATION_ALIGN_TX, "Station");
     }
 }

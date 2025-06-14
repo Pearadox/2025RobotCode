@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.util.Units;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.ElevatorConstants;
@@ -7,13 +8,10 @@ import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.Arm.ArmMode;
 import org.littletonrobotics.junction.Logger;
 
-import edu.wpi.first.math.util.Units;
-
 public class InverseKinematics {
     public InverseKinematics() {
         // nothing
     }
-
 
     private double getElevatorHeightMeters(double branchX, double branchY) {
         double elevatorHeightMeters = branchY
@@ -84,7 +82,6 @@ public class InverseKinematics {
         return rots;
     }
 
-    
     // public double getTZForArmSpacing(Arm arm) {
     //     ArmMode armMode = arm.getArmMode();
 
