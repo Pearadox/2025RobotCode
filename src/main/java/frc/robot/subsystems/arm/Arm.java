@@ -7,13 +7,17 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.SimulationConstants;
+import frc.robot.commands.InverseKinematics;
 import frc.robot.subsystems.elevator.MechVisualizer;
 import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
 public class Arm extends SubsystemBase {
+    private InverseKinematics ik = new InverseKinematics();
+
     private boolean isCoral = true;
     private boolean isAligning = false;
     private double lastAngle = 0.0;
@@ -68,21 +72,15 @@ public class Arm extends SubsystemBase {
                     setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
                 }
             } else if (armMode == ArmMode.L2) {
-                setpoint = ArmConstants.ARM_LEVEL_2_ROT + armAdjust;
+                setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + armAdjust;
             } else if (armMode == ArmMode.L3) {
-                setpoint = ArmConstants.ARM_LEVEL_3_ROT + armAdjust;
+                setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + armAdjust;
 
                 if (Constants.currentMode == Constants.Mode.SIM) {
                     setpoint += 1;
                 }
             } else if (armMode == ArmMode.L4) {
-                if (isAligning) {
-                    // setpoint = RobotContainer.align.getArmAngleRots() + armAdjust;
-                    setpoint = ArmConstants.ARM_L4_BEHIND_CORAL + armAdjust;
-
-                } else {
-                    setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;
-                }
+                setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + armAdjust;
             }
         } else if (!isCoral) {
             if (armMode == ArmMode.Stowed) {

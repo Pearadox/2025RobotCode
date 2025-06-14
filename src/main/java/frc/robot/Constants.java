@@ -183,7 +183,11 @@ public class Constants {
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
+
+        // real heights of branches
         public static final double L4_HEIGHT = Units.inchesToMeters(72);
+        public static final double L3_HEIGHT = Units.inchesToMeters(48);
+        public static final double L2_HEIGHT = Units.inchesToMeters(36);
 
         // these are from the arm's pivot point to the bottom of a held coral
         public static final double PIVOT_TO_CORAL_RADIUS = Units.inchesToMeters(23.4106654653);

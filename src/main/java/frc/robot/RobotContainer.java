@@ -57,7 +57,7 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
     private Drive drive;
     private Elevator elevator;
-    private Arm arm;
+    public static Arm arm;
     private EndEffector endEffector;
     private Vision vision;
     private Climber climber;
