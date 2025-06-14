@@ -24,7 +24,8 @@ import java.util.Arrays;
 import java.util.List;
 
 public class Constants {
-    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : Mode.SIM;
+    public static final Mode simMode = Mode.REPLAY;
+    public static final Mode currentMode = RobotBase.isReal() ? Mode.REAL : simMode;
 
     public static enum Mode {
         /** Running on a real robot. */
