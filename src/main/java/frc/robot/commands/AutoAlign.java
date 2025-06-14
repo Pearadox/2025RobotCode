@@ -16,7 +16,6 @@ import java.util.Map;
 import java.util.function.Supplier;
 import lombok.Getter;
 import lombok.Setter;
-
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 

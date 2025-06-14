@@ -75,18 +75,22 @@ public class Elevator extends SubsystemBase {
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-                setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + elevatorOffset; 
+                setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT)
+                        + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-                setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + elevatorOffset; 
+                setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT)
+                        + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 if (DriverStation.isAutonomous()) {
-                    setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
+                    setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
+                            + elevatorOffset
+                            - 0.4;
                 } else {
-                    setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset;
+                    setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
+                            + elevatorOffset;
                 }
-            
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
