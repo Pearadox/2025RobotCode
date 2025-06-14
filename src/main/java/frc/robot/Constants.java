@@ -170,14 +170,14 @@ public class Constants {
         public static final double STATION_ALIGN_TX = 0.07;
         public static final double STATION_ALIGN_TZ = 0;
 
-        public static final double REEF_kP = 0.5; // Tune all PID values
+        public static final double REEF_kP = 0.6; // Tune all PID values
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0;
 
         public static final double REEF_Forward_kP = 0.2; // Tune all PID values
 
         // for some reason, 0.02 is much too low in sim??
-        public static final double ROT_REEF_kP = Robot.isSimulation() ? Units.radiansToDegrees(0.02) : 0.02;
+        public static final double ROT_REEF_kP = Units.radiansToDegrees(0.015);
         public static final double ROT_REEF_kI = 0;
         public static final double ROT_REEF_kD = 0;
 

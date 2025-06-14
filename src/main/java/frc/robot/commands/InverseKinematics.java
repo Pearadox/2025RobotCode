@@ -26,7 +26,7 @@ public class InverseKinematics {
     }
 
     public double getElevatorHeightRots(double branchX, double branchY) {
-        double elevatorHeightMeters = getElevatorHeightMeters(branchY, branchX);
+        double elevatorHeightMeters = getElevatorHeightMeters(branchX, branchY);
         Logger.recordOutput("Elevator/AlignElevatorHeight", elevatorHeightMeters);
         Logger.recordOutput("Elevator/AlignElevatorIsNaN", Double.isNaN(elevatorHeightMeters));
         double rots = 0;

@@ -1,6 +1,7 @@
 package frc.robot;
 
 import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
@@ -36,10 +37,10 @@ import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOReal;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFXReal;
-import frc.robot.subsystems.drive.ModuleIOTalonFXSim;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOReal;
@@ -49,6 +50,7 @@ import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.simulation.AlgaeHandler;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -71,7 +73,8 @@ public class RobotContainer {
     public static final XboxController driverController = new XboxController(0);
     public static final XboxController opController = new XboxController(1);
 
-    // Driver Controller
+    // ---------------------------- Driver Controller --------------------------------- //
+
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
@@ -87,7 +90,8 @@ public class RobotContainer {
     private final Trigger strafe_Triggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
 
-    // Op Controller
+    // ----------------------------- Op Controller -------------------------------- //
+
     private final JoystickButton homeElevator_Start =
             new JoystickButton(opController, XboxController.Button.kStart.value);
     private final JoystickButton station_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
@@ -114,35 +118,37 @@ public class RobotContainer {
 
     public RobotContainer() {
         switch (Constants.currentMode) {
-            case REAL: // Real robot, instantiate hardware IO implementations
+
+                // Real robot, instantiate hardware IO implementations
+
+            case REAL:
                 drive = new Drive(
                         new GyroIOPigeon2(),
-                        new ModuleIOTalonFXReal(TunerConstants.FrontLeft),
-                        new ModuleIOTalonFXReal(TunerConstants.FrontRight),
-                        new ModuleIOTalonFXReal(TunerConstants.BackLeft),
-                        new ModuleIOTalonFXReal(TunerConstants.BackRight),
-                        (pose) -> {});
+                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
+                        new ModuleIOTalonFX(TunerConstants.FrontRight),
+                        new ModuleIOTalonFX(TunerConstants.BackLeft),
+                        new ModuleIOTalonFX(TunerConstants.BackRight));
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight(camera0Name, drive::getRotation),
+                        new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
                 endEffector = new EndEffector(new EndEffectorIOReal());
                 climber = new Climber(new ClimberIOReal());
                 break;
 
-            case SIM: // Sim robot, instantiate physics sim IO implementations
-                driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new Rotation2d()));
+                // Sim robot, instantiate physics sim IO implementations
+
+            case SIM:
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 drive = new Drive(
-                        new GyroIOSim(driveSimulation.getGyroSimulation()),
-                        new ModuleIOTalonFXSim(
-                                TunerConstants.FrontLeft, driveSimulation.getModules()[0]),
-                        new ModuleIOTalonFXSim(
-                                TunerConstants.FrontRight, driveSimulation.getModules()[1]),
-                        new ModuleIOTalonFXSim(
-                                TunerConstants.BackLeft, driveSimulation.getModules()[2]),
-                        new ModuleIOTalonFXSim(
-                                TunerConstants.BackRight, driveSimulation.getModules()[3]),
-                        driveSimulation::setSimulationWorldPose);
+                        new GyroIO() {},
+                        new ModuleIOSim(TunerConstants.FrontLeft),
+                        new ModuleIOSim(TunerConstants.FrontRight),
+                        new ModuleIOSim(TunerConstants.BackLeft),
+                        new ModuleIOSim(TunerConstants.BackRight));
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(
@@ -150,12 +156,14 @@ public class RobotContainer {
                         () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
-                vision = new Vision(
-                        drive::accept); // , new VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
+                vision = new Vision(drive::addVisionMeasurement); // , new
+                // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
                 break;
 
-            default: // Replayed robot, disable IO implementations
+                // Replayed robot, disable IO implementations
+
+            default:
                 elevator = new Elevator(new ElevatorIO() {});
                 arm = new Arm(new ArmIO() {});
                 endEffector = new EndEffector(new EndEffectorIO() {});
@@ -171,7 +179,8 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
-        // Event Markers
+        // ------------------------------ Event Markers ---------------------------------- //
+
         new EventTrigger("LevelStation")
                 .onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
                         .andThen(new InstantCommand(() -> arm.setArmIntake())));
@@ -183,7 +192,9 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
-        // Driver Bindings
+
+        // ------------------------------- Driver Bindings ------------------------------- //
+
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.setPose(
@@ -197,7 +208,8 @@ public class RobotContainer {
         reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
         stationAlign_PovUp.whileTrue(align.stationAlign(drive));
 
-        // Operator Bindings
+        // ------------------------------- Operator Bindings ------------------------------- //
+
         homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.stopElevator())
@@ -274,6 +286,8 @@ public class RobotContainer {
         return false;
     }
 
+    // -------------------------------- PathPlanner Commands -------------------------------- //
+
     public void registerNamedCommands() {
         NamedCommands.registerCommand(
                 "LevelStation",
@@ -337,6 +351,8 @@ public class RobotContainer {
                 "Algae Intake", new RunCommand(() -> endEffector.algaeIn()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.algaeOut()));
     }
+
+    // ----------------------------------- Default Commands -------------------------------- //
 
     public void setDefaultCommands() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
