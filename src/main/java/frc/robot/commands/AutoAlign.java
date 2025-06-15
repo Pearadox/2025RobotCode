@@ -192,7 +192,9 @@ public class AutoAlign {
     }
 
     public Command reefAlignLeft(Drive drive) {
-        // aligningLeft = true;
+        if (!aligningLeft) {
+            aligningLeft = true;
+        }
         return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX);
     }
 
@@ -201,7 +203,9 @@ public class AutoAlign {
     }
 
     public Command reefAlignRight(Drive drive) {
-        // aligningLeft = false;
+        if (aligningLeft) {
+            aligningLeft = false;
+        }
         return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_RIGHT_TX);
     }
 
