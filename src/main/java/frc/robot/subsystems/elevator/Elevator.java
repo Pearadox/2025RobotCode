@@ -7,6 +7,7 @@ package frc.robot.subsystems.elevator;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.InverseKinematics;
@@ -76,15 +77,19 @@ public class Elevator extends SubsystemBase {
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
                 setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + elevatorOffset; 
+                //setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L2_HEIGHT) + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + elevatorOffset; 
+                //setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L3_HEIGHT) + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 if (DriverStation.isAutonomous()) {
                     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
+                    //setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
                 } else {
                     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset;
+                    //setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
                 }
             
             }

@@ -7,9 +7,13 @@ import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants.ArmConstants;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.Arm.ArmMode;
 import frc.robot.subsystems.drive.Drive;
 import java.util.HashMap;
 import java.util.Map;
@@ -63,6 +67,10 @@ public class AutoAlign {
 
     @AutoLogOutput
     private double rotationOutput = 0;
+
+    @AutoLogOutput
+    @Getter
+    private boolean aligningLeft = false;
 
     public AutoAlign(Supplier<Pose2d> poseSupplier) {
         this.poseSupplier = poseSupplier;
@@ -184,6 +192,7 @@ public class AutoAlign {
     }
 
     public Command reefAlignLeft(Drive drive) {
+        // aligningLeft = true;
         return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX);
     }
 
@@ -192,10 +201,99 @@ public class AutoAlign {
     }
 
     public Command reefAlignRight(Drive drive) {
+        // aligningLeft = false;
         return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_RIGHT_TX);
     }
 
     public Command stationAlign(Drive drive) {
         return getAlignCommand(drive, false, AlignConstants.STATION_ALIGN_TX);
+    }
+
+
+    // Dynamic IK
+    private double getElevatorHeightMeters(double branchY) {
+        currentPose = poseSupplier.get();
+        targetPose = getTagPose(findClosestTag(tagIDs, currentPose))
+            .transformBy(
+                new Transform2d(new Translation2d(
+                    -1 * AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG, isAligningLeft() ? AlignConstants.REEF_ALIGN_LEFT_TX : AlignConstants.REEF_ALIGN_RIGHT_TX),
+                new Rotation2d()));
+
+        double distance = targetPose.getTranslation().minus(currentPose.getTranslation()).getNorm();
+
+        double elevatorHeightMeters = branchY
+                - Math.sqrt(Math.pow(AlignConstants.PIVOT_TO_CORAL_RADIUS, 2) - Math.pow(distance, 2));
+
+        if (Double.isNaN(elevatorHeightMeters)) {
+            return Double.NaN;
+        }
+
+        return elevatorHeightMeters;
+    }
+
+    public double getElevatorHeightRots(double branchY) {
+        double elevatorHeightMeters = getElevatorHeightMeters(branchY);
+        Logger.recordOutput("Elevator/AlignElevatorHeight", elevatorHeightMeters);
+        Logger.recordOutput("Elevator/AlignElevatorIsNaN", Double.isNaN(elevatorHeightMeters));
+        double rots = 0;
+
+        if (Double.isNaN(elevatorHeightMeters)) {
+            return ElevatorConstants.LEVEL_THREE_ROT;
+        }
+
+        if (Arm.getArmMode() == ArmMode.L2) {
+            elevatorHeightMeters = elevatorHeightMeters
+                    + 2 * AlignConstants.PIVOT_TO_CORAL_RADIUS * Math.sin(getArmAngleRads(branchY));
+        }
+
+        rots = Units.metersToInches(elevatorHeightMeters - AlignConstants.ELEVATOR_STARTING_HEIGHT)
+                * ElevatorConstants.GEAR_RATIO
+                / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+
+        return rots;
+    }
+
+    private double getArmAngleRads(double branchY) {
+        currentPose = poseSupplier.get();
+        targetPose = getTagPose(findClosestTag(tagIDs, currentPose))
+            .transformBy(
+                new Transform2d(new Translation2d(
+                    -1 * AlignConstants.BRANCH_OFFSET_BEHIND_APRILTAG, isAligningLeft() ? AlignConstants.REEF_ALIGN_LEFT_TX : AlignConstants.REEF_ALIGN_RIGHT_TX),
+                new Rotation2d()));
+
+        double distance = targetPose.getTranslation().minus(currentPose.getTranslation()).getNorm();
+
+        double armAngle = Math.acos(
+                (distance) / AlignConstants.PIVOT_TO_CORAL_RADIUS);
+
+        if (Double.isNaN(armAngle)) {
+            return Double.NaN;
+        }
+
+        return armAngle;
+    }
+
+    public double getArmAngleRots(double branchY) {
+        double armAngleRads = getArmAngleRads(branchY);
+        Logger.recordOutput(
+                "Arm/AlignDegreesFromHorizontal",
+                Units.radiansToDegrees(armAngleRads + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET));
+        Logger.recordOutput("Arm/AlignIsNaN", Double.isNaN(armAngleRads));
+        double rots = 0;
+
+        if (Double.isNaN(armAngleRads)) {
+            return ArmConstants.ARM_ALGAE_LOW;
+        }
+
+        if (Arm.getArmMode() == ArmMode.L2) {
+            armAngleRads = armAngleRads - 2 * armAngleRads;
+        }
+
+        rots = Units.radiansToRotations((armAngleRads
+                        + (-1 * AlignConstants.ARM_STARTING_ANGLE)
+                        + AlignConstants.ARM_TO_CORAL_ANGULAR_OFFSET))
+                * ArmConstants.ARM_GEAR_RATIO;
+
+        return rots;
     }
 }

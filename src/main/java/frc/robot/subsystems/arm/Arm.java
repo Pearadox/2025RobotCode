@@ -7,6 +7,7 @@ package frc.robot.subsystems.arm;
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants;
+import frc.robot.RobotContainer;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.SimulationConstants;
@@ -73,14 +74,17 @@ public class Arm extends SubsystemBase {
                 }
             } else if (armMode == ArmMode.L2) {
                 setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + armAdjust;
+                //setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.L2_HEIGHT) + armAdjust;
             } else if (armMode == ArmMode.L3) {
                 setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + armAdjust;
+                //setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.L3_HEIGHT) + armAdjust;
 
                 if (Constants.currentMode == Constants.Mode.SIM) {
                     setpoint += 1;
                 }
             } else if (armMode == ArmMode.L4) {
                 setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + armAdjust;
+                //setpoint = RobotContainer.align.getArmAngleRots(AlignConstants.L4_HEIGHT) + armAdjust;
             }
         } else if (!isCoral) {
             if (armMode == ArmMode.Stowed) {
