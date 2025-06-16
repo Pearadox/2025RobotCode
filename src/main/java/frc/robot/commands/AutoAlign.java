@@ -74,10 +74,12 @@ public class AutoAlign {
 
     public AutoAlign(Supplier<Pose2d> poseSupplier) {
         this.poseSupplier = poseSupplier;
-
+        
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
         rotationController.setTolerance(Units.degreesToRadians(3));
         translationController.setTolerance(Units.inchesToMeters(4));
+
+        setTagIDs(true);
     }
 
     private Pose2d getTagPose(int tagID) {
