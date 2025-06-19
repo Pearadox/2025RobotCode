@@ -52,6 +52,7 @@ public class Robot extends LoggedRobot {
     @Override
     public void robotPeriodic() {
         CommandScheduler.getInstance().run();
+        MechVisualizer.getInstance().periodic();
     }
 
     @Override
@@ -106,7 +107,6 @@ public class Robot extends LoggedRobot {
 
     @Override
     public void simulationPeriodic() {
-        MechVisualizer.getInstance().periodic();
         m_robotContainer.displaySimFieldToAdvantageScope();
     }
 }

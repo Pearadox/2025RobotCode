@@ -2,7 +2,6 @@ package frc.robot.subsystems.led;
 
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
-import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -27,12 +26,15 @@ public class LEDStrip extends SubsystemBase {
         led.setLength(ledBuffer.getLength());
         led.setData(ledBuffer);
         led.start();
+
+        // can this be run periodically?
+        setGradient(Color.kGreen, Color.kGold);
     }
 
     public void periodic() {
-        if (DriverStation.isDisabled()) {
-            setGradient(Color.kGreen, Color.kGold);
-        }
+        // if (DriverStation.isDisabled()) {
+        //     setGradient(Color.kLightGreen, Color.kLightYellow);
+        // }
         led.setData(ledBuffer);
     }
 
