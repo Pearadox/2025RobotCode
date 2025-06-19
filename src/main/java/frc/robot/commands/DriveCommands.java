@@ -83,12 +83,10 @@ public class DriveCommands {
                     omega = Math.copySign(omega * omega, omega);
 
                     // Convert to field relative speeds & send command
-                    final double CAMP_DEMO_LIMIT = 0.5;
-
                     ChassisSpeeds speeds = new ChassisSpeeds(
-                            linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec() * CAMP_DEMO_LIMIT,
-                            linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec() * CAMP_DEMO_LIMIT,
-                            omega * drive.getMaxAngularSpeedRadPerSec() * CAMP_DEMO_LIMIT);
+                            linearVelocity.getX() * drive.getMaxLinearSpeedMetersPerSec(),
+                            linearVelocity.getY() * drive.getMaxLinearSpeedMetersPerSec(),
+                            omega * drive.getMaxAngularSpeedRadPerSec());
 
                     if (fieldOriented) {
                         boolean isFlipped = DriverStation.getAlliance().isPresent()
