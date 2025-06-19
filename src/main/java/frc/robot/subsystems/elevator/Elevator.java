@@ -79,8 +79,9 @@ public class Elevator extends SubsystemBase {
                         + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-                setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT)
-                        + elevatorOffset;
+                setpoint =
+                        Math.max(-1, ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT))
+                                + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 if (DriverStation.isAutonomous()) {
@@ -89,7 +90,8 @@ public class Elevator extends SubsystemBase {
                             - 0.4;
                 } else {
                     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
-                            + elevatorOffset;
+                            + elevatorOffset
+                            + 0.6;
                 }
             }
         } else if (!isCoral) {

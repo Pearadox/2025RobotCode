@@ -128,10 +128,9 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
-                vision = new Vision(
-                        drive::addVisionMeasurement,
-                        new VisionIOLimelight(camera0Name, drive::getRotation),
-                        new VisionIOLimelight(camera1Name, drive::getRotation));
+                vision =
+                        new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
+                // new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
                 endEffector = new EndEffector(new EndEffectorIOReal());

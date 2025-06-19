@@ -181,6 +181,12 @@ public class AutoAlign {
         for (int tag : FieldConstants.BLUE_REEF_TAG_IDS) {
             tagMap.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
         }
+        for (int tag : FieldConstants.RED_CORAL_STATION_TAG_IDS) {
+            tagMap.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
+        }
+        for (int tag : FieldConstants.BLUE_CORAL_STATION_TAG_IDS) {
+            tagMap.put(tag, VisionConstants.aprilTagLayout.getTagPose(tag).get());
+        }
         return tagMap;
     }
 

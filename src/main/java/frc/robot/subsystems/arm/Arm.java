@@ -74,7 +74,7 @@ public class Arm extends SubsystemBase {
             } else if (armMode == ArmMode.L2) {
                 setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + armAdjust;
             } else if (armMode == ArmMode.L3) {
-                setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + armAdjust;
+                setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + armAdjust - 2.5;
 
                 if (Constants.currentMode == Constants.Mode.SIM) {
                     setpoint += 1;
