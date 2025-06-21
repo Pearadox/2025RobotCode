@@ -335,19 +335,19 @@ public class RobotContainer {
 
         NamedCommands.registerCommand(
                 "Auto Align Left",
-                align.reefAlignLeft(drive).until(align::isAligned).withTimeout(3));
+                align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(3));
 
         NamedCommands.registerCommand(
                 "Auto Align Mid",
-                align.reefAlignMid(drive).until(align::isAligned).withTimeout(3));
+                align.reefAlignMid(drive).until(align::isAlignedDebounced).withTimeout(3));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
-                align.reefAlignRight(drive).until(align::isAligned).withTimeout(3));
+                align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(3));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
-                align.stationAlign(drive).until(align::isAligned).withTimeout(3));
+                align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(3));
 
         NamedCommands.registerCommand(
                 "Set Algae",
