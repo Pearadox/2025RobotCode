@@ -128,8 +128,10 @@ public class RobotContainer {
                         new ModuleIOTalonFX(TunerConstants.FrontRight),
                         new ModuleIOTalonFX(TunerConstants.BackLeft),
                         new ModuleIOTalonFX(TunerConstants.BackRight));
-                vision =
-                        new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
+                vision = new Vision(
+                        drive::addVisionMeasurement,
+                        new VisionIOLimelight(camera0Name, drive::getRotation),
+                        new VisionIOLimelight(camera1Name, drive::getRotation));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
@@ -238,11 +240,11 @@ public class RobotContainer {
 
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
-                .andThen(new InstantCommand(() -> endEffector.setCoral()))
-                .andThen(new InstantCommand(() -> endEffector.stop())));
+                .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
+                .andThen(new InstantCommand(() -> endEffector.stopEE())));
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
-                .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
 
         climberAdjustUp_PovUp
                 .whileTrue(new RunCommand(() -> climber.climberUp()))
@@ -308,9 +310,9 @@ public class RobotContainer {
                                 new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralOut()));
+        NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.outtakeCoral()));
         NamedCommands.registerCommand(
-                "Intake", new RunCommand(() -> endEffector.coralIn()).until(() -> endEffector.hasCoral()));
+                "Intake", new RunCommand(() -> endEffector.intakeCoral()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
         NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
         NamedCommands.registerCommand(
@@ -344,11 +346,11 @@ public class RobotContainer {
                 "Set Algae",
                 new InstantCommand(() -> elevator.setAlgae())
                         .andThen(new InstantCommand(() -> arm.setAlgae()))
-                        .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+                        .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
 
         NamedCommands.registerCommand(
-                "Algae Intake", new RunCommand(() -> endEffector.algaeIn()).until(() -> endEffector.hasCoral()));
-        NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.algaeOut()));
+                "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() -> endEffector.hasCoral()));
+        NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.outtakeAlgae()));
     }
 
     // ----------------------------------- Default Commands -------------------------------- //

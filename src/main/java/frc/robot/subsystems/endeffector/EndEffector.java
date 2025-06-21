@@ -14,12 +14,10 @@ import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
 public class EndEffector extends SubsystemBase {
-    private boolean isCoral = true;
+    private boolean isCoralMode = true;
     private boolean isHoldingCoral = true;
     private boolean isHoldingAlgae = false;
-    private boolean holdSpeed = false;
-
-    private double lastRot = 0;
+    private boolean needsHoldSpeed = false;
 
     private EndEffectorIO io;
     private final EndEffectorIOInputsAutoLogged inputs = new EndEffectorIOInputsAutoLogged();
@@ -27,7 +25,7 @@ public class EndEffector extends SubsystemBase {
     public EndEffector(EndEffectorIO io) {
         this.io = io;
 
-        SmarterDashboard.putNumber("EE/EE Speed", isCoral ? -0.15 : 0.1);
+        SmarterDashboard.putNumber("EE/EE Speed", isCoralMode ? -0.15 : 0.1);
     }
 
     @Override
@@ -40,56 +38,57 @@ public class EndEffector extends SubsystemBase {
         SmarterDashboard.putBoolean("EE/Holding Coral", isHoldingCoral);
         SmarterDashboard.putBoolean("EE/Holding Algae", isHoldingAlgae);
         SmarterDashboard.putBoolean("EE/Has Coral", hasCoral());
-        SmarterDashboard.putBoolean("EE/Holding Speed", holdSpeed);
+        SmarterDashboard.putBoolean("EE/Holding Speed", needsHoldSpeed);
     }
 
     public void collectGamePiece() {
-        if (DriverStation.isTeleop()) {
-            if (RobotContainer.driverController.getLeftBumperButton()) {
-                if (isCoral) {
-                    coralIn();
-                    holdSpeed = false;
-                } else if (!isCoral) {
-                    algaeIn();
-                    holdSpeed = true;
-                }
-                isHoldingCoral = false;
-            } else if (RobotContainer.driverController.getRightBumperButton()) {
-                if (isCoral) {
-                    coralOut();
-                } else if (!isCoral) {
-                    algaeOut();
-                }
+        if (DriverStation.isAutonomous()) return;
 
-                holdSpeed = false;
-                isHoldingCoral = false;
+        boolean isIntaking = RobotContainer.driverController.getLeftBumperButton();
+        boolean isOuttaking = RobotContainer.driverController.getRightBumperButton();
+
+        if (isIntaking) {
+            if (isCoralMode) {
+                intakeCoral();
+                needsHoldSpeed = false;
             } else {
-                if (!holdSpeed) {
-                    stop();
-                }
-                if (isCoral) {
-                    holdCoral();
-                }
+                intakeAlgae();
+                needsHoldSpeed = true;
             }
+            isHoldingCoral = false;
+            return;
         }
+
+        if (isOuttaking) {
+            if (isCoralMode) {
+                outtakeCoral();
+            } else {
+                outtakeAlgae();
+            }
+            needsHoldSpeed = false;
+            isHoldingCoral = false;
+            return;
+        }
+
+        // Idle behavior
+        if (!needsHoldSpeed) stopEE();
+        if (isCoralMode) holdCoral();
     }
 
-    // scores
-    public void coralIn() {
+    public void intakeCoral() {
         io.setSpeed(EndEffectorConstants.PULL_SPEED);
         setLastRot();
     }
 
-    public void algaeIn() {
+    public void intakeAlgae() {
         io.setSpeed(EndEffectorConstants.ALGAE_PULL_SPEED);
     }
 
-    public void algaeOut() {
+    public void outtakeAlgae() {
         io.setSpeed(EndEffectorConstants.ALGAE_PUSH_SPEED);
     }
 
-    // intakes
-    public void coralOut() {
+    public void outtakeCoral() {
         if (Arm.getArmMode() == ArmMode.L2 || Arm.getArmMode() == ArmMode.Stowed) {
             io.setSpeed(EndEffectorConstants.L2_PUSH_SPEED);
         } else if (Arm.getArmMode() == ArmMode.L3) {
@@ -111,16 +110,16 @@ public class EndEffector extends SubsystemBase {
     }
 
     public void stopCoral() {
-        stop();
+        stopEE();
         isHoldingCoral = true;
     }
 
     public void stopAlgae() {
-        stop();
+        stopEE();
         isHoldingAlgae = true;
     }
 
-    public void stop() {
+    public void stopEE() {
         io.setSpeed(0);
     }
 
@@ -136,19 +135,17 @@ public class EndEffector extends SubsystemBase {
         isHoldingCoral = hold;
     }
 
-    public void setLastRot() {
-        lastRot = inputs.positionRots;
+    public void setLastRot() {}
+
+    public void setCoralMode() {
+        isCoralMode = true;
     }
 
-    public void setCoral() {
-        isCoral = true;
+    public void setAlgaeMode() {
+        isCoralMode = false;
     }
 
-    public void setAlgae() {
-        isCoral = false;
-    }
-
-    public boolean isCoral() {
-        return isCoral;
+    public boolean getIsCoralMode() {
+        return isCoralMode;
     }
 }

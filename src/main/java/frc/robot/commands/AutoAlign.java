@@ -51,6 +51,10 @@ public class AutoAlign {
 
     @AutoLogOutput
     @Getter
+    private boolean isReef = true;
+
+    @AutoLogOutput
+    @Getter
     private double yVelocity = 0;
 
     @AutoLogOutput
@@ -75,6 +79,8 @@ public class AutoAlign {
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
         rotationController.setTolerance(Units.degreesToRadians(3));
         translationController.setTolerance(Units.inchesToMeters(4));
+
+        setTagIDs(isReef);
     }
 
     private Pose2d getTagPose(int tagID) {
@@ -153,6 +159,7 @@ public class AutoAlign {
         } else {
             tagIDs = isReef ? FieldConstants.BLUE_REEF_TAG_IDS : FieldConstants.BLUE_CORAL_STATION_TAG_IDS;
         }
+        this.isReef = isReef;
     }
 
     public void setBranchTx(double tx) {

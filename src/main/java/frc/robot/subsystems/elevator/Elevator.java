@@ -35,13 +35,13 @@ public class Elevator extends SubsystemBase {
     private ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
-    /** Creates a new Elevator. */
     public Elevator(ElevatorIO io) {
         this.io = io;
     }
 
     @Override
     public void periodic() {
+
         io.updateInputs(inputs);
         Logger.processInputs("Elevator", inputs);
 
@@ -54,8 +54,6 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putNumber("Elevator/Velocity (in/sec)", getElevatorVelocityInchesPerSecond());
         SmarterDashboard.putNumber("Elevator/Position Rots", getElevatorPositionRots());
         SmarterDashboard.putNumber("Elevator/Velocity (rot/sec)", getElevatorVelocity_RotsPerSecond());
-
-        // setAligning(!RobotContainer.align.isAligned());
     }
 
     public void setElevatorPosition() {
