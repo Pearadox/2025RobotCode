@@ -5,8 +5,12 @@
 package frc.robot.subsystems.elevator;
 
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.RobotContainer;
+import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ElevatorConstants;
+// import frc.robot.commands.InverseKinematics;
 import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
@@ -35,13 +39,13 @@ public class Elevator extends SubsystemBase {
     private ElevatorIO io;
     private final ElevatorIOInputsAutoLogged inputs = new ElevatorIOInputsAutoLogged();
 
+    /** Creates a new Elevator. */
     public Elevator(ElevatorIO io) {
         this.io = io;
     }
 
     @Override
     public void periodic() {
-
         io.updateInputs(inputs);
         Logger.processInputs("Elevator", inputs);
 
@@ -54,6 +58,8 @@ public class Elevator extends SubsystemBase {
         SmarterDashboard.putNumber("Elevator/Velocity (in/sec)", getElevatorVelocityInchesPerSecond());
         SmarterDashboard.putNumber("Elevator/Position Rots", getElevatorPositionRots());
         SmarterDashboard.putNumber("Elevator/Velocity (rot/sec)", getElevatorVelocity_RotsPerSecond());
+
+        // setAligning(!RobotContainer.align.isAligned());
     }
 
     public void setElevatorPosition() {
@@ -70,31 +76,22 @@ public class Elevator extends SubsystemBase {
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
-                // setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT)
-                //         + elevatorOffset;
-
-                setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
+                //setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + elevatorOffset; 
+                setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L2_HEIGHT) + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
-                // setpoint =
-                //         Math.max(-1, ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ,
-                // AlignConstants.L3_HEIGHT))
-                //                 + elevatorOffset;
-
-                setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+                //setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L3_HEIGHT) + elevatorOffset; 
+                setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L3_HEIGHT) + elevatorOffset;
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
-                // if (DriverStation.isAutonomous()) {
-                //     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
-                //             + elevatorOffset
-                //             - 0.4;
-                // } else {
-                //     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
-                //             + elevatorOffset
-                //             + 0.6;
-                // }
-
-                setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+                if (DriverStation.isAutonomous()) {
+                    //setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
+                } else {
+                    //setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + elevatorOffset;
+                    setpoint = RobotContainer.align.getElevatorHeightRots(AlignConstants.L4_HEIGHT) + elevatorOffset - 0.4;
+                }
+            
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
