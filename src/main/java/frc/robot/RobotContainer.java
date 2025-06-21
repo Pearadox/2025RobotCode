@@ -209,6 +209,13 @@ public class RobotContainer {
         reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
         stationAlign_PovUp.whileTrue(align.stationAlign(drive));
 
+        strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
+                drive,
+                () -> 0,
+                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()),
+                () -> 0,
+                false));
+
         // ------------------------------- Operator Bindings ------------------------------- //
 
         homeElevator_Start

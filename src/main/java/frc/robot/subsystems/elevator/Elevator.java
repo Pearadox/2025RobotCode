@@ -75,7 +75,6 @@ public class Elevator extends SubsystemBase {
                 //         + elevatorOffset;
                 setpoint = ElevatorConstants.LEVEL_TWO_ROT + elevatorOffset;
 
-
             } else if (elevatorMode == ElevatorMode.LEVEL_THREE) {
                 // setpoint =
                 //         Math.max(-1, ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ,
@@ -83,9 +82,8 @@ public class Elevator extends SubsystemBase {
                 //                 + elevatorOffset;
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
 
-
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
-                        // if (DriverStation.isAutonomous()) {
+                // if (DriverStation.isAutonomous()) {
                 //     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
                 //             + elevatorOffset
                 //             - 0.4;
@@ -96,7 +94,6 @@ public class Elevator extends SubsystemBase {
                 // }
 
                 setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
-            
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {

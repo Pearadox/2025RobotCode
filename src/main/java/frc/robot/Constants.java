@@ -165,14 +165,14 @@ public class Constants {
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
-        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(15);
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(17);
 
         public static final double STATION_ALIGN_TX = 0.07;
         public static final double STATION_ALIGN_TZ = 0;
 
         public static final double REEF_kP = 1.; // Tune all PID values
         public static final double REEF_kI = 0;
-        public static final double REEF_kD = 0.01;
+        public static final double REEF_kD = 0.0;
 
         public static final double REEF_Forward_kP = 0.2; // Tune all PID values
 
@@ -358,7 +358,7 @@ public class Constants {
         public static final double PULL_SPEED = -0.3;
 
         public static final double PUSH_SPEED = 0.5; // 0.3
-        public static final double L3_PUSH_SPEED = 0.45; // 0.3
+        public static final double L3_PUSH_SPEED = 0.3; // 0.3
         public static final double L2_PUSH_SPEED = 0.2; // 0.3
         public static final double ALGAE_PULL_SPEED = 0.8;
         public static final double ALGAE_PUSH_SPEED = -1.0;

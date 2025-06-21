@@ -223,5 +223,4 @@ public class AutoAlign {
     public Command stationAlign(Drive drive) {
         return getAlignCommand(drive, false, AlignConstants.STATION_ALIGN_TX, "Station");
     }
-
 }
