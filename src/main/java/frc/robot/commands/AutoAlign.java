@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.*;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -27,6 +29,8 @@ public class AutoAlign {
             new PIDController(AlignConstants.REEF_kP, AlignConstants.REEF_kI, AlignConstants.REEF_kD);
     private final PIDController rotationController =
             new PIDController(AlignConstants.ROT_REEF_kP, AlignConstants.ROT_REEF_kI, AlignConstants.ROT_REEF_kD);
+
+    private Debouncer isAlignedDebouncer = new Debouncer(0.2);
 
     @AutoLogOutput
     private double distanceError = 0;
@@ -136,7 +140,7 @@ public class AutoAlign {
     }
 
     public void updateVelocities() {
-        if (isAligned() && lastAlignCommand.equals(currentAlignCommand)) {
+        if (isAligned()) {
             xVelocity = 0;
             yVelocity = 0;
             angularVelocity = 0;
@@ -168,7 +172,12 @@ public class AutoAlign {
 
     @AutoLogOutput(key = "AutoAlign/isAligned")
     public boolean isAligned() {
-        return translationController.atSetpoint() && rotationController.atSetpoint();
+        return translationController.atSetpoint() && rotationController.atSetpoint() && lastAlignCommand.equals(currentAlignCommand);
+    }
+
+    @AutoLogOutput(key = "AutoAlign/isAlignedDebounced")
+    public boolean isAlignedDebounced() {
+        return isAlignedDebouncer.calculate(isAligned());
     }
 
     public void reset() {
@@ -199,7 +208,7 @@ public class AutoAlign {
 
     private Command getAlignCommand(Drive drive, boolean isReef, double tx, String curCommand) {
         return new InstantCommand(() -> {
-                    setCurrentAlignCommand(curCommand);
+                    setCurrentAlignCommand(curCommand + " " + Timer.getFPGATimestamp());
                     setTagIDs(isReef);
                     setBranchTx(tx);
                 })
