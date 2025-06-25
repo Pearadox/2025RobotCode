@@ -35,21 +35,41 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "GH_BACK"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Set Algae"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "LevelTwo"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "GH_BACK"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.25
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Set Algae"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LevelTwo"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -96,15 +116,35 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "LevelThree"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "2B_IJ"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BARGE_IJ"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LevelThree"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -127,15 +167,35 @@
           }
         },
         {
-          "type": "named",
+          "type": "parallel",
           "data": {
-            "name": "LevelFour"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "IJ_BARGE"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "IJ_BARGE"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LevelFour"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         },
         {
@@ -145,15 +205,41 @@
           }
         },
         {
-          "type": "path",
+          "type": "parallel",
           "data": {
-            "pathName": "BARGE_BACK"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "LevelStation"
+            "commands": [
+              {
+                "type": "path",
+                "data": {
+                  "pathName": "BARGE_BACK"
+                }
+              },
+              {
+                "type": "sequential",
+                "data": {
+                  "commands": [
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.0
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Set Coral"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LevelStation"
+                      }
+                    }
+                  ]
+                }
+              }
+            ]
           }
         }
       ]
