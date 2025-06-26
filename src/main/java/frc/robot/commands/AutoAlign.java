@@ -1,8 +1,10 @@
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
 import edu.wpi.first.wpilibj2.command.RunCommand;
@@ -11,6 +13,7 @@ import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.LoggedTunableNumber;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Supplier;
@@ -23,10 +26,23 @@ public class AutoAlign {
     @Setter
     private Supplier<Pose2d> poseSupplier;
 
+    private static LoggedTunableNumber tunablekP = new LoggedTunableNumber("Align/kP", AlignConstants.REEF_kP);
+    private static LoggedTunableNumber tunablekI = new LoggedTunableNumber("Align/kI", AlignConstants.REEF_kI);
+    private static LoggedTunableNumber tunablekD = new LoggedTunableNumber("Align/kD", AlignConstants.REEF_kD);
+
+    private static LoggedTunableNumber tunableRotkP =
+            new LoggedTunableNumber("Align/Rot kP", AlignConstants.ROT_REEF_kP);
+    private static LoggedTunableNumber tunableRotkI =
+            new LoggedTunableNumber("Align/Rot kI", AlignConstants.ROT_REEF_kI);
+    private static LoggedTunableNumber tunableRotkD =
+            new LoggedTunableNumber("Align/Rot kD", AlignConstants.ROT_REEF_kD);
+
     private final PIDController translationController =
             new PIDController(AlignConstants.REEF_kP, AlignConstants.REEF_kI, AlignConstants.REEF_kD);
     private final PIDController rotationController =
             new PIDController(AlignConstants.ROT_REEF_kP, AlignConstants.ROT_REEF_kI, AlignConstants.ROT_REEF_kD);
+
+    private Debouncer isAlignedDebouncer = new Debouncer(0.2);
 
     @AutoLogOutput
     private double distanceError = 0;
@@ -77,8 +93,8 @@ public class AutoAlign {
         this.poseSupplier = poseSupplier;
 
         rotationController.enableContinuousInput(-Math.PI, Math.PI);
-        rotationController.setTolerance(Units.degreesToRadians(3));
-        translationController.setTolerance(Units.inchesToMeters(4));
+        rotationController.setTolerance(AlignConstants.ALIGN_ROT_TOLERANCE);
+        translationController.setTolerance(AlignConstants.ALIGN_TRANSLATION_TOLERANCE);
 
         setTagIDs(isReef);
     }
@@ -112,7 +128,18 @@ public class AutoAlign {
         currentPose = poseSupplier.get();
         int currentTagID = findClosestTag(tagIDs, currentPose);
         targetPose = getTagPose(currentTagID)
-                .transformBy(new Transform2d(new Translation2d(currentBranchTz, currentBranchTx), new Rotation2d()));
+                .transformBy(new Transform2d(
+                        new Translation2d(currentBranchTz, currentBranchTx),
+                        isReef ? Rotation2d.kZero : Rotation2d.k180deg));
+
+        if (tunablekP.hasChanged(hashCode()) || tunablekI.hasChanged(hashCode()) || tunablekD.hasChanged(hashCode())) {
+            translationController.setPID(tunablekP.get(), tunablekI.get(), tunablekD.get());
+        }
+        if (tunableRotkP.hasChanged(hashCode())
+                || tunableRotkI.hasChanged(hashCode())
+                || tunableRotkD.hasChanged(hashCode())) {
+            rotationController.setPID(tunableRotkP.get(), tunableRotkI.get(), tunableRotkD.get());
+        }
 
         updateControllerOutputs();
         updateVelocities();
@@ -128,7 +155,7 @@ public class AutoAlign {
         Rotation2d directionToTarget = currentToTarget.getAngle();
         if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
 
-        double translationMagnitude = translationController.calculate(0, distanceError);
+        double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.8, 0.8);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
 
         rotationOutput = rotationController.calculate(
@@ -136,7 +163,7 @@ public class AutoAlign {
     }
 
     public void updateVelocities() {
-        if (isAligned() && lastAlignCommand.equals(currentAlignCommand)) {
+        if (isAlignedDebounced()) {
             xVelocity = 0;
             yVelocity = 0;
             angularVelocity = 0;
@@ -145,9 +172,9 @@ public class AutoAlign {
             yVelocity = translationOutput.getY();
             angularVelocity = rotationOutput;
 
-            xVelocity += 0.1 * Math.signum(xVelocity);
-            yVelocity += 0.1 * Math.signum(yVelocity);
-            angularVelocity += 0.1 * Math.signum(angularVelocity);
+            xVelocity += AlignConstants.ALIGN_KS * Math.signum(xVelocity);
+            yVelocity += AlignConstants.ALIGN_KS * Math.signum(yVelocity);
+            angularVelocity += AlignConstants.ALIGN_KS * Math.signum(angularVelocity);
         }
 
         lastAlignCommand = currentAlignCommand;
@@ -168,7 +195,14 @@ public class AutoAlign {
 
     @AutoLogOutput(key = "AutoAlign/isAligned")
     public boolean isAligned() {
-        return translationController.atSetpoint() && rotationController.atSetpoint();
+        return translationController.atSetpoint()
+                && rotationController.atSetpoint()
+                && lastAlignCommand.equals(currentAlignCommand);
+    }
+
+    @AutoLogOutput(key = "AutoAlign/isAlignedDebounced")
+    public boolean isAlignedDebounced() {
+        return isAlignedDebouncer.calculate(isAligned());
     }
 
     public void reset() {
@@ -199,13 +233,13 @@ public class AutoAlign {
 
     private Command getAlignCommand(Drive drive, boolean isReef, double tx, String curCommand) {
         return new InstantCommand(() -> {
-                    setCurrentAlignCommand(curCommand);
+                    setCurrentAlignCommand(curCommand + " " + Timer.getFPGATimestamp());
                     setTagIDs(isReef);
                     setBranchTx(tx);
                 })
-                .andThen(DriveCommands.joystickDrive(
-                                drive, () -> getXVelocity(), () -> getYVelocity(), () -> getAngularVelocity(), true)
-                        .alongWith(new RunCommand(() -> updateFieldRelativeAlignSpeeds())));
+                .andThen(new RunCommand(() -> updateFieldRelativeAlignSpeeds())
+                        .alongWith(DriveCommands.joystickDrive(
+                                drive, () -> getXVelocity(), () -> getYVelocity(), () -> getAngularVelocity(), true)));
     }
 
     public Command reefAlignLeft(Drive drive) {

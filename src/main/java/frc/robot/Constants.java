@@ -148,7 +148,7 @@ public class Constants {
         // public static final double ALIGN_STRAFE_KI = 0.001;
         // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
 
-        public static final double ALIGN_KS = 0.02; // 0.009
+        public static final double ALIGN_KS = 0.1; // 0.009
 
         // tx and ty tolerances with setpoint
         public static final double ALIGN_TOLERANCE_PIXELS = 0.5;
@@ -165,19 +165,18 @@ public class Constants {
         public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
-        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(17);
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
+        public static final double REEF_STATION_ALIGN_TZ = Units.inchesToMeters(12);
 
         public static final double STATION_ALIGN_TX = 0.07;
         public static final double STATION_ALIGN_TZ = 0;
 
-        public static final double REEF_kP = 1.; // Tune all PID values
+        public static final double REEF_kP = 1.5; // try raising
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0.0;
-
-        public static final double REEF_Forward_kP = 0.2; // Tune all PID values
-
+        
         // for some reason, 0.02 is much too low in sim??
-        public static final double ROT_REEF_kP = Units.radiansToDegrees(0.018);
+        public static final double ROT_REEF_kP = 1.1;
         public static final double ROT_REEF_kI = 0;
         public static final double ROT_REEF_kD = 0;
 
@@ -196,6 +195,9 @@ public class Constants {
         public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
         // from the arm's pivot point to floor
         public static final double ELEVATOR_STARTING_HEIGHT = 1.0023799104; // Units.inchesToMeters(39);
+
+        public static final double ALIGN_ROT_TOLERANCE = Units.degreesToRadians(3);
+        public static final double ALIGN_TRANSLATION_TOLERANCE = Units.inchesToMeters(4);
     }
 
     public static final class ElevatorConstants {
