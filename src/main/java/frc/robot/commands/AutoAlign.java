@@ -143,19 +143,19 @@ public class AutoAlign {
     public double getAlignStrafeSpeedPercent(double setPoint, int tagID, String llName) {
         // 3D transform of the robot in the coordinate system of the primary in-view AprilTag
         // (array (6)) [tx, ty, tz, pitch, yaw, roll] (meters, degrees)
-        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
-        double tx = targetRelativeRobotPose[0];
-        double txError = tx - setPoint;
+        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
+        // double tx = targetRelativeRobotPose[0];
+        // double txError = tx - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
 
-        if (!llIsValid(llName, tagID)) {
+        // if (!llIsValid(llName, tagID)) {
             alignSpeedStrafe = reefStrafeSpeedController.calculate(offset.getY(), setPoint);
             alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
-        } else {
-            alignSpeedStrafe = reefStrafeSpeedController.calculate(tx, setPoint);
-            alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
-        }
+        // } else {
+        //     alignSpeedStrafe = reefStrafeSpeedController.calculate(tx, setPoint);
+        //     alignSpeedStrafe += AlignConstants.ALIGN_KS * Math.signum(alignSpeedStrafe);
+        // }
 
         // Logger.recordOutput("Align/Strafe Speed", alignSpeedStrafe);
         // Logger.recordOutput("Align/Strafe Setpoint", setPoint);
@@ -198,9 +198,9 @@ public class AutoAlign {
 
     public double getAlignForwardSpeedPercent(double setPoint, int tagID, String llName) {
 
-        double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
-        double tz = targetRelativeRobotPose[2];
-        double tzError = tz - setPoint;
+        // double[] targetRelativeRobotPose = LimelightHelpers.getBotPose_TargetSpace(llName);
+        // double tz = targetRelativeRobotPose[2];
+        // double tzError = tz - setPoint;
 
         Transform2d offset = poseSupplier.get().minus(getTagPose(tagID));
         this.horizDisplacement = offset.getX();
@@ -209,21 +209,21 @@ public class AutoAlign {
             return 0;
         }
 
-        if (!llIsValid(llName, tagID)) {
+        // if (!llIsValid(llName, tagID)) {
             alignSpeedForward = reefForwardSpeedController.calculate(offset.getX(), setPoint);
-        } else {
-            if (tagID == currentCSAlignTagID) {
-                setPoint = 0;
-            }
-            alignSpeedForward = -reefForwardSpeedController.calculate(tz, setPoint);
-        }
+        // } else {
+        //     if (tagID == currentCSAlignTagID) {
+        //         setPoint = 0;
+        //     }
+        //     alignSpeedForward = -reefForwardSpeedController.calculate(tz, setPoint);
+        // }
 
         isAligned();
         isAlignedTest();
 
         Logger.recordOutput("Align/Forward Speed", alignSpeedForward);
-        Logger.recordOutput("Align/ty", tz);
-        Logger.recordOutput("Align/ty Error", tzError);
+        // Logger.recordOutput("Align/ty", tz);
+        // Logger.recordOutput("Align/ty Error", tzError);
         Logger.recordOutput("Align/x", offset.getX());
         Logger.recordOutput("Align/y", offset.getY());
         // Logger.recordOutput("Align/Offset", offset);
