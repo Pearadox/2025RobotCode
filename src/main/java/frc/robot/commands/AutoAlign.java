@@ -1,5 +1,6 @@
 package frc.robot.commands;
 
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.filter.Debouncer;
@@ -12,7 +13,7 @@ import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.Constants.VisionConstants;
 import frc.robot.RobotContainer;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.HashMap;
 import java.util.Map;
@@ -231,30 +232,36 @@ public class AutoAlign {
         return tagMap;
     }
 
-    private Command getAlignCommand(Drive drive, boolean isReef, double tx, String curCommand) {
+    private Command getAlignCommand(
+            CommandSwerveDrivetrain drive,
+            SwerveRequest.FieldCentric req,
+            boolean isReef,
+            double tx,
+            String curCommand) {
         return new InstantCommand(() -> {
                     setCurrentAlignCommand(curCommand + " " + Timer.getFPGATimestamp());
                     setTagIDs(isReef);
                     setBranchTx(tx);
                 })
                 .andThen(new RunCommand(() -> updateFieldRelativeAlignSpeeds())
-                        .alongWith(DriveCommands.joystickDrive(
-                                drive, () -> getXVelocity(), () -> getYVelocity(), () -> getAngularVelocity(), true)));
+                        .alongWith(drive.applyRequest(() -> req.withVelocityX(getXVelocity() * getXVelocity())
+                                .withVelocityY(getYVelocity() * getYVelocity())
+                                .withRotationalRate(getAngularVelocity() * getAngularVelocity()))));
     }
 
-    public Command reefAlignLeft(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX, "Left Branch");
+    public Command reefAlignLeft(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
+        return getAlignCommand(drive, req, true, AlignConstants.REEF_ALIGN_LEFT_TX, "Left Branch");
     }
 
-    public Command reefAlignMid(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_MID_TX, "Mid Reef");
+    public Command reefAlignMid(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
+        return getAlignCommand(drive, req, true, AlignConstants.REEF_ALIGN_MID_TX, "Mid Reef");
     }
 
-    public Command reefAlignRight(Drive drive) {
-        return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_RIGHT_TX, "Right Branch");
+    public Command reefAlignRight(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
+        return getAlignCommand(drive, req, true, AlignConstants.REEF_ALIGN_RIGHT_TX, "Right Branch");
     }
 
-    public Command stationAlign(Drive drive) {
-        return getAlignCommand(drive, false, AlignConstants.STATION_ALIGN_TX, "Station");
+    public Command stationAlign(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
+        return getAlignCommand(drive, req, false, AlignConstants.STATION_ALIGN_TX, "Station");
     }
 }

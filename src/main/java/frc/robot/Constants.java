@@ -174,7 +174,7 @@ public class Constants {
         public static final double REEF_kP = 1.5; // try raising
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0.0;
-        
+
         // for some reason, 0.02 is much too low in sim??
         public static final double ROT_REEF_kP = 1.1;
         public static final double ROT_REEF_kI = 0;

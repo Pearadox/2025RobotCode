@@ -3,6 +3,8 @@ package frc.robot;
 import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import com.pathplanner.lib.events.EventTrigger;
@@ -24,9 +26,9 @@ import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
-import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ElevatorHold;
 import frc.robot.generated.TunerConstants;
+import frc.robot.subsystems.CommandSwerveDrivetrain;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.Arm.ArmMode;
 import frc.robot.subsystems.arm.ArmIO;
@@ -36,11 +38,6 @@ import frc.robot.subsystems.climber.Climber;
 import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOReal;
 import frc.robot.subsystems.climber.ClimberIOSim;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOReal;
@@ -57,13 +54,41 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private Drive drive;
+    //     private Drive drive;
     private Elevator elevator;
     public static Arm arm;
     private EndEffector endEffector;
     private Vision vision;
     private Climber climber;
     public static AutoAlign align;
+
+    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
+
+    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+    // speed
+    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+    // second max angular velocity
+
+    /* Setting up bindings for necessary control of the swerve drive platform */
+    private final SwerveRequest.FieldCentric drive = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1)
+            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors
+    private final SwerveRequest.RobotCentric robotOrientedDrive = new SwerveRequest.RobotCentric()
+            .withDeadband(MaxSpeed * 0.1)
+            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors
+    private final SwerveRequest.FieldCentricFacingAngle pointTowards = new SwerveRequest.FieldCentricFacingAngle()
+            .withDeadband(MaxSpeed * 0.1)
+            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive
+    // motors;
+    private final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    private final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+    private final Telemetry logger = new Telemetry(MaxSpeed);
 
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -122,14 +147,10 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
 
             case REAL:
-                drive = new Drive(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                        new ModuleIOTalonFX(TunerConstants.FrontRight),
-                        new ModuleIOTalonFX(TunerConstants.BackLeft),
-                        new ModuleIOTalonFX(TunerConstants.BackRight));
-                vision =
-                        new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
+                vision = new Vision(
+                        drivetrain::addVisionMeasurement,
+                        new VisionIOLimelight(
+                                camera0Name, () -> drivetrain.getState().Pose.getRotation()));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
@@ -141,13 +162,6 @@ public class RobotContainer {
 
             case SIM:
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
-
-                drive = new Drive(
-                        new GyroIO() {},
-                        new ModuleIOSim(TunerConstants.FrontLeft),
-                        new ModuleIOSim(TunerConstants.FrontRight),
-                        new ModuleIOSim(TunerConstants.BackLeft),
-                        new ModuleIOSim(TunerConstants.BackRight));
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(
@@ -155,7 +169,7 @@ public class RobotContainer {
                         () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
-                vision = new Vision(drive::addVisionMeasurement); // , new
+                vision = new Vision(drivetrain::addVisionMeasurement); // , new
                 // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
                 break;
@@ -170,7 +184,7 @@ public class RobotContainer {
                 break;
         }
 
-        align = new AutoAlign(drive::getPose);
+        align = new AutoAlign(() -> drivetrain.getState().Pose);
 
         setDefaultCommands();
         registerNamedCommands();
@@ -196,23 +210,31 @@ public class RobotContainer {
 
         // Reset gyro / odometry
         final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
-                ? () -> drive.setPose(
+                ? () -> drivetrain.resetPose(
                         driveSimulation
                                 .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
-                : () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
-        resetHeading_Start.onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+                : () -> drivetrain.resetPose(
+                        new Pose2d(drivetrain.getState().Pose.getTranslation(), new Rotation2d())); // zero gyro
+        resetHeading_Start.onTrue(Commands.runOnce(resetGyro, drivetrain).ignoringDisable(true));
 
-        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
-        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
-        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
-        stationAlign_PovUp.whileTrue(align.stationAlign(drive));
+        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drivetrain, drive));
+        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drivetrain, drive));
+        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drivetrain, drive));
+        stationAlign_PovUp.whileTrue(align.stationAlign(drivetrain, drive));
 
-        strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
-                drive,
-                () -> 0,
-                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()),
-                () -> 0,
-                false));
+        strafe_Triggers.whileTrue(drivetrain.applyRequest(
+                () -> robotOrientedDrive
+                        .withVelocityX(-driverController.getLeftY() * MaxSpeed) // Drive forward
+                        // with negative
+                        // Y
+                        // (forward)
+                        .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
+                                * 0.1
+                                * MaxSpeed) // Drive left with negative X (left)
+                        .withRotationalRate(-driverController.getRightX() * MaxAngularRate) // Drive
+                // counterclockwise
+                // with negative X (left)
+                ));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 
@@ -329,23 +351,34 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> elevator.zeroElevator()))
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.stopWithX()));
+        NamedCommands.registerCommand(
+                "Stop",
+                new InstantCommand(() -> drivetrain.applyRequest(
+                        () -> drive.withVelocityX(0).withVelocityY(0).withRotationalRate(0))));
 
         NamedCommands.registerCommand(
                 "Auto Align Left",
-                align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
+                align.reefAlignLeft(drivetrain, drive)
+                        .until(align::isAlignedDebounced)
+                        .withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Auto Align Mid",
-                align.reefAlignMid(drive).until(align::isAlignedDebounced).withTimeout(2));
+                align.reefAlignMid(drivetrain, drive)
+                        .until(align::isAlignedDebounced)
+                        .withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
-                align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(2));
+                align.reefAlignRight(drivetrain, drive)
+                        .until(align::isAlignedDebounced)
+                        .withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
-                align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(2));
+                align.stationAlign(drivetrain, drive)
+                        .until(align::isAlignedDebounced)
+                        .withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Set Algae",
@@ -361,12 +394,20 @@ public class RobotContainer {
     // ----------------------------------- Default Commands -------------------------------- //
 
     public void setDefaultCommands() {
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> -driverController.getRightX(),
-                true));
+        drivetrain.setDefaultCommand(
+                // Drivetrain will execute this command periodically
+                drivetrain.applyRequest(
+                        () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
+                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
+                                        * MaxSpeed) // Drive left with negative
+                                // X (left)
+                                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
+                                        * MaxAngularRate) // Drive
+                        // counterclockwise
+                        // with negative X
+                        // (left)
+                        ));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
@@ -378,7 +419,7 @@ public class RobotContainer {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
         align.setPoseSupplier(driveSimulation::getSimulatedDriveTrainPose);
-        drive.setPose(new Pose2d(12, 2, new Rotation2d()));
+        drivetrain.resetPose(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
         AlgaeHandler.getInstance().reset();
     }
