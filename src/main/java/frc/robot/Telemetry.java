@@ -104,7 +104,15 @@ public class Telemetry {
         driveTimestamp.set(state.Timestamp);
         driveOdometryFrequency.set(1.0 / state.OdometryPeriod);
 
-        // Logger.recordOutput("Telemetry/Pose", state.Pose);
+        // try {
+        //     if (state.Pose != null) {
+        //         Logger.recordOutput("Telemetry/Pose", state.Pose);
+        //     } else {
+        //         System.out.println("pose is null");
+        //     }
+        // } catch (Exception e) {
+        //     e.printStackTrace();
+        // }
         Logger.recordOutput("Telemetry/Speeds", state.Speeds);
         Logger.recordOutput("Telemetry/Module States", state.ModuleStates);
         Logger.recordOutput("Telemetry/Module Targets", state.ModuleTargets);

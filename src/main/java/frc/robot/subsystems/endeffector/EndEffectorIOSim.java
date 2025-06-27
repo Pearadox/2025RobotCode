@@ -35,7 +35,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
     private TalonFXSimState endEffectorSimState;
 
     // must be within 6 inches of the intake
-    private static final double TRANSLATIONAL_TOLERANCE_METERS = Units.inchesToMeters(16);
+    private static final double TRANSLATIONAL_TOLERANCE_METERS = Units.inchesToMeters(32);
 
     private boolean hasCoral = true;
     private boolean hasAlgae = false;

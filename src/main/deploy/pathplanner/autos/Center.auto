@@ -1,0 +1,98 @@
+{
+  "version": "2025.0",
+  "command": {
+    "type": "sequential",
+    "data": {
+      "commands": [
+        {
+          "type": "named",
+          "data": {
+            "name": "HoldCoral"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "1_GH"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Auto Align Right"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Outtake"
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "GH_BACK"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Stop"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "Set Algae"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
+            "name": "LevelTwo"
+          }
+        },
+        {
+          "type": "wait",
+          "data": {
+            "waitTime": 1.0
+          }
+        },
+        {
+          "type": "race",
+          "data": {
+            "commands": [
+              {
+                "type": "named",
+                "data": {
+                  "name": "Auto Align Mid"
+                }
+              },
+              {
+                "type": "named",
+                "data": {
+                  "name": "Algae Intake"
+                }
+              }
+            ]
+          }
+        },
+        {
+          "type": "path",
+          "data": {
+            "pathName": "GH_BACK"
+          }
+        }
+      ]
+    }
+  },
+  "resetOdom": true,
+  "folder": null,
+  "choreoAuto": false
+}

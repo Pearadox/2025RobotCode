@@ -1,7 +1,6 @@
 package frc.robot.subsystems.climber;
 
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
-import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ClimbConstants;
@@ -37,12 +36,14 @@ public class ClimberIOReal implements ClimberIO {
 
     @Override
     public void runPosition(double setpoint) {
-        climbMotor.setControl(new PositionVoltage(setpoint));
+        // climbMotor.setControl(new PositionVoltage(setpoint));
+        climbMotor.set(0.0);
     }
 
     @Override
     public void setSpeed(double speed) {
-        climbMotor.set(speed);
+        // climbMotor.set(speed);
+        climbMotor.set(0.0);
     }
 
     @Override

@@ -49,8 +49,8 @@ import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.simulation.AlgaeHandler;
+import frc.robot.util.simulation.MapleSimSwerveDrivetrain;
 import org.ironmaple.simulation.SimulatedArena;
-import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
@@ -64,9 +64,11 @@ public class RobotContainer {
 
     public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
 
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
+    public static final double MaxSpeed =
+            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top
     // speed
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
+    public static final double MaxAngularRate =
+            RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per
     // second max angular velocity
 
     /* Setting up bindings for necessary control of the swerve drive platform */
@@ -90,7 +92,7 @@ public class RobotContainer {
 
     private final Telemetry logger = new Telemetry(MaxSpeed);
 
-    private SwerveDriveSimulation driveSimulation = null;
+    // private SwerveDriveSimulation driveSimulation = null;
 
     //     public static final LEDStrip ledstrip = LEDStrip.getInstance();
 
@@ -161,12 +163,11 @@ public class RobotContainer {
                 // Sim robot, instantiate physics sim IO implementations
 
             case SIM:
-                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(
-                        () -> driveSimulation.getSimulatedDriveTrainPose(), // drivetrain.getState().Pose,
-                        () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        () -> MapleSimSwerveDrivetrain.getSimulatedPose(),
+                        () -> MapleSimSwerveDrivetrain.getSimChassisSpeeds(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
                 vision = new Vision(drivetrain::addVisionMeasurement); // , new
@@ -188,7 +189,7 @@ public class RobotContainer {
 
         setDefaultCommands();
         registerNamedCommands();
-        autoChooser = AutoBuilder.buildAutoChooser("2B_IJ-CS-KL-CS-KL");
+        autoChooser = AutoBuilder.buildAutoChooser("Left");
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
@@ -205,16 +206,13 @@ public class RobotContainer {
     }
 
     private void configureBindings() {
+        drivetrain.registerTelemetry(logger::telemeterize);
 
         // ------------------------------- Driver Bindings ------------------------------- //
 
         // Reset gyro / odometry
-        final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
-                ? () -> drivetrain.resetPose(
-                        driveSimulation
-                                .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
-                : () -> drivetrain.resetPose(
-                        new Pose2d(drivetrain.getState().Pose.getTranslation(), new Rotation2d())); // zero gyro
+        final Runnable resetGyro = () -> drivetrain.resetPose(
+                new Pose2d(drivetrain.getState().Pose.getTranslation(), new Rotation2d())); // zero gyro
         resetHeading_Start.onTrue(Commands.runOnce(resetGyro, drivetrain).ignoringDisable(true));
 
         reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drivetrain, drive));
@@ -295,6 +293,8 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> elevator.setAligning(true))))
                 .onFalse(new InstantCommand(() -> arm.setAligning(false))
                         .andThen(new InstantCommand(() -> elevator.setAligning(false))));
+
+        slowMode_A.onTrue(new InstantCommand(() -> drivetrain.changeSpeedMultiplier()));
 
         // if (Constants.currentMode == Constants.Mode.SIM) {
         //     csDropLB.onTrue(new InstantCommand(() -> dropCoralFromStation(false)).ignoringDisable(true));
@@ -398,16 +398,14 @@ public class RobotContainer {
                 // Drivetrain will execute this command periodically
                 drivetrain.applyRequest(
                         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                        * MaxSpeed
+                                        * drivetrain.getSpeedMultipler())
                                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                                        * MaxSpeed) // Drive left with negative
-                                // X (left)
+                                        * MaxSpeed
+                                        * drivetrain.getSpeedMultipler())
                                 .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX())
-                                        * MaxAngularRate) // Drive
-                        // counterclockwise
-                        // with negative X
-                        // (left)
-                        ));
+                                        * MaxAngularRate
+                                        * drivetrain.getSpeedMultipler())));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
@@ -418,7 +416,7 @@ public class RobotContainer {
     public void resetSimulation() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        align.setPoseSupplier(driveSimulation::getSimulatedDriveTrainPose);
+        align.setPoseSupplier(MapleSimSwerveDrivetrain::getSimulatedPose);
         drivetrain.resetPose(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
         AlgaeHandler.getInstance().reset();
@@ -428,7 +426,7 @@ public class RobotContainer {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
         SimulatedArena.getInstance().simulationPeriodic();
-        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(driveSimulation.getSimulatedDriveTrainPose()));
+        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(MapleSimSwerveDrivetrain.getSimulatedPose()));
         Logger.recordOutput(
                 "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
         Logger.recordOutput(

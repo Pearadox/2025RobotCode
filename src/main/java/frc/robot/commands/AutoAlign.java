@@ -154,7 +154,9 @@ public class AutoAlign {
         Translation2d currentToTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
         distanceError = currentToTarget.getNorm();
         Rotation2d directionToTarget = currentToTarget.getAngle();
-        if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
+        if (RobotContainer.isRedAlliance()) {
+            directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
+        }
 
         double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.8, 0.8);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
@@ -176,6 +178,10 @@ public class AutoAlign {
             xVelocity += AlignConstants.ALIGN_KS * Math.signum(xVelocity);
             yVelocity += AlignConstants.ALIGN_KS * Math.signum(yVelocity);
             angularVelocity += AlignConstants.ALIGN_KS * Math.signum(angularVelocity);
+
+            xVelocity = square(xVelocity, RobotContainer.MaxSpeed * 0.5);
+            yVelocity = square(yVelocity, RobotContainer.MaxSpeed * 0.5);
+            angularVelocity = square(angularVelocity, RobotContainer.MaxAngularRate * 0.5);
         }
 
         lastAlignCommand = currentAlignCommand;
@@ -244,9 +250,9 @@ public class AutoAlign {
                     setBranchTx(tx);
                 })
                 .andThen(new RunCommand(() -> updateFieldRelativeAlignSpeeds())
-                        .alongWith(drive.applyRequest(() -> req.withVelocityX(getXVelocity() * getXVelocity())
-                                .withVelocityY(getYVelocity() * getYVelocity())
-                                .withRotationalRate(getAngularVelocity() * getAngularVelocity()))));
+                        .alongWith(drive.applyRequest(() -> req.withVelocityX(getXVelocity())
+                                .withVelocityY(getYVelocity())
+                                .withRotationalRate(getAngularVelocity()))));
     }
 
     public Command reefAlignLeft(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
@@ -263,5 +269,9 @@ public class AutoAlign {
 
     public Command stationAlign(CommandSwerveDrivetrain drive, SwerveRequest.FieldCentric req) {
         return getAlignCommand(drive, req, false, AlignConstants.STATION_ALIGN_TX, "Station");
+    }
+
+    public static double square(double x, double max) {
+        return (x * x * Math.signum(x)) * max;
     }
 }

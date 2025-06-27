@@ -140,6 +140,7 @@ public class Constants {
         public static final double DRIVER_ALIGNING_DEADBAND = 0.15;
 
         public static final double SLOW_MODE_SPEED = 0.3;
+        public static final double FAST_MODE_SPEED = 0.8;
     }
 
     public static final class AlignConstants {
@@ -277,7 +278,7 @@ public class Constants {
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08
         public static final double ARM_INTAKE_ROT =
-                Units.degreesToRotations(-15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
+                Units.degreesToRotations(-20) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0) * ARM_GEAR_RATIO; // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73) * ARM_GEAR_RATIO;
