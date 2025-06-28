@@ -162,9 +162,9 @@ public class Constants {
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.97 / 2.0); // 12.94 //12.97
 
         // target relative
-        public static final double REEF_ALIGN_MID_TX = 0; // 0.28575
+        public static final double REEF_ALIGN_MID_TX = 0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
-        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.01;
+        public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
         public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
         public static final double REEF_STATION_ALIGN_TZ = Units.inchesToMeters(12);
 
@@ -174,7 +174,7 @@ public class Constants {
         public static final double REEF_kP = 1.5; // try raising
         public static final double REEF_kI = 0;
         public static final double REEF_kD = 0.0;
-        
+
         // for some reason, 0.02 is much too low in sim??
         public static final double ROT_REEF_kP = 1.1;
         public static final double ROT_REEF_kI = 0;
@@ -223,10 +223,10 @@ public class Constants {
         // Inches
         public static final double STOWED_HEIGHT = 0;
         public static final double STATION_HEIGHT =
-                15; // Home Field is 1in higher than official field - official is 15.4
+                15.7; // Home Field is 1in higher than official field - official is 15.4 // 15
         public static final double LEVEL_TWO_HEIGHT =
                 0; // 10.9; // was 12, 7 This is slightly away from the reef for clearance //
-        public static final double LEVEL_THREE_HEIGHT = 1.5; // 15 //TODO l3 height
+        public static final double LEVEL_THREE_HEIGHT = 1.1; // 15  // 1.5 //
         public static final double LEVEL_FOUR_HEIGHT = 24.6; // 29.625; //
 
         public static final double ALGAE_LOW_HEIGHT = 6.4; // 6.7
