@@ -358,7 +358,7 @@ public class Constants {
     public static final class EndEffectorConstants {
         public static final int END_EFFECTOR_ID = 23;
 
-        public static final double PULL_SPEED = -0.3;
+        public static final double PULL_SPEED = -0.25;
 
         public static final double PUSH_SPEED = 0.5; // 0.3
         public static final double L3_PUSH_SPEED = 0.3; // 0.3

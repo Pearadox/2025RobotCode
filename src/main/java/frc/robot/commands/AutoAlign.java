@@ -158,7 +158,7 @@ public class AutoAlign {
             directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
         }
 
-        double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.8, 0.8);
+        double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.6, 0.6);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
 
         rotationOutput = rotationController.calculate(
@@ -179,9 +179,9 @@ public class AutoAlign {
             yVelocity += AlignConstants.ALIGN_KS * Math.signum(yVelocity);
             angularVelocity += AlignConstants.ALIGN_KS * Math.signum(angularVelocity);
 
-            xVelocity = square(xVelocity, RobotContainer.MaxSpeed * 0.5);
-            yVelocity = square(yVelocity, RobotContainer.MaxSpeed * 0.5);
-            angularVelocity = square(angularVelocity, RobotContainer.MaxAngularRate * 0.5);
+            xVelocity = square(xVelocity, RobotContainer.MaxSpeed * 0.7);
+            yVelocity = square(yVelocity, RobotContainer.MaxSpeed * 0.7);
+            angularVelocity = square(angularVelocity, RobotContainer.MaxAngularRate);
         }
 
         lastAlignCommand = currentAlignCommand;
