@@ -155,7 +155,7 @@ public class AutoAlign {
         Rotation2d directionToTarget = currentToTarget.getAngle();
         if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
 
-        double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.7, 0.7);
+        double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.8, 0.8);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
 
         rotationOutput = rotationController.calculate(
@@ -163,19 +163,19 @@ public class AutoAlign {
     }
 
     public void updateVelocities() {
-        // if (isAligned()) {
-        //     xVelocity = 0;
-        //     yVelocity = 0;
-        //     angularVelocity = 0;
-        // } else {
-        xVelocity = translationOutput.getX();
-        yVelocity = translationOutput.getY();
-        angularVelocity = rotationOutput;
+        if (isAlignedDebounced()) {
+            xVelocity = 0;
+            yVelocity = 0;
+            angularVelocity = 0;
+        } else {
+            xVelocity = translationOutput.getX();
+            yVelocity = translationOutput.getY();
+            angularVelocity = rotationOutput;
 
-        xVelocity += AlignConstants.ALIGN_KS * Math.signum(xVelocity);
-        yVelocity += AlignConstants.ALIGN_KS * Math.signum(yVelocity);
-        angularVelocity += AlignConstants.ALIGN_KS * Math.signum(angularVelocity);
-        // }
+            xVelocity += AlignConstants.ALIGN_KS * Math.signum(xVelocity);
+            yVelocity += AlignConstants.ALIGN_KS * Math.signum(yVelocity);
+            angularVelocity += AlignConstants.ALIGN_KS * Math.signum(angularVelocity);
+        }
 
         lastAlignCommand = currentAlignCommand;
     }
