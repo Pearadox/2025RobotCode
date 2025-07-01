@@ -58,8 +58,8 @@ public class AutoAlign {
     @AutoLogOutput
     private double currentBranchTx = AlignConstants.REEF_ALIGN_MID_TX;
 
-    @AutoLogOutpu 
-    private double currentBranchTz = AlignConstants.REEF_ALIGN_TZ * 2;
+    @AutoLogOutput
+    private double currentBranchTz = AlignConstants.REEF_ALIGN_TZ;
 
     @AutoLogOutput
     @Getter
@@ -181,10 +181,12 @@ public class AutoAlign {
     }
 
     public void setTagIDs(boolean isReef) {
-        if (RobotContainer.isRedAlliance()) {
-            tagIDs = isReef ? FieldConstants.RED_REEF_TAG_IDS : FieldConstants.RED_CORAL_STATION_TAG_IDS;
+        if (isReef) {
+            tagIDs = FieldConstants.ALL_REEF_TAG_IDS;
         } else {
-            tagIDs = isReef ? FieldConstants.BLUE_REEF_TAG_IDS : FieldConstants.BLUE_CORAL_STATION_TAG_IDS;
+            tagIDs = RobotContainer.isRedAlliance()
+                    ? FieldConstants.RED_CORAL_STATION_TAG_IDS
+                    : FieldConstants.BLUE_CORAL_STATION_TAG_IDS;
         }
         this.isReef = isReef;
     }

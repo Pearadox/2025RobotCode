@@ -132,13 +132,43 @@
                     {
                       "type": "wait",
                       "data": {
-                        "waitTime": 0.5
+                        "waitTime": 0.3
                       }
                     },
                     {
                       "type": "named",
                       "data": {
                         "name": "LevelStation"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 0.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "ElevatorStowedMode"
+                      }
+                    },
+                    {
+                      "type": "wait",
+                      "data": {
+                        "waitTime": 1.5
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "Set Algae"
+                      }
+                    },
+                    {
+                      "type": "named",
+                      "data": {
+                        "name": "LevelThree"
                       }
                     }
                   ]
