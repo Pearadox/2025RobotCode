@@ -175,6 +175,7 @@ public class RobotContainer {
         setDefaultCommands();
         registerNamedCommands();
         autoChooser = AutoBuilder.buildAutoChooser("2B_IJ-CS-KL-CS-KL");
+        autoChooser.addOption("Drive FF Ch", DriveCommands.feedforwardCharacterization(drive));
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
@@ -187,7 +188,7 @@ public class RobotContainer {
                 .onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        DriverStation.silenceJoystickConnectionWarning(Robot.isSimulation());
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     private void configureBindings() {
@@ -213,6 +214,8 @@ public class RobotContainer {
                 () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()),
                 () -> 0,
                 false));
+
+        slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 
@@ -363,9 +366,9 @@ public class RobotContainer {
     public void setDefaultCommands() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
-                () -> -driverController.getLeftY(),
-                () -> -driverController.getLeftX(),
-                () -> -driverController.getRightX(),
+                () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
+                () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
+                () -> -driverController.getRightX() * drive.getTurnMultiplier(),
                 true));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));

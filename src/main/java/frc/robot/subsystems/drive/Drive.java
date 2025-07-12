@@ -67,6 +67,10 @@ public class Drive extends SubsystemBase {
                     Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
                     Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
 
+    private double driveMultiplier = 1;
+    private double turnMultiplier = 1;
+    private boolean useMultiplier = false;
+
     // PathPlanner config constants
     private static final double ROBOT_MASS_KG = 74.088;
     private static final double ROBOT_MOI = 6.883;
@@ -339,5 +343,24 @@ public class Drive extends SubsystemBase {
             new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
             new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
         };
+    }
+
+    public void changeSpeedMultiplier() {
+        useMultiplier = !useMultiplier;
+        if (useMultiplier) {
+            driveMultiplier = 0.4;
+            turnMultiplier = 0.6;
+        } else {
+            driveMultiplier = 1;
+            turnMultiplier = 1;
+        }
+    }
+
+    public double getDriveMultiplier() {
+        return driveMultiplier;
+    }
+
+    public double getTurnMultiplier() {
+        return turnMultiplier;
     }
 }
