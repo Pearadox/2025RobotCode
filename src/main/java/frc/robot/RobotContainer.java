@@ -1,6 +1,5 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
@@ -36,8 +35,8 @@ import frc.robot.subsystems.climber.ClimberIO;
 import frc.robot.subsystems.climber.ClimberIOReal;
 import frc.robot.subsystems.climber.ClimberIOSim;
 import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIO;
 import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
 import frc.robot.subsystems.elevator.Elevator;
@@ -126,9 +125,9 @@ public class RobotContainer {
                         new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
                         new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
                         new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight));
-                vision =
-                        new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
+                        (robotPose) -> {});
+                vision = new Vision(drive::accept, new VisionIOLimelight(camera0Name, drive::getRotation));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
                 arm = new Arm(new ArmIOReal());
@@ -139,14 +138,17 @@ public class RobotContainer {
                 // Sim robot, instantiate physics sim IO implementations
 
             case SIM:
+                driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new Rotation2d()));
                 SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
                 drive = new Drive(
-                        new GyroIO() {},
-                        new ModuleIOSim(Constants.TUNER_CONSTANTS.FrontLeft),
-                        new ModuleIOSim(Constants.TUNER_CONSTANTS.FrontRight),
-                        new ModuleIOSim(Constants.TUNER_CONSTANTS.BackLeft),
-                        new ModuleIOSim(Constants.TUNER_CONSTANTS.BackRight));
+                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        new ModuleIOSim(driveSimulation.getModules()[0]),
+                        new ModuleIOSim(driveSimulation.getModules()[1]),
+                        new ModuleIOSim(driveSimulation.getModules()[2]),
+                        new ModuleIOSim(driveSimulation.getModules()[3]),
+                        driveSimulation::setSimulationWorldPose);
+
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(
@@ -154,7 +156,7 @@ public class RobotContainer {
                         () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
-                vision = new Vision(drive::addVisionMeasurement); // , new
+                vision = new Vision(drive::accept); // , new
                 // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
                 break;
@@ -195,12 +197,10 @@ public class RobotContainer {
         // ------------------------------- Driver Bindings ------------------------------- //
 
         // Reset gyro / odometry
-        final Runnable resetGyro = Constants.currentMode == Constants.Mode.SIM
-                ? () -> drive.setPose(
-                        driveSimulation
-                                .getSimulatedDriveTrainPose()) // reset odometry to actual robot pose during simulation
-                : () -> drive.setPose(new Pose2d(drive.getPose().getTranslation(), new Rotation2d())); // zero gyro
-        resetHeading_Start.onTrue(Commands.runOnce(resetGyro, drive).ignoringDisable(true));
+        final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
+                ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
+                : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+        resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
         reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
         reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
@@ -380,7 +380,7 @@ public class RobotContainer {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
         align.setPoseSupplier(driveSimulation::getSimulatedDriveTrainPose);
-        drive.setPose(new Pose2d(12, 2, new Rotation2d()));
+        drive.resetOdometry(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
         AlgaeHandler.getInstance().reset();
     }

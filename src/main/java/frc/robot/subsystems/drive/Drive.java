@@ -48,13 +48,18 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
+import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LocalADStarAK;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Consumer;
+import org.ironmaple.simulation.drivesims.COTS;
+import org.ironmaple.simulation.drivesims.configs.DriveTrainSimulationConfig;
+import org.ironmaple.simulation.drivesims.configs.SwerveModuleSimulationConfig;
 import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
-public class Drive extends SubsystemBase {
+public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     // Constants.TUNER_CONSTANTS doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY =
             new CANBus(Constants.TUNER_CONSTANTS.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
@@ -78,9 +83,9 @@ public class Drive extends SubsystemBase {
     private boolean useMultiplier = false;
 
     // PathPlanner config constants
-    private static final double ROBOT_MASS_KG = 74.088;
+    private static final double ROBOT_MASS_KG = Pounds.of(114 + 18).in(Kilograms);
     private static final double ROBOT_MOI = 6.883;
-    private static final double WHEEL_COF = 1.2;
+    private static final double WHEEL_COF = COTS.WHEELS.VEX_GRIP_V2.cof;
     private static final RobotConfig PP_CONFIG = new RobotConfig(
             ROBOT_MASS_KG,
             ROBOT_MOI,
@@ -93,6 +98,22 @@ public class Drive extends SubsystemBase {
                     1),
             getModuleTranslations());
 
+    public static final DriveTrainSimulationConfig mapleSimConfig = DriveTrainSimulationConfig.Default()
+            .withRobotMass(Kilograms.of(ROBOT_MASS_KG))
+            .withCustomModuleTranslations(getModuleTranslations())
+            .withGyro(COTS.ofPigeon2())
+            .withBumperSize(Inches.of(30 + 3.25 * 2), Inches.of(28 + 3.25 * 2))
+            .withSwerveModule(new SwerveModuleSimulationConfig(
+                    DCMotor.getKrakenX60(1),
+                    DCMotor.getFalcon500(1),
+                    Constants.TUNER_CONSTANTS.FrontLeft.DriveMotorGearRatio,
+                    Constants.TUNER_CONSTANTS.FrontLeft.SteerMotorGearRatio,
+                    Volts.of(Constants.TUNER_CONSTANTS.FrontLeft.DriveFrictionVoltage),
+                    Volts.of(Constants.TUNER_CONSTANTS.FrontLeft.SteerFrictionVoltage),
+                    Inches.of(2),
+                    KilogramSquareMeters.of(Constants.TUNER_CONSTANTS.FrontLeft.SteerInertia),
+                    WHEEL_COF));
+
     static final Lock odometryLock = new ReentrantLock();
     private final GyroIO gyroIO;
     private final GyroIOInputsAutoLogged gyroInputs = new GyroIOInputsAutoLogged();
@@ -101,20 +122,28 @@ public class Drive extends SubsystemBase {
     private final Alert gyroDisconnectedAlert =
             new Alert("Disconnected gyro, using kinematics as fallback.", AlertType.kError);
 
-    private SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
+    private final SwerveDriveKinematics kinematics = new SwerveDriveKinematics(getModuleTranslations());
     private Rotation2d rawGyroRotation = new Rotation2d();
-    private SwerveModulePosition[] lastModulePositions = // For delta tracking
+    private final SwerveModulePosition[] lastModulePositions = // For delta tracking
             new SwerveModulePosition[] {
                 new SwerveModulePosition(),
                 new SwerveModulePosition(),
                 new SwerveModulePosition(),
                 new SwerveModulePosition()
             };
-    private SwerveDrivePoseEstimator poseEstimator =
+    private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
+    private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
-    public Drive(GyroIO gyroIO, ModuleIO flModuleIO, ModuleIO frModuleIO, ModuleIO blModuleIO, ModuleIO brModuleIO) {
+    public Drive(
+            GyroIO gyroIO,
+            ModuleIO flModuleIO,
+            ModuleIO frModuleIO,
+            ModuleIO blModuleIO,
+            ModuleIO brModuleIO,
+            Consumer<Pose2d> resetSimulationPoseCallBack) {
         this.gyroIO = gyroIO;
+        this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
         modules[0] = new Module(flModuleIO, 0, Constants.TUNER_CONSTANTS.FrontLeft);
         modules[1] = new Module(frModuleIO, 1, Constants.TUNER_CONSTANTS.FrontRight);
         modules[2] = new Module(blModuleIO, 2, Constants.TUNER_CONSTANTS.BackLeft);
@@ -129,7 +158,7 @@ public class Drive extends SubsystemBase {
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configure(
                 this::getPose,
-                this::setPose,
+                this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
                 new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
@@ -214,13 +243,13 @@ public class Drive extends SubsystemBase {
      */
     public void runVelocity(ChassisSpeeds speeds) {
         // Calculate module setpoints
-        ChassisSpeeds discreteSpeeds = ChassisSpeeds.discretize(speeds, 0.02);
-        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(discreteSpeeds);
+        speeds = ChassisSpeeds.discretize(speeds, 0.02);
+        SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
         SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.TUNER_CONSTANTS.kSpeedAt12Volts);
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
-        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", discreteSpeeds);
+        Logger.recordOutput("SwerveChassisSpeeds/Setpoints", speeds);
 
         // Send setpoints to modules
         for (int i = 0; i < 4; i++) {
@@ -321,13 +350,14 @@ public class Drive extends SubsystemBase {
     }
 
     /** Resets the current odometry pose. */
-    public void setPose(Pose2d pose) {
+    public void resetOdometry(Pose2d pose) {
+        resetSimulationPoseCallBack.accept(pose);
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
 
     /** Adds a new timestamped vision measurement. */
-    public void addVisionMeasurement(
-            Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
+    @Override
+    public void accept(Pose2d visionRobotPoseMeters, double timestampSeconds, Matrix<N3, N1> visionMeasurementStdDevs) {
         poseEstimator.addVisionMeasurement(visionRobotPoseMeters, timestampSeconds, visionMeasurementStdDevs);
     }
 

@@ -4,6 +4,7 @@
 
 package frc.robot;
 
+import edu.wpi.first.wpilibj.RobotController;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.CommandScheduler;
 import frc.robot.subsystems.elevator.MechVisualizer;
@@ -21,6 +22,8 @@ public class Robot extends LoggedRobot {
 
     public Robot() {
         Logger.recordMetadata("2025RobotCode", "Comp Bot Code"); // Set a metadata value
+        Logger.recordMetadata("Identity/Rio Serial", RobotController.getSerialNumber());
+        Logger.recordMetadata("Identity/Name", Constants.IDENTITY.name());
 
         // Set up data receivers & replay source
         switch (Constants.currentMode) {
