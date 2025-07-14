@@ -26,7 +26,6 @@ import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ElevatorHold;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.arm.Arm;
 import frc.robot.subsystems.arm.Arm.ArmMode;
 import frc.robot.subsystems.arm.ArmIO;
@@ -124,10 +123,10 @@ public class RobotContainer {
             case REAL:
                 drive = new Drive(
                         new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(TunerConstants.FrontLeft),
-                        new ModuleIOTalonFX(TunerConstants.FrontRight),
-                        new ModuleIOTalonFX(TunerConstants.BackLeft),
-                        new ModuleIOTalonFX(TunerConstants.BackRight));
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight));
                 vision =
                         new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
@@ -144,10 +143,10 @@ public class RobotContainer {
 
                 drive = new Drive(
                         new GyroIO() {},
-                        new ModuleIOSim(TunerConstants.FrontLeft),
-                        new ModuleIOSim(TunerConstants.FrontRight),
-                        new ModuleIOSim(TunerConstants.BackLeft),
-                        new ModuleIOSim(TunerConstants.BackRight));
+                        new ModuleIOSim(Constants.TUNER_CONSTANTS.FrontLeft),
+                        new ModuleIOSim(Constants.TUNER_CONSTANTS.FrontRight),
+                        new ModuleIOSim(Constants.TUNER_CONSTANTS.BackLeft),
+                        new ModuleIOSim(Constants.TUNER_CONSTANTS.BackRight));
                 elevator = new Elevator(new ElevatorIOSim());
                 arm = new Arm(new ArmIOSim());
                 endEffector = new EndEffector(new EndEffectorIOSim(

@@ -20,6 +20,8 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
+import frc.robot.generated.TunerConstants;
+import frc.robot.util.RobotIdentity;
 import java.util.Arrays;
 import java.util.List;
 
@@ -36,6 +38,9 @@ public class Constants {
         /** Replaying from a log file. */
         REPLAY
     }
+
+    public static final RobotIdentity IDENTITY = RobotIdentity.getRobotIdentity();
+    public static final TunerConstants TUNER_CONSTANTS = IDENTITY.tunerConstants;
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
@@ -276,8 +281,8 @@ public class Constants {
 
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08
-        public static final double ARM_INTAKE_ROT =
-                Units.degreesToRotations(-15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
+        public static final double ARM_INTAKE_ROT = 
+                Units.degreesToRotations(IDENTITY == RobotIdentity.EVE ? -20 : -15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0) * ARM_GEAR_RATIO; // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73) * ARM_GEAR_RATIO;
