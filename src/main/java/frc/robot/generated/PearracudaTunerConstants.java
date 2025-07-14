@@ -31,7 +31,7 @@ public class PearracudaTunerConstants extends TunerConstants {
     private static final double COUPLE_RATIO = 3.5714285714285716;
     private static final double DRIVE_RATIO = 6.746031746031747;
     private static final double TURN_RATIO = 21.428571428571427;
-    
+
     private static final Distance WHEEL_RADIUS = Inches.of(2);
 
     private static final boolean LEFT_INVERTED = false;
