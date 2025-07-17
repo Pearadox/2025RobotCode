@@ -49,6 +49,8 @@ import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.RobotIdentity;
+import frc.robot.util.SmarterDashboard;
 import frc.robot.util.simulation.AlgaeHandler;
 import org.ironmaple.simulation.SimulatedArena;
 import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
@@ -180,6 +182,9 @@ public class RobotContainer {
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
+        SmarterDashboard.putString("RoboRio Serial", RobotIdentity.getRoboRioSerial());
+        SmarterDashboard.putString("Robot Identity", RobotIdentity.getRobotIdentityString());
+
         // ------------------------------ Event Markers ---------------------------------- //
 
         new EventTrigger("LevelStation")
@@ -215,6 +220,7 @@ public class RobotContainer {
                 false));
 
         slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
+        zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 
@@ -294,7 +300,7 @@ public class RobotContainer {
         return false;
     }
 
-    // -------------------------------- PathPlanner Commands -------------------------------- //
+    // -------------------------------- PathPlanner Commands -------------------------------- /w
 
     public void registerNamedCommands() {
         NamedCommands.registerCommand(

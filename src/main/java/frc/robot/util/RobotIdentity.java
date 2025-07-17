@@ -19,11 +19,26 @@ public enum RobotIdentity {
         String rioSerial = RobotController.getSerialNumber();
 
         if (rioSerial.equals("032B4B61")) {
+            ;
             return EVE;
         }
 
-        System.out.println("Running on an unrecognized RoboRIO! " + rioSerial);
-
         return PEARRACUDA;
+    }
+
+    public static String getRobotIdentityString() {
+        String rioSerial = RobotController.getSerialNumber();
+
+        if (rioSerial.equals("032B4B61")) {
+            return "Eve";
+        } else if (rioSerial.equals("032B4B64")) {
+            return "Pearracuda";
+        } else {
+            return "Unknown";
+        }
+    }
+
+    public static String getRoboRioSerial() {
+        return RobotController.getSerialNumber();
     }
 }

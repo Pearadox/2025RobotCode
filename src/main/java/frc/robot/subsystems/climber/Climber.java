@@ -36,6 +36,7 @@ public class Climber extends SubsystemBase {
 
         SmarterDashboard.putNumber("Climber/State", climbState);
         SmarterDashboard.putString("Climber/StateStr", climbStateString);
+        SmarterDashboard.putNumber("Climber/ClimberOffset", climberOffset);
     }
 
     public void climberAdjustUp() {
