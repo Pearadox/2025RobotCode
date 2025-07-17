@@ -14,7 +14,7 @@ public class PearracudaTunerConstants extends TunerConstants {
             .withKI(0)
             .withKD(0.24539)
             .withKS(0.12644)
-            .withKV(2.43684)
+            .withKV(0.81228)
             .withKA(0.040542)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
@@ -22,8 +22,8 @@ public class PearracudaTunerConstants extends TunerConstants {
             .withKP(0.6)
             .withKI(0)
             .withKD(0)
-            .withKS(0.15202)
-            .withKV(0.1141)
+            .withKS(0.12644)
+            .withKV(0.81228)
             .withKA(0.0040132);
 
     private static final CANBus CAN_BUS = new CANBus("Drivetrain", "./logs/example.hoot");
