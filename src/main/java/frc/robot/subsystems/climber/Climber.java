@@ -32,7 +32,7 @@ public class Climber extends SubsystemBase {
 
         MechVisualizer.getInstance().updateClimberRoll(getAngleRads());
 
-        updateClimStateString();
+        updateClimbStateString();
 
         SmarterDashboard.putNumber("Climber/State", climbState);
         SmarterDashboard.putString("Climber/StateStr", climbStateString);
@@ -55,7 +55,7 @@ public class Climber extends SubsystemBase {
         io.setSpeed(0);
     }
 
-    public void updateClimStateString() {
+    public void updateClimbStateString() {
         if (climbState == 2) {
             climbStateString = "Climbing!";
         } else if (climbState == 1) {
