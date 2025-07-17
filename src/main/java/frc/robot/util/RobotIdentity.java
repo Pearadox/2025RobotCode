@@ -19,7 +19,6 @@ public enum RobotIdentity {
         String rioSerial = RobotController.getSerialNumber();
 
         if (rioSerial.equals("032B4B61")) {
-            ;
             return EVE;
         }
 
