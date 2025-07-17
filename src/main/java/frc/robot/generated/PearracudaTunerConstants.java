@@ -13,8 +13,8 @@ public class PearracudaTunerConstants extends TunerConstants {
             .withKP(50)
             .withKI(0)
             .withKD(0.24539)
-            .withKS(0.12644)
-            .withKV(0.81228)
+            .withKS(0.19817)
+            .withKV(2.4066)
             .withKA(0.040542)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
