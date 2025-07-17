@@ -10,11 +10,11 @@ import edu.wpi.first.units.measure.Distance;
 
 public class PearracudaTunerConstants extends TunerConstants {
     private static final Slot0Configs STEER_GAINS = new Slot0Configs()
-            .withKP(50)
+            .withKP(55)
             .withKI(0)
             .withKD(0.24539)
-            .withKS(0.19817)
-            .withKV(2.4066)
+            .withKS(0.12644)
+            .withKV(0.81228)
             .withKA(0.040542)
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
@@ -22,8 +22,8 @@ public class PearracudaTunerConstants extends TunerConstants {
             .withKP(0.6)
             .withKI(0)
             .withKD(0)
-            .withKS(0.12644)
-            .withKV(0.81228)
+            .withKS(0.13158) // 0.12644
+            .withKV(0.81887) // 0.81228
             .withKA(0.0040132);
 
     private static final CANBus CAN_BUS = new CANBus("Drivetrain", "./logs/example.hoot");
