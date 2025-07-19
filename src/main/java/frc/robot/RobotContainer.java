@@ -47,6 +47,7 @@ import frc.robot.subsystems.endeffector.EndEffector;
 import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
+import frc.robot.subsystems.led.LEDStrip;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
@@ -64,6 +65,7 @@ public class RobotContainer {
     private Vision vision;
     private Climber climber;
     public static AutoAlign align;
+    public static LEDStrip ledStrip = LEDStrip.getInstance();
 
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -267,11 +269,12 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberStateInc_PovLeft.onTrue(new InstantCommand(() -> climber.decrementClimbState()));
         climberStateDec_PovRight.onTrue(new InstantCommand(() -> {
-            elevator.setElevatorStowedMode();
-            arm.setAlgae();
-            arm.setStowed();})
-            .andThen(new WaitCommand(0.2))
-            .andThen(new InstantCommand(() -> climber.incrementClimbState())));
+                    elevator.setElevatorStowedMode();
+                    arm.setAlgae();
+                    arm.setStowed();
+                })
+                .andThen(new WaitCommand(0.2))
+                .andThen(new InstantCommand(() -> climber.incrementClimbState())));
 
         elevatorAdjust.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
@@ -371,15 +374,14 @@ public class RobotContainer {
     public void setDefaultCommands() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
-                () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
-                () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
-                () -> -driverController.getRightX() * drive.getTurnMultiplier(),
+                () -> -driverController.getLeftY() * drive.getDriveMultiplier() * 0.4, // added for demo purposes
+                () -> -driverController.getLeftX() * drive.getDriveMultiplier() * 0.4, // added for demo purposes
+                () -> -driverController.getRightX() * drive.getTurnMultiplier() * 0.6, // added for demo purposes
                 true));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
         // climber.setDefaultCommand(new ClimbCommand());
-        // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
     }
 
     public void resetSimulation() {

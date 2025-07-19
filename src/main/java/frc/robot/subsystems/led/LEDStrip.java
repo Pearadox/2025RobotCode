@@ -1,18 +1,25 @@
 package frc.robot.subsystems.led;
 
+import edu.wpi.first.units.measure.Frequency;
+import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.AddressableLED;
 import edu.wpi.first.wpilibj.AddressableLEDBuffer;
+import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.LEDPattern;
 import edu.wpi.first.wpilibj.util.Color;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.RunCommand;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import frc.robot.Constants.LEDConstants;
+import frc.robot.RobotContainer;
+import frc.robot.util.SmarterDashboard;
 import java.util.function.BooleanSupplier;
 
 public class LEDStrip extends SubsystemBase {
     private AddressableLED led;
     private AddressableLEDBuffer ledBuffer;
+    // private AddressableLEDBufferView DynamoBufferViewLeft;
+    // private AddressableLEDBufferView DynamoBufferViewRight;
 
     private static final LEDStrip LEDSTRIP = new LEDStrip();
 
@@ -20,22 +27,36 @@ public class LEDStrip extends SubsystemBase {
         return LEDSTRIP;
     }
 
+    private static final Color kRavenBlack = new Color("#101820");
+    private static final Color kDynamoOrange = new Color("#FF2700");
+    private static final Color kSpaceCityBlue = new Color("#92C3F1");
+    private static final Color kAstrosLightOrange = new Color("#F4871E");
+    private static final Color kAstrosOrange = new Color("#EB6E1F");
+    private static final Color kAstrosNavy = new Color("#002D62");
+
     public LEDStrip() {
         led = new AddressableLED(LEDConstants.PORT);
         ledBuffer = new AddressableLEDBuffer(LEDConstants.NUM_LEDS);
         led.setLength(ledBuffer.getLength());
         led.setData(ledBuffer);
         led.start();
-
-        // can this be run periodically?
-        setGradient(Color.kGreen, Color.kGold);
     }
 
     public void periodic() {
-        // if (DriverStation.isDisabled()) {
-        //     setGradient(Color.kLightGreen, Color.kLightYellow);
-        // }
+        if (DriverStation.isDisabled()) {
+            setGradient(LEDConstants.SCROLL_FREQ, kDynamoOrange, kAstrosLightOrange, kAstrosNavy, kAstrosLightOrange);
+        } else {
+            // setGradient(Percent.per(Second).of(getRate()), kDynamoOrange, kDynamoOrange, kSpaceCityBlue);
+            setBreathing(kDynamoOrange);
+        }
         led.setData(ledBuffer);
+
+        SmarterDashboard.putNumber("LED/Rate", getRate());
+    }
+
+    public double getRate() {
+        return Math.sqrt(Math.pow(RobotContainer.driverController.getLeftX(), 2)
+                + Math.pow(RobotContainer.driverController.getLeftY(), 2));
     }
 
     public Command defaultCommand(BooleanSupplier isCoralSupplier) {
@@ -49,7 +70,8 @@ public class LEDStrip extends SubsystemBase {
     }
 
     public Command success() {
-        return new RunCommand(() -> setBlinking(Color.kGreen), this).withTimeout(LEDConstants.BLINKING_DURATION);
+        return new RunCommand(() -> setBlinking(LEDConstants.BLINK_PERIOD, Color.kGreen), this)
+                .withTimeout(LEDConstants.BLINKING_DURATION);
     }
 
     private void setCoralOrAlgae(BooleanSupplier isCoralSupplier) {
@@ -69,10 +91,16 @@ public class LEDStrip extends SubsystemBase {
         led.setData(ledBuffer);
     }
 
-    private void setBlinking(Color color) {
-        LEDPattern blinkPattern = LEDPattern.solid(color)
-                .blink(LEDConstants.BLINK_PERIOD.div(2.0))
-                .atBrightness(LEDConstants.BLINK_BRIGHTNESS);
+    private void setGradient(Frequency frequency, Color... colors) {
+        LEDPattern gradient =
+                LEDPattern.gradient(LEDPattern.GradientType.kContinuous, colors).scrollAtRelativeSpeed(frequency);
+        gradient.applyTo(ledBuffer);
+        led.setData(ledBuffer);
+    }
+
+    private void setBlinking(Time period, Color color) {
+        LEDPattern blinkPattern =
+                LEDPattern.solid(color).blink(period.div(2.0)).atBrightness(LEDConstants.BLINK_BRIGHTNESS);
         blinkPattern.applyTo(ledBuffer);
         led.setData(ledBuffer);
     }
