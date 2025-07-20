@@ -44,7 +44,13 @@ public class LEDStrip extends SubsystemBase {
 
     public void periodic() {
         if (DriverStation.isDisabled()) {
-            setGradient(LEDConstants.SCROLL_FREQ, kDynamoOrange, kAstrosLightOrange, kAstrosNavy, kAstrosLightOrange);
+            // setGradient(LEDConstants.SCROLL_FREQ, kDynamoOrange, kAstrosLightOrange, kAstrosNavy,
+            // kAstrosLightOrange);
+            setGradient(
+                    LEDConstants.SCROLL_FREQ,
+                    gammaCorrect(kAstrosOrange, 2.2),
+                    gammaCorrect(kAstrosLightOrange, 2.2),
+                    gammaCorrect(kAstrosNavy, 1));
         } else {
             // setGradient(Percent.per(Second).of(getRate()), kDynamoOrange, kDynamoOrange, kSpaceCityBlue);
             setBreathing(kDynamoOrange);
@@ -109,5 +115,13 @@ public class LEDStrip extends SubsystemBase {
         LEDPattern breathePattern = LEDPattern.solid(color).breathe(LEDConstants.BREATHE_PERIOD);
         breathePattern.applyTo(ledBuffer);
         led.setData(ledBuffer);
+    }
+
+    private Color gammaCorrect(Color color, double gamma) {
+        return new Color(gamma(color.red, gamma), gamma(color.green, gamma), gamma(color.blue, gamma));
+    }
+
+    private int gamma(double val, double gamma) {
+        return Math.min(255, (int) Math.round(255 * Math.pow(val, gamma)));
     }
 }

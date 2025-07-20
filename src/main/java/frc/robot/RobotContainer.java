@@ -269,12 +269,14 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberStateInc_PovLeft.onTrue(new InstantCommand(() -> climber.decrementClimbState()));
         climberStateDec_PovRight.onTrue(new InstantCommand(() -> {
-                    elevator.setElevatorStowedMode();
+                    elevator.setElevatorStationMode();
                     arm.setAlgae();
-                    arm.setStowed();
+                    climber.incrementClimbState();
                 })
-                .andThen(new WaitCommand(0.2))
-                .andThen(new InstantCommand(() -> climber.incrementClimbState())));
+                .andThen(new WaitCommand(2))
+                .andThen(new InstantCommand(() -> {
+                        elevator.setElevatorStowedMode();
+                        arm.setStowed();})));
 
         elevatorAdjust.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
