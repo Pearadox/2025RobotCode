@@ -2,8 +2,10 @@ package frc.robot.commands;
 
 import edu.wpi.first.math.MathUtil;
 import edu.wpi.first.math.controller.PIDController;
+import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.*;
+import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
@@ -26,6 +28,9 @@ public class AutoAlign {
     @Setter
     private Supplier<Pose2d> poseSupplier;
 
+    private static final double ANGLE_MAX_VELOCITY = 8.0;
+    private static final double ANGLE_MAX_ACCELERATION = 20.0;
+
     private static LoggedTunableNumber tunablekP = new LoggedTunableNumber("Align/kP", AlignConstants.REEF_kP);
     private static LoggedTunableNumber tunablekI = new LoggedTunableNumber("Align/kI", AlignConstants.REEF_kI);
     private static LoggedTunableNumber tunablekD = new LoggedTunableNumber("Align/kD", AlignConstants.REEF_kD);
@@ -39,8 +44,18 @@ public class AutoAlign {
 
     private final PIDController translationController =
             new PIDController(AlignConstants.REEF_kP, AlignConstants.REEF_kI, AlignConstants.REEF_kD);
-    private final PIDController rotationController =
-            new PIDController(AlignConstants.ROT_REEF_kP, AlignConstants.ROT_REEF_kI, AlignConstants.ROT_REEF_kD);
+    private final ProfiledPIDController rotationController = new ProfiledPIDController(
+            AlignConstants.ROT_REEF_kP,
+            AlignConstants.ROT_REEF_kI,
+            AlignConstants.ROT_REEF_kD,
+            new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION),
+            0.02);
+    // private final PIDController rotationController =
+    //         new PIDController(AlignConstants.ROT_REEF_kP, AlignConstants.ROT_REEF_kI, AlignConstants.ROT_REEF_kD);
+
+    //      ProfiledPIDController angleController = new ProfiledPIDController(
+    //         ANGLE_KP, 0.0, ANGLE_KD, new TrapezoidProfile.Constraints(ANGLE_MAX_VELOCITY, ANGLE_MAX_ACCELERATION));
+    // angleController.enableContinuousInput(-Math.PI, Math.PI);
 
     private Debouncer isAlignedDebouncer = new Debouncer(0.2);
 
@@ -144,8 +159,8 @@ public class AutoAlign {
         updateControllerOutputs();
         updateVelocities();
 
-        Logger.recordOutput("AutoAlign/RotationErrorRad", rotationController.getError());
-        Logger.recordOutput("AutoAlign/RotationErrorDeg", Math.toDegrees(rotationController.getError()));
+        // Logger.recordOutput("AutoAlign/RotationErrorRad", rotationController.getError());
+        Logger.recordOutput("AutoAlign/RotationErrorDeg", Math.toDegrees(rotationController.getPositionError()));
         Logger.recordOutput("AutoAlign/CurrentBranchTag", currentTagID);
     }
 
@@ -207,7 +222,7 @@ public class AutoAlign {
 
     public void reset() {
         translationController.reset();
-        rotationController.reset();
+        // rotationController.reset();
     }
 
     public void setCurrentAlignCommand(String curCommand) {

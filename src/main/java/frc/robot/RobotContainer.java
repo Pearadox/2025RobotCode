@@ -275,8 +275,9 @@ public class RobotContainer {
                 })
                 .andThen(new WaitCommand(2))
                 .andThen(new InstantCommand(() -> {
-                        elevator.setElevatorStowedMode();
-                        arm.setStowed();})));
+                    elevator.setElevatorStowedMode();
+                    arm.setStowed();
+                })));
 
         elevatorAdjust.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
