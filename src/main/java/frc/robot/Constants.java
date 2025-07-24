@@ -201,7 +201,7 @@ public class Constants {
         // from the arm's pivot point to floor
         public static final double ELEVATOR_STARTING_HEIGHT = 1.0023799104; // Units.inchesToMeters(39);
 
-        public static final double ALIGN_ROT_TOLERANCE = Units.degreesToRadians(3);
+        public static final double ALIGN_ROT_TOLERANCE = Units.degreesToRadians(4);
         public static final double ALIGN_TRANSLATION_TOLERANCE = Units.inchesToMeters(4);
     }
 
