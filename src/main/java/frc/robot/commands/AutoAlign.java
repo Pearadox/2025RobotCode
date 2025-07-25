@@ -165,7 +165,7 @@ public class AutoAlign {
         Translation2d currentToTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
         distanceError = currentToTarget.getNorm();
         Rotation2d directionToTarget = currentToTarget.getAngle();
-        if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
+        // if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
 
         double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.4, 0.4);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
