@@ -174,6 +174,9 @@ public class RobotContainer {
         }
 
         align = new AutoAlign(drive::getPose);
+        if (Constants.currentMode == Constants.Mode.SIM) {
+            align.setRobotSupplier(driveSimulation::getSimulatedDriveTrainPose);
+        }
 
         setDefaultCommands();
         registerNamedCommands();
@@ -386,7 +389,6 @@ public class RobotContainer {
     public void resetSimulation() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        align.setPoseSupplier(driveSimulation::getSimulatedDriveTrainPose);
         drive.resetOdometry(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
         AlgaeHandler.getInstance().reset();

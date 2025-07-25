@@ -9,7 +9,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -22,7 +21,7 @@ import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.robot.generated.TunerConstants;
 import frc.robot.util.RobotIdentity;
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Constants {
@@ -64,6 +63,7 @@ public class Constants {
         public static final int[] BLUE_CORAL_STATION_TAG_IDS = {12, 13};
         public static final int[] RED_REEF_TAG_IDS = {7, 6, 11, 10, 9, 8};
         public static final int[] RED_CORAL_STATION_TAG_IDS = {1, 2};
+        public static final int[] ALL_REEF_TAG_IDS = {18, 19, 20, 21, 22, 17, 7, 6, 11, 10, 9, 8};
 
         public static final Translation2d BLUE_FAR_CAGE =
                 new Translation2d(Units.inchesToMeters(345.428), Units.inchesToMeters(286.779));
@@ -84,21 +84,18 @@ public class Constants {
 
         public static final Translation2d BLUE_REEF_CENTER = new Translation2d(4.5, 4);
 
-        public static final Translation2d BLUE_NPS_CORAL_STATION =
-                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
-        public static final Translation2d BLUE_PS_CORAL_STATION =
-                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
+        public static final List<Pose2d> CORAL_STATIONS = new ArrayList<>();
 
-        public static final Translation2d RED_NPS_CORAL_STATION =
-                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
-        public static final Translation2d RED_PS_CORAL_STATION =
-                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
-
-        public static final List<Pose2d> CORAL_STATIONS = Arrays.asList(
-                new Pose2d(BLUE_NPS_CORAL_STATION, new Rotation2d(125)),
-                new Pose2d(BLUE_PS_CORAL_STATION, new Rotation2d(-125)),
-                new Pose2d(RED_NPS_CORAL_STATION, new Rotation2d(-125)),
-                new Pose2d(RED_PS_CORAL_STATION, new Rotation2d(125)));
+        static {
+            for (int tag : BLUE_CORAL_STATION_TAG_IDS) {
+                CORAL_STATIONS.add(
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d());
+            }
+            for (int tag : RED_CORAL_STATION_TAG_IDS) {
+                CORAL_STATIONS.add(
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d());
+            }
+        }
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
@@ -115,6 +112,14 @@ public class Constants {
             for (int tag : FieldConstants.BLUE_REEF_TAG_IDS) {
                 REEF_TAG_POSES[i++] =
                         VisionConstants.aprilTagLayout.getTagPose(tag).get();
+            }
+        }
+
+        public static final List<Pose2d> REEF_TAGS = new ArrayList<>();
+
+        static {
+            for (Pose3d tag : REEF_TAG_POSES) {
+                REEF_TAGS.add(tag.toPose2d());
             }
         }
 
@@ -148,42 +153,31 @@ public class Constants {
     }
 
     public static final class AlignConstants {
-        // TODO: possible align pid adjustment
-        // public static final double ALIGN_STRAFE_KP = 0.06;
-        // public static final double ALIGN_STRAFE_KI = 0.001;
-        // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
-
-        public static final double ALIGN_KS = 0.1; // 0.009
-
-        // tx and ty tolerances with setpoint
-        public static final double ALIGN_TOLERANCE_PIXELS = 0.5;
-        // don't try translationally aligning unless rotation is already aligned within this tolerance
-        public static final double ALIGN_ROT_TOLERANCE_DEGREES = 10;
-
-        // reduce speed by 1/4 every tick when an april tag is not seen
-        public static final double ALIGN_DAMPING_FACTOR = 0.75;
-        public static final double ALIGN_SPEED_DEADBAND = 0.025;
-
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.97 / 2.0); // 12.94 //12.97
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = 0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
-        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18 + 4); // try lowering
         public static final double REEF_STATION_ALIGN_TZ = Units.inchesToMeters(12);
 
-        public static final double STATION_ALIGN_TX = 0.07;
-        public static final double STATION_ALIGN_TZ = 0;
+        public static final Translation2d LEFT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, -BRANCH_SPACING);
+        public static final Translation2d RIGHT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, BRANCH_SPACING);
+        public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, 0.0);
+        public static final Translation2d STATION_OFFSET = new Translation2d(REEF_STATION_ALIGN_TZ, 0.0);
 
-        public static final double REEF_kP = 0.5; // 1.5
-        public static final double REEF_kI = 0;
-        public static final double REEF_kD = 0.0;
+        public static final double DRIVE_kP = 5.0;
+        public static final double DRIVE_kI = 0.0;
+        public static final double DRIVE_kD = 0.0;
+        public static final double MAX_DRIVE_VELOCITY = 4.73;
+        public static final double MAX_DRIVE_ACCELERATION = 20;
 
-        // for some reason, 0.02 is much too low in sim??
-        public static final double ROT_REEF_kP = 0.5;
-        public static final double ROT_REEF_kI = 0;
-        public static final double ROT_REEF_kD = 0;
+        public static final double ROT_kP = 5.0;
+        public static final double ROT_kI = 0.0;
+        public static final double ROT_kD = 0.0;
+        public static final double MAX_ROT_VELOCITY = 8;
+        public static final double MAX_ROT_ACCELERATION = 20;
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
