@@ -5,7 +5,6 @@ import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.filter.Debouncer;
 import edu.wpi.first.math.geometry.*;
-import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj.Timer;
 import edu.wpi.first.wpilibj2.command.Command;
@@ -165,7 +164,7 @@ public class AutoAlign {
         Translation2d currentToTarget = targetPose.getTranslation().minus(currentPose.getTranslation());
         distanceError = currentToTarget.getNorm();
         Rotation2d directionToTarget = currentToTarget.getAngle();
-        // if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
+        if (RobotContainer.isRedAlliance()) directionToTarget = directionToTarget.plus(Rotation2d.k180deg);
 
         double translationMagnitude = MathUtil.clamp(translationController.calculate(0, distanceError), -0.4, 0.4);
         translationOutput = new Translation2d(translationMagnitude, directionToTarget);
@@ -250,13 +249,14 @@ public class AutoAlign {
                     setBranchTx(tx);
                 })
                 .andThen(new RunCommand(() -> updateFieldRelativeAlignSpeeds())
-                        .alongWith(
-                            new RunCommand(() -> 
-                                drive.runVelocity(new ChassisSpeeds(getXVelocity(), getYVelocity(), getAngularVelocity())))));
-                            
-                            //DriveCommands.joystickDrive(
-                            //    drive, () -> getXVelocity(), () -> getYVelocity(), () -> getAngularVelocity(), true)));
-        }
+                        .alongWith(DriveCommands.joystickDrive(
+                                drive,
+                                () -> getXVelocity(),
+                                () -> getYVelocity(),
+                                () -> getAngularVelocity(),
+                                true,
+                                true)));
+    }
 
     public Command reefAlignLeft(Drive drive) {
         return getAlignCommand(drive, true, AlignConstants.REEF_ALIGN_LEFT_TX, "Left Branch");

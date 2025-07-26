@@ -217,6 +217,7 @@ public class RobotContainer {
                 () -> 0,
                 () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()),
                 () -> 0,
+                false,
                 false));
 
         slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
@@ -375,7 +376,8 @@ public class RobotContainer {
                 () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
                 () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
                 () -> -driverController.getRightX() * drive.getTurnMultiplier(),
-                true));
+                true,
+                false));
 
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
