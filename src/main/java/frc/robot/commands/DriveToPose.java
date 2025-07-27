@@ -4,6 +4,8 @@
 
 package frc.robot.commands;
 
+import edu.wpi.first.math.MathUtil;
+import edu.wpi.first.math.controller.PIDController;
 import edu.wpi.first.math.controller.ProfiledPIDController;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -23,8 +25,6 @@ public class DriveToPose extends Command {
     private static final LoggedTunableNumber drivekD = new LoggedTunableNumber("Align/kD", AlignConstants.DRIVE_kD);
     private static final LoggedTunableNumber driveMaxVel =
             new LoggedTunableNumber("Align/Max Vel", AlignConstants.MAX_DRIVE_VELOCITY);
-    private static final LoggedTunableNumber driveMaxAcc =
-            new LoggedTunableNumber("Align/Max Acc", AlignConstants.MAX_DRIVE_ACCELERATION);
 
     private static final LoggedTunableNumber rotkP = new LoggedTunableNumber("Align/Rot kP", AlignConstants.ROT_kP);
     private static final LoggedTunableNumber rotkI = new LoggedTunableNumber("Align/Rot kI", AlignConstants.ROT_kI);
@@ -34,7 +34,7 @@ public class DriveToPose extends Command {
     private static final LoggedTunableNumber rotMaxAcc =
             new LoggedTunableNumber("Align/Rot Max Acc", AlignConstants.MAX_ROT_ACCELERATION);
 
-    private ProfiledPIDController translationController;
+    private PIDController translationController;
     private ProfiledPIDController rotationController;
 
     private Drive drive;
@@ -47,11 +47,7 @@ public class DriveToPose extends Command {
         this.targetSupplier = target;
         this.robotSupplier = robot;
 
-        translationController = new ProfiledPIDController(
-                drivekP.get(),
-                drivekI.get(),
-                drivekD.get(),
-                new TrapezoidProfile.Constraints(driveMaxVel.get(), driveMaxAcc.get()));
+        translationController = new PIDController(drivekP.get(), drivekI.get(), drivekD.get());
 
         rotationController = new ProfiledPIDController(
                 rotkP.get(),
@@ -68,8 +64,11 @@ public class DriveToPose extends Command {
     // Called when the command is initially scheduled.
     @Override
     public void initialize() {
-        translationController.reset(0);
-        rotationController.reset(robotSupplier.get().getRotation().getRadians());
+        Pose2d currentPose = robotSupplier.get();
+        ChassisSpeeds currentSpeeds = drive.getChassisSpeeds();
+
+        translationController.reset();
+        rotationController.reset(currentPose.getRotation().getRadians(), currentSpeeds.omegaRadiansPerSecond);
     }
 
     // Called every time the scheduler runs while the command is scheduled.
@@ -83,11 +82,13 @@ public class DriveToPose extends Command {
         Translation2d translationError = targetPose.minus(currentPose).getTranslation();
         Rotation2d directionToTarget = translationError.getAngle();
 
-        double translationOutput = translationController.calculate(translationError.getNorm(), 0);
+        double translationOutput = -MathUtil.clamp(
+                translationController.calculate(translationError.getNorm(), 0), -driveMaxVel.get(), driveMaxVel.get());
+
         double rotationOutput = rotationController.calculate(
                 currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
 
-        Translation2d translationVelocity = new Translation2d(-translationOutput, directionToTarget);
+        Translation2d translationVelocity = new Translation2d(translationOutput, directionToTarget);
 
         drive.runVelocity(new ChassisSpeeds(translationVelocity.getX(), translationVelocity.getY(), rotationOutput));
 
@@ -120,10 +121,6 @@ public class DriveToPose extends Command {
         }
         if (rotkP.hasChanged(hashCode()) || rotkI.hasChanged(hashCode()) || rotkD.hasChanged(hashCode())) {
             rotationController.setPID(rotkP.get(), rotkI.get(), rotkD.get());
-        }
-        if (driveMaxVel.hasChanged(hashCode()) || driveMaxAcc.hasChanged(hashCode())) {
-            translationController.setConstraints(
-                    new TrapezoidProfile.Constraints(driveMaxVel.get(), driveMaxAcc.get()));
         }
         if (rotMaxVel.hasChanged(hashCode()) || rotMaxAcc.hasChanged(hashCode())) {
             rotationController.setConstraints(new TrapezoidProfile.Constraints(rotMaxVel.get(), rotMaxAcc.get()));

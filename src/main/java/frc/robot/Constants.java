@@ -167,17 +167,16 @@ public class Constants {
         public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, 0.0);
         public static final Translation2d STATION_OFFSET = new Translation2d(REEF_STATION_ALIGN_TZ, 0.0);
 
-        public static final double DRIVE_kP = 5.0;
+        public static final double DRIVE_kP = 5.0; // m/s per m error
         public static final double DRIVE_kI = 0.0;
         public static final double DRIVE_kD = 0.0;
-        public static final double MAX_DRIVE_VELOCITY = 4.73;
-        public static final double MAX_DRIVE_ACCELERATION = 20;
+        public static final double MAX_DRIVE_VELOCITY = 3.0; // m/s
 
-        public static final double ROT_kP = 5.0;
+        public static final double ROT_kP = 5.0; // rad/s per rad error
         public static final double ROT_kI = 0.0;
-        public static final double ROT_kD = 0.0;
-        public static final double MAX_ROT_VELOCITY = 8;
-        public static final double MAX_ROT_ACCELERATION = 20;
+        public static final double ROT_kD = 0.5;
+        public static final double MAX_ROT_VELOCITY = 8; // rad/s
+        public static final double MAX_ROT_ACCELERATION = 10; // rad/s^2
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
