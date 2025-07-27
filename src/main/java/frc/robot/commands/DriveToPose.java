@@ -12,8 +12,10 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AlignConstants;
+import frc.robot.Constants;
 import frc.robot.subsystems.drive.Drive;
 import frc.robot.util.LoggedTunableNumber;
+
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
 
@@ -83,7 +85,8 @@ public class DriveToPose extends Command {
         Translation2d translationError = targetPose.minus(currentPose).getTranslation();
         Rotation2d directionToTarget = translationError.getAngle();
 
-        double translationOutput = translationController.calculate(translationError.getNorm(), 0);
+        double translationOutput = translationController.calculate(translationError.getNorm(), Constants.IDENTITY_STRING == "EVE" ? 6 : 0); 
+        // TODO: Find more elegant solution for eve ramming into reef
         double rotationOutput = rotationController.calculate(
                 currentPose.getRotation().getRadians(), targetPose.getRotation().getRadians());
 

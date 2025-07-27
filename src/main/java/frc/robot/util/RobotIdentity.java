@@ -29,11 +29,11 @@ public enum RobotIdentity {
         String rioSerial = RobotController.getSerialNumber();
 
         if (rioSerial.equals("032B4B61")) {
-            return "Eve";
+            return "EVE";
         } else if (rioSerial.equals("032B4B64")) {
-            return "Pearracuda";
+            return "PEARRACUDA";
         } else {
-            return "Unknown";
+            return "UNKNOWN";
         }
     }
 
