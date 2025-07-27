@@ -39,6 +39,7 @@ public class Constants {
     }
 
     public static final RobotIdentity IDENTITY = RobotIdentity.getRobotIdentity();
+    public static final String IDENTITY_STRING = RobotIdentity.getRobotIdentityString();
     public static final TunerConstants TUNER_CONSTANTS = IDENTITY.tunerConstants;
 
     public static class VisionConstants {
