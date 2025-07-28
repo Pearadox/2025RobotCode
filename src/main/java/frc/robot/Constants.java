@@ -160,7 +160,7 @@ public class Constants {
         public static final double REEF_ALIGN_MID_TX = 0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
-        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18 + 4); // try lowering
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
         public static final double REEF_STATION_ALIGN_TZ = Units.inchesToMeters(12);
 
         public static final Translation2d LEFT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, -BRANCH_SPACING);
@@ -172,12 +172,13 @@ public class Constants {
         public static final double DRIVE_kI = 0.0;
         public static final double DRIVE_kD = 0.0;
         public static final double MAX_DRIVE_VELOCITY = 3.0; // m/s
+        public static final double MAX_DRIVE_ACCELERATION = 20; // m/s^2
 
         public static final double ROT_kP = 5.0; // rad/s per rad error
         public static final double ROT_kI = 0.0;
-        public static final double ROT_kD = 0.5;
+        public static final double ROT_kD = 0.0;
         public static final double MAX_ROT_VELOCITY = 8; // rad/s
-        public static final double MAX_ROT_ACCELERATION = 10; // rad/s^2
+        public static final double MAX_ROT_ACCELERATION = 20; // rad/s^2
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
