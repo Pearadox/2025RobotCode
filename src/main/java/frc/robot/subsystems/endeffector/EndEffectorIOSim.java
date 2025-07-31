@@ -8,7 +8,6 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Transform3d;
@@ -248,7 +247,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
                         // No additional velocity (the coral station isn't moving)
                         new ChassisSpeeds(),
                         // Coral station yaw
-                        nearestCS.getRotation().plus(Rotation2d.k180deg),
+                        nearestCS.getRotation(),
                         // The height at which the coral is ejected
                         Meters.of(1),
                         // The initial speed of the coral

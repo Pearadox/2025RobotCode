@@ -31,6 +31,8 @@ public class EndEffector extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        inputs.hasCoral = true;
+
         Logger.processInputs("EE", inputs);
 
         collectGamePiece();

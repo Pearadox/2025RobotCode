@@ -72,8 +72,12 @@ public class DriveToPose extends Command {
         Pose2d currentPose = robotSupplier.get();
         ChassisSpeeds currentSpeeds = drive.getChassisSpeeds();
 
-        translationController.reset(
-                targetPose.minus(currentPose).getTranslation().getNorm());
+        Translation2d translationError = targetPose.minus(currentPose).getTranslation();
+        Rotation2d directionToTarget = translationError.getAngle();
+        double velocityTowardsTarget = currentSpeeds.vxMetersPerSecond * directionToTarget.getCos()
+                + currentSpeeds.vyMetersPerSecond * directionToTarget.getSin();
+
+        translationController.reset(translationError.getNorm(), -velocityTowardsTarget);
         rotationController.reset(robotSupplier.get().getRotation().getRadians(), currentSpeeds.omegaRadiansPerSecond);
     }
 

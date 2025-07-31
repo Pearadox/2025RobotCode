@@ -168,13 +168,13 @@ public class Constants {
         public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, 0.0);
         public static final Translation2d STATION_OFFSET = new Translation2d(REEF_STATION_ALIGN_TZ, 0.0);
 
-        public static final double DRIVE_kP = 5.0; // m/s per m error
+        public static final double DRIVE_kP = 2.5; // m/s per m error
         public static final double DRIVE_kI = 0.0;
         public static final double DRIVE_kD = 0.0;
         public static final double MAX_DRIVE_VELOCITY = 3.0; // m/s
-        public static final double MAX_DRIVE_ACCELERATION = 20; // m/s^2
+        public static final double MAX_DRIVE_ACCELERATION = 10; // m/s^2
 
-        public static final double ROT_kP = 5.0; // rad/s per rad error
+        public static final double ROT_kP = 3.0; // rad/s per rad error
         public static final double ROT_kI = 0.0;
         public static final double ROT_kD = 0.0;
         public static final double MAX_ROT_VELOCITY = 8; // rad/s
