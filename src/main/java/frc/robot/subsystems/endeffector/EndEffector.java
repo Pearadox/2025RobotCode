@@ -31,6 +31,8 @@ public class EndEffector extends SubsystemBase {
     @Override
     public void periodic() {
         io.updateInputs(inputs);
+        // inputs.hasCoral = true; // this was for testing autos on eve
+
         Logger.processInputs("EE", inputs);
 
         collectGamePiece();

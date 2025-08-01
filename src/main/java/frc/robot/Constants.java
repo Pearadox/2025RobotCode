@@ -9,7 +9,6 @@ import edu.wpi.first.math.VecBuilder;
 import edu.wpi.first.math.Vector;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
-import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 import edu.wpi.first.math.geometry.Translation2d;
@@ -20,7 +19,9 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import java.util.Arrays;
+import frc.robot.generated.TunerConstants;
+import frc.robot.util.RobotIdentity;
+import java.util.ArrayList;
 import java.util.List;
 
 public class Constants {
@@ -36,6 +37,10 @@ public class Constants {
         /** Replaying from a log file. */
         REPLAY
     }
+
+    public static final RobotIdentity IDENTITY = RobotIdentity.getRobotIdentity();
+    public static final String IDENTITY_STRING = RobotIdentity.getRobotIdentityString();
+    public static final TunerConstants TUNER_CONSTANTS = IDENTITY.tunerConstants;
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
@@ -80,21 +85,18 @@ public class Constants {
 
         public static final Translation2d BLUE_REEF_CENTER = new Translation2d(4.5, 4);
 
-        public static final Translation2d BLUE_NPS_CORAL_STATION =
-                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
-        public static final Translation2d BLUE_PS_CORAL_STATION =
-                new Translation2d(Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
+        public static final List<Pose2d> CORAL_STATIONS = new ArrayList<>();
 
-        public static final Translation2d RED_NPS_CORAL_STATION =
-                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(291.176));
-        public static final Translation2d RED_PS_CORAL_STATION =
-                new Translation2d(FIELD_LENGTH - Units.inchesToMeters(33.526), Units.inchesToMeters(25.824));
-
-        public static final List<Pose2d> CORAL_STATIONS = Arrays.asList(
-                new Pose2d(BLUE_NPS_CORAL_STATION, new Rotation2d(125)),
-                new Pose2d(BLUE_PS_CORAL_STATION, new Rotation2d(-125)),
-                new Pose2d(RED_NPS_CORAL_STATION, new Rotation2d(-125)),
-                new Pose2d(RED_PS_CORAL_STATION, new Rotation2d(125)));
+        static {
+            for (int tag : BLUE_CORAL_STATION_TAG_IDS) {
+                CORAL_STATIONS.add(
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d());
+            }
+            for (int tag : RED_CORAL_STATION_TAG_IDS) {
+                CORAL_STATIONS.add(
+                        VisionConstants.aprilTagLayout.getTagPose(tag).get().toPose2d());
+            }
+        }
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
@@ -111,6 +113,14 @@ public class Constants {
             for (int tag : FieldConstants.BLUE_REEF_TAG_IDS) {
                 REEF_TAG_POSES[i++] =
                         VisionConstants.aprilTagLayout.getTagPose(tag).get();
+            }
+        }
+
+        public static final List<Pose2d> REEF_TAGS = new ArrayList<>();
+
+        static {
+            for (Pose3d tag : REEF_TAG_POSES) {
+                REEF_TAGS.add(tag.toPose2d());
             }
         }
 
@@ -144,33 +154,31 @@ public class Constants {
     }
 
     public static final class AlignConstants {
-        // TODO: possible align pid adjustment
-        // public static final double ALIGN_STRAFE_KP = 0.06;
-        // public static final double ALIGN_STRAFE_KI = 0.001;
-        // public static final double ALIGN_FORWARD_KP = 0.04; // -0.06
-
-        public static final double ALIGN_KS = 0.1; // 0.009
-
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.97 / 2.0); // 12.94 //12.97
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = 0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
-        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(17); // try lowering
+        public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
         public static final double REEF_STATION_ALIGN_TZ = Units.inchesToMeters(12);
 
-        public static final double STATION_ALIGN_TX = 0.07;
-        public static final double STATION_ALIGN_TZ = 0;
+        public static final Translation2d LEFT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, -BRANCH_SPACING);
+        public static final Translation2d RIGHT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, BRANCH_SPACING);
+        public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, 0.0);
+        public static final Translation2d STATION_OFFSET = new Translation2d(REEF_STATION_ALIGN_TZ, 0.0);
 
-        public static final double REEF_kP = 1.5; // try raising
-        public static final double REEF_kI = 0;
-        public static final double REEF_kD = 0.0;
+        public static final double DRIVE_kP = 2.5; // m/s per m error
+        public static final double DRIVE_kI = 0.0;
+        public static final double DRIVE_kD = 0.0;
+        public static final double MAX_DRIVE_VELOCITY = 3.0; // m/s
+        public static final double MAX_DRIVE_ACCELERATION = 10; // m/s^2
 
-        // for some reason, 0.02 is much too low in sim??
-        public static final double ROT_REEF_kP = 1.1;
-        public static final double ROT_REEF_kI = 0;
-        public static final double ROT_REEF_kD = 0;
+        public static final double ROT_kP = 3.0; // rad/s per rad error
+        public static final double ROT_kI = 0.0;
+        public static final double ROT_kD = 0.0;
+        public static final double MAX_ROT_VELOCITY = 8; // rad/s
+        public static final double MAX_ROT_ACCELERATION = 20; // rad/s^2
 
         // the top of the branch (L4) is ~2" behind the april tag
         public static final double BRANCH_OFFSET_BEHIND_APRILTAG = Units.inchesToMeters(2.049849);
@@ -188,7 +196,7 @@ public class Constants {
         // from the arm's pivot point to floor
         public static final double ELEVATOR_STARTING_HEIGHT = 1.0023799104; // Units.inchesToMeters(39);
 
-        public static final double ALIGN_ROT_TOLERANCE = Units.degreesToRadians(3);
+        public static final double ALIGN_ROT_TOLERANCE = Units.degreesToRadians(4);
         public static final double ALIGN_TRANSLATION_TOLERANCE = Units.inchesToMeters(4);
     }
 
@@ -268,8 +276,8 @@ public class Constants {
 
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08
-        public static final double ARM_INTAKE_ROT =
-                Units.degreesToRotations(-15) * ARM_GEAR_RATIO; //  was 61 //-299 // -311
+        public static final double ARM_INTAKE_ROT = Units.degreesToRotations(IDENTITY == RobotIdentity.EVE ? -20 : -15)
+                * ARM_GEAR_RATIO; //  was 61 //-299 // -311
         public static final double ARM_STOWED_ROT = Units.degreesToRotations(0) * ARM_GEAR_RATIO; // should be 0
 
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73) * ARM_GEAR_RATIO;

@@ -49,9 +49,9 @@ import edu.wpi.first.wpilibj2.command.SubsystemBase;
 import edu.wpi.first.wpilibj2.command.sysid.SysIdRoutine;
 import frc.robot.Constants;
 import frc.robot.Constants.Mode;
-import frc.robot.generated.TunerConstants;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.util.LocalADStarAK;
+import frc.robot.util.SmarterDashboard;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 import java.util.function.Consumer;
@@ -62,30 +62,41 @@ import org.littletonrobotics.junction.AutoLogOutput;
 import org.littletonrobotics.junction.Logger;
 
 public class Drive extends SubsystemBase implements Vision.VisionConsumer {
-    // TunerConstants doesn't include these constants, so they are declared locally
+    // Constants.TUNER_CONSTANTS doesn't include these constants, so they are declared locally
     static final double ODOMETRY_FREQUENCY =
-            new CANBus(TunerConstants.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
+            new CANBus(Constants.TUNER_CONSTANTS.DrivetrainConstants.CANBusName).isNetworkFD() ? 250.0 : 100.0;
     public static final double DRIVE_BASE_RADIUS = Math.max(
             Math.max(
-                    Math.hypot(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-                    Math.hypot(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY)),
+                    Math.hypot(
+                            Constants.TUNER_CONSTANTS.FrontLeft.LocationX,
+                            Constants.TUNER_CONSTANTS.FrontLeft.LocationY),
+                    Math.hypot(
+                            Constants.TUNER_CONSTANTS.FrontRight.LocationX,
+                            Constants.TUNER_CONSTANTS.FrontRight.LocationY)),
             Math.max(
-                    Math.hypot(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-                    Math.hypot(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)));
+                    Math.hypot(
+                            Constants.TUNER_CONSTANTS.BackLeft.LocationX, Constants.TUNER_CONSTANTS.BackLeft.LocationY),
+                    Math.hypot(
+                            Constants.TUNER_CONSTANTS.BackRight.LocationX,
+                            Constants.TUNER_CONSTANTS.BackRight.LocationY)));
+
+    private double driveMultiplier = 1;
+    private double turnMultiplier = 1;
+    private boolean useMultiplier = false;
 
     // PathPlanner config constants
-    private static final double ROBOT_MASS_KG = Units.lbsToKilograms(114 + 18);
+    private static final double ROBOT_MASS_KG = Pounds.of(114 + 18).in(Kilograms);
     private static final double ROBOT_MOI = 6.883;
     private static final double WHEEL_COF = COTS.WHEELS.VEX_GRIP_V2.cof;
     private static final RobotConfig PP_CONFIG = new RobotConfig(
             ROBOT_MASS_KG,
             ROBOT_MOI,
             new ModuleConfig(
-                    TunerConstants.FrontLeft.WheelRadius,
-                    TunerConstants.kSpeedAt12Volts.in(MetersPerSecond),
+                    Constants.TUNER_CONSTANTS.FrontLeft.WheelRadius,
+                    Constants.TUNER_CONSTANTS.kSpeedAt12Volts.in(MetersPerSecond),
                     WHEEL_COF,
-                    DCMotor.getKrakenX60Foc(1).withReduction(TunerConstants.FrontLeft.DriveMotorGearRatio),
-                    TunerConstants.FrontLeft.SlipCurrent,
+                    DCMotor.getKrakenX60Foc(1).withReduction(Constants.TUNER_CONSTANTS.FrontLeft.DriveMotorGearRatio),
+                    Constants.TUNER_CONSTANTS.FrontLeft.SlipCurrent,
                     1),
             getModuleTranslations());
 
@@ -96,13 +107,13 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             .withBumperSize(Inches.of(30 + 3.25 * 2), Inches.of(28 + 3.25 * 2))
             .withSwerveModule(new SwerveModuleSimulationConfig(
                     DCMotor.getKrakenX60(1),
-                    DCMotor.getKrakenX60(1),
-                    TunerConstants.FrontLeft.DriveMotorGearRatio,
-                    TunerConstants.FrontLeft.SteerMotorGearRatio,
-                    Volts.of(TunerConstants.FrontLeft.DriveFrictionVoltage),
-                    Volts.of(TunerConstants.FrontLeft.SteerFrictionVoltage),
-                    Meters.of(TunerConstants.FrontLeft.WheelRadius),
-                    KilogramSquareMeters.of(TunerConstants.FrontLeft.SteerInertia),
+                    DCMotor.getFalcon500(1),
+                    Constants.TUNER_CONSTANTS.FrontLeft.DriveMotorGearRatio,
+                    Constants.TUNER_CONSTANTS.FrontLeft.SteerMotorGearRatio,
+                    Volts.of(Constants.TUNER_CONSTANTS.FrontLeft.DriveFrictionVoltage),
+                    Volts.of(Constants.TUNER_CONSTANTS.FrontLeft.SteerFrictionVoltage),
+                    Inches.of(2),
+                    KilogramSquareMeters.of(Constants.TUNER_CONSTANTS.FrontLeft.SteerInertia),
                     WHEEL_COF));
 
     static final Lock odometryLock = new ReentrantLock();
@@ -124,7 +135,6 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             };
     private final SwerveDrivePoseEstimator poseEstimator =
             new SwerveDrivePoseEstimator(kinematics, rawGyroRotation, lastModulePositions, new Pose2d());
-
     private final Consumer<Pose2d> resetSimulationPoseCallBack;
 
     public Drive(
@@ -136,10 +146,10 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
             Consumer<Pose2d> resetSimulationPoseCallBack) {
         this.gyroIO = gyroIO;
         this.resetSimulationPoseCallBack = resetSimulationPoseCallBack;
-        modules[0] = new Module(flModuleIO, 0, TunerConstants.FrontLeft);
-        modules[1] = new Module(frModuleIO, 1, TunerConstants.FrontRight);
-        modules[2] = new Module(blModuleIO, 2, TunerConstants.BackLeft);
-        modules[3] = new Module(brModuleIO, 3, TunerConstants.BackRight);
+        modules[0] = new Module(flModuleIO, 0, Constants.TUNER_CONSTANTS.FrontLeft);
+        modules[1] = new Module(frModuleIO, 1, Constants.TUNER_CONSTANTS.FrontRight);
+        modules[2] = new Module(blModuleIO, 2, Constants.TUNER_CONSTANTS.BackLeft);
+        modules[3] = new Module(brModuleIO, 3, Constants.TUNER_CONSTANTS.BackRight);
 
         // Usage reporting for swerve template
         HAL.report(tResourceType.kResourceType_RobotDrive, tInstances.kRobotDriveSwerve_AdvantageKit);
@@ -150,7 +160,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Configure AutoBuilder for PathPlanner
         AutoBuilder.configure(
                 this::getPose,
-                this::setPose,
+                this::resetOdometry,
                 this::getChassisSpeeds,
                 this::runVelocity,
                 new PPHolonomicDriveController(new PIDConstants(5.0, 0.0, 0.0), new PIDConstants(5.0, 0.0, 0.0)),
@@ -226,6 +236,8 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
         // Update gyro alert
         gyroDisconnectedAlert.set(!gyroInputs.connected && Constants.currentMode != Mode.SIM);
+
+        SmarterDashboard.putBoolean("Drive/Slow Mode", useMultiplier);
     }
 
     /**
@@ -237,7 +249,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         // Calculate module setpoints
         speeds = ChassisSpeeds.discretize(speeds, 0.02);
         SwerveModuleState[] setpointStates = kinematics.toSwerveModuleStates(speeds);
-        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, TunerConstants.kSpeedAt12Volts);
+        SwerveDriveKinematics.desaturateWheelSpeeds(setpointStates, Constants.TUNER_CONSTANTS.kSpeedAt12Volts);
 
         // Log unoptimized setpoints and setpoint speeds
         Logger.recordOutput("SwerveStates/Setpoints", setpointStates);
@@ -308,7 +320,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     /** Returns the measured chassis speeds of the robot. */
     @AutoLogOutput(key = "SwerveChassisSpeeds/Measured")
-    private ChassisSpeeds getChassisSpeeds() {
+    public ChassisSpeeds getChassisSpeeds() {
         return kinematics.toChassisSpeeds(getModuleStates());
     }
 
@@ -342,7 +354,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     }
 
     /** Resets the current odometry pose. */
-    public void setPose(Pose2d pose) {
+    public void resetOdometry(Pose2d pose) {
         resetSimulationPoseCallBack.accept(pose);
         poseEstimator.resetPosition(rawGyroRotation, getModulePositions(), pose);
     }
@@ -355,7 +367,7 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
 
     /** Returns the maximum linear speed in meters per sec. */
     public double getMaxLinearSpeedMetersPerSec() {
-        return TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
+        return Constants.TUNER_CONSTANTS.kSpeedAt12Volts.in(MetersPerSecond);
     }
 
     /** Returns the maximum angular speed in radians per sec. */
@@ -366,10 +378,33 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
     /** Returns an array of module translations. */
     public static Translation2d[] getModuleTranslations() {
         return new Translation2d[] {
-            new Translation2d(TunerConstants.FrontLeft.LocationX, TunerConstants.FrontLeft.LocationY),
-            new Translation2d(TunerConstants.FrontRight.LocationX, TunerConstants.FrontRight.LocationY),
-            new Translation2d(TunerConstants.BackLeft.LocationX, TunerConstants.BackLeft.LocationY),
-            new Translation2d(TunerConstants.BackRight.LocationX, TunerConstants.BackRight.LocationY)
+            new Translation2d(
+                    Constants.TUNER_CONSTANTS.FrontLeft.LocationX, Constants.TUNER_CONSTANTS.FrontLeft.LocationY),
+            new Translation2d(
+                    Constants.TUNER_CONSTANTS.FrontRight.LocationX, Constants.TUNER_CONSTANTS.FrontRight.LocationY),
+            new Translation2d(
+                    Constants.TUNER_CONSTANTS.BackLeft.LocationX, Constants.TUNER_CONSTANTS.BackLeft.LocationY),
+            new Translation2d(
+                    Constants.TUNER_CONSTANTS.BackRight.LocationX, Constants.TUNER_CONSTANTS.BackRight.LocationY)
         };
+    }
+
+    public void changeSpeedMultiplier() {
+        useMultiplier = !useMultiplier;
+        if (useMultiplier) {
+            driveMultiplier = 0.4;
+            turnMultiplier = 0.6;
+        } else {
+            driveMultiplier = 1;
+            turnMultiplier = 1;
+        }
+    }
+
+    public double getDriveMultiplier() {
+        return driveMultiplier;
+    }
+
+    public double getTurnMultiplier() {
+        return turnMultiplier;
     }
 }
