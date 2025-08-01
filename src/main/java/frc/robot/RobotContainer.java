@@ -348,8 +348,7 @@ public class RobotContainer {
                 align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
 
         NamedCommands.registerCommand(
-                "Auto Align Mid",
-                align.reefAlignMid(drive).until(align::isAlignedDebounced).withTimeout(2));
+                "Auto Align Mid", align.reefAlignMid(drive).withTimeout(5));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",

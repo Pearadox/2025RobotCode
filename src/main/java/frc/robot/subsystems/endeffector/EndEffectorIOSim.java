@@ -103,7 +103,7 @@ public class EndEffectorIOSim implements EndEffectorIO {
         inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble();
         inputs.supplyCurrent = endEffector.getSupplyCurrent().getValueAsDouble();
 
-        inputs.hasCoral = this.hasCoral;
+        inputs.hasCoral = this.hasCoral || this.hasAlgae;
 
         if (inputs.appliedVolts <= -0.5) { // rollers spinning clockwise
             intakeCoralProjectiles();
