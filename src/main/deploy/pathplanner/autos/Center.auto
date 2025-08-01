@@ -7,31 +7,25 @@
         {
           "type": "named",
           "data": {
-            "name": "HoldCoral"
+            "name": "Stow"
           }
         },
         {
           "type": "path",
           "data": {
-            "pathName": "1_GH"
+            "pathName": "W_GH"
           }
         },
         {
           "type": "named",
           "data": {
-            "name": "Auto Align Right"
+            "name": "Score"
           }
         },
         {
-          "type": "named",
+          "type": "path",
           "data": {
-            "name": "Stop"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Outtake"
+            "pathName": "W_GH_BACK"
           }
         }
       ]

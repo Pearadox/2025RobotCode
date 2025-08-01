@@ -2,6 +2,7 @@ package frc.robot;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,6 +13,7 @@ import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
 import edu.wpi.first.wpilibj2.command.Commands;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
@@ -38,7 +40,7 @@ public class RobotContainer {
     private Drive drive;
     private Vision vision;
     private GroundIntake groundIntake;
-    
+
     public static AutoAlign align;
 
     private SwerveDriveSimulation driveSimulation = null;
@@ -164,7 +166,15 @@ public class RobotContainer {
     // -------------------------------- PathPlanner Commands -------------------------------- /w
 
     public void registerNamedCommands() {
-        NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.stopWithX()));
+        NamedCommands.registerCommand("Stow", new InstantCommand(() -> groundIntake.setState(PivotPos.stowed)));
+        NamedCommands.registerCommand(
+                "Score",
+                new InstantCommand(() -> drive.stopWithX())
+                        .andThen(new WaitCommand(0.5))
+                        .andThen(new InstantCommand(() -> groundIntake.setState(PivotPos.outtake)))
+                        .andThen(new WaitCommand(0.5)));
+
+        new EventTrigger("Intake").onTrue(new InstantCommand(() -> groundIntake.setState(PivotPos.intake)));
     }
 
     // ----------------------------------- Default Commands -------------------------------- //

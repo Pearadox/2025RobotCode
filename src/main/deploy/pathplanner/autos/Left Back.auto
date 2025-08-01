@@ -13,7 +13,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W_IJ"
+            "pathName": "W_AB"
           }
         },
         {
@@ -25,13 +25,7 @@
         {
           "type": "path",
           "data": {
-            "pathName": "W_IJ_1"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Stow"
+            "pathName": "W_AB_2"
           }
         },
         {
@@ -41,33 +35,9 @@
           }
         },
         {
-          "type": "path",
-          "data": {
-            "pathName": "W_1_KL"
-          }
-        },
-        {
-          "type": "named",
-          "data": {
-            "name": "Score"
-          }
-        },
-        {
-          "type": "path",
-          "data": {
-            "pathName": "W_KL_2"
-          }
-        },
-        {
           "type": "named",
           "data": {
             "name": "Stow"
-          }
-        },
-        {
-          "type": "wait",
-          "data": {
-            "waitTime": 0.5
           }
         },
         {
