@@ -324,7 +324,8 @@ public class Constants {
     }
 
     public static final class IntakeConstants {
-        public static final int PIVOT_ID = 40;
+        // CANID for pivot
+        public static final int PIVOT_ID = 40; // real CANID
 
         // public static final int PIVOT_GEAR_RATIO = 60;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;
@@ -340,15 +341,6 @@ public class Constants {
         public static final double PIVOT_MAX_OUTPUT = 0.5;
 
         public static final double PIVOT_GEARING = 60; // 25:1 reduction gear ratio
-
-        public static final double PIVOT_OUTTAKE_ROT =
-                Units.degreesToRotations(10.0) * PIVOT_GEARING; // TODO: find outtake rot in motor rotations
-        public static final double PIVOT_INTAKE_ROT =
-                Units.degreesToRotations(105.0) * PIVOT_GEARING; // TODO: find intake rot in motor rotations
-        public static final double PIVOT_STOWED_ROT =
-                Units.degreesToRotations(0.0) * PIVOT_GEARING; // TODO: find stowed rot in motor rotations
-        public static final double PIVOT_ALGAE_ROT =
-                Units.degreesToRotations(40.0) * PIVOT_GEARING; // TODO: find stowed rot in motor rotations
 
         // CAN ID for roller
         public static final int ROLLER_ID = 41;

@@ -1,7 +1,5 @@
 package frc.robot;
 
-import static frc.robot.subsystems.vision.VisionConstants.*;
-
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
@@ -26,8 +24,9 @@ import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIO;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.groundintake.GroundIntake;
+import frc.robot.subsystems.groundintake.GroundIntake.PivotPos;
 import frc.robot.subsystems.vision.Vision;
-import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
 import frc.robot.util.SmarterDashboard;
 import frc.robot.util.simulation.AlgaeHandler;
@@ -38,30 +37,30 @@ import org.littletonrobotics.junction.Logger;
 public class RobotContainer {
     private Drive drive;
     private Vision vision;
+    private GroundIntake groundIntake;
+    
     public static AutoAlign align;
 
     private SwerveDriveSimulation driveSimulation = null;
 
     // Controller
     public static final XboxController driverController = new XboxController(0);
-    public static final XboxController opController = new XboxController(1);
+    // public static final XboxController opController = new XboxController(1);
 
     // ---------------------------- Driver Controller --------------------------------- //
 
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
-    private final POVButton reefAlignLeft_PovLeft = new POVButton(driverController, 270);
-    private final POVButton reefAlignCenter_PovDown = new POVButton(driverController, 180);
-    private final POVButton reefAlignRight_PovRight = new POVButton(driverController, 90);
-    private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
+    private final Trigger groundIntakeStowed = new POVButton(driverController, 0);
+    private final Trigger groundIntakeIntake = new POVButton(driverController, 180);
+    private final Trigger groundIntakeOuttake = new POVButton(driverController, 270);
+    private final Trigger groundIntakeAlgae = new POVButton(driverController, 90);
 
     private final JoystickButton slowMode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
 
     private final Trigger strafe_Triggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
-
-    // ----------------------------- Op Controller -------------------------------- //
 
     public final SendableChooser<Command> autoChooser;
 
@@ -75,7 +74,7 @@ public class RobotContainer {
                         new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
                         new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
                         (robotPose) -> {});
-                vision = new Vision(drive::accept, new VisionIOLimelight(camera0Name, drive::getRotation));
+                vision = new Vision(drive::accept); // TODO: add limelight or quest if desired
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
                 break;
 
@@ -106,6 +105,8 @@ public class RobotContainer {
                 break;
         }
 
+        groundIntake = new GroundIntake();
+
         align = new AutoAlign(drive::getPose);
         if (Constants.currentMode == Constants.Mode.SIM) {
             align.setRobotSupplier(driveSimulation::getSimulatedDriveTrainPose);
@@ -133,11 +134,6 @@ public class RobotContainer {
                 : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
         resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
-        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
-        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
-        stationAlign_PovUp.whileTrue(align.stationAlign(drive));
-
         strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
                 drive,
                 () -> 0,
@@ -147,7 +143,10 @@ public class RobotContainer {
 
         slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
 
-        // ------------------------------- Operator Bindings ------------------------------- //
+        groundIntakeStowed.onTrue(new InstantCommand(() -> groundIntake.setState(PivotPos.stowed)));
+        groundIntakeIntake.onTrue(new InstantCommand(() -> groundIntake.setState(PivotPos.intake)));
+        groundIntakeOuttake.onTrue(new InstantCommand(() -> groundIntake.setState(PivotPos.outtake)));
+        groundIntakeAlgae.onTrue(new InstantCommand(() -> groundIntake.setState(PivotPos.algae)));
     }
 
     public Command getAutonomousCommand() {
@@ -166,21 +165,6 @@ public class RobotContainer {
 
     public void registerNamedCommands() {
         NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.stopWithX()));
-
-        NamedCommands.registerCommand(
-                "Auto Align Left",
-                align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
-
-        NamedCommands.registerCommand(
-                "Auto Align Mid", align.reefAlignMid(drive).withTimeout(5));
-
-        NamedCommands.registerCommand(
-                "Auto Align Right",
-                align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(2));
-
-        NamedCommands.registerCommand(
-                "Auto Align Station",
-                align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(2));
     }
 
     // ----------------------------------- Default Commands -------------------------------- //
