@@ -42,13 +42,13 @@
   },
   "goalEndState": {
     "velocity": 0,
-    "rotation": -0.07159979827729021
+    "rotation": 0.0
   },
   "reversed": false,
   "folder": "Wall-E",
   "idealStartingState": {
     "velocity": 0,
-    "rotation": -0.07646229381622528
+    "rotation": 0.0
   },
   "useDefaultConstraints": false
 }
