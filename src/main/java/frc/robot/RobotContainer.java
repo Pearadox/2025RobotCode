@@ -370,7 +370,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> endEffector.setCoralMode())));
 
         NamedCommands.registerCommand(
-                "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() -> false));
+                "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.outtakeAlgae()));
     }
 
