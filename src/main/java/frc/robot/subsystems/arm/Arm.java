@@ -10,6 +10,7 @@ import frc.robot.Constants;
 import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.SimulationConstants;
 import frc.robot.subsystems.elevator.MechVisualizer;
+import frc.robot.util.RobotIdentity;
 import frc.robot.util.SmarterDashboard;
 import org.littletonrobotics.junction.Logger;
 
@@ -19,7 +20,7 @@ public class Arm extends SubsystemBase {
     private boolean isCoral = true;
     private boolean isAligning = false;
     private double lastAngle = 0.0;
-    private double armAdjust = 0.0;
+    private double armAdjust = Constants.IDENTITY == RobotIdentity.EVE ? -0.71 : 0.0;
 
     public enum ArmMode {
         Intake,

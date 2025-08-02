@@ -283,8 +283,9 @@ public class Constants {
         public static final double ARM_ALGAE_LOW = Units.degreesToRotations(73) * ARM_GEAR_RATIO;
         public static final double ARM_ALGAE_HIGH = Units.degreesToRotations(82) * ARM_GEAR_RATIO;
         public static final double ARM_BARGE = Units.degreesToRotations(160) * ARM_GEAR_RATIO - 2.1;
+        // public static final double ARM_BARGE_BACKWARDS = -ARM_BARGE;
         // public static final double ARM_CLIMB = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
-        public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO;
+        public static final double ARM_LOLLIPOP = Units.degreesToRotations(-50) * ARM_GEAR_RATIO; // TODO: try negate
         public static final double ARM_L4_BEHIND_CORAL = 22.057; // rots
         public static final double ARM_STATION_BEHIND_CORAL = Units.degreesToRotations(-15) * ARM_GEAR_RATIO - 1.63;
 

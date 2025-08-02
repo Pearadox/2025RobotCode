@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger;
 public class Elevator extends SubsystemBase {
     // private InverseKinematics ik = new InverseKinematics();
 
-    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? 0.5414 : 0.0;
+    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? 0.6814 : 0.0;
 
     private boolean isCoral = true;
     private boolean isAligning = false;
