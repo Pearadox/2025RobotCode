@@ -19,11 +19,11 @@ public class WallETunerConstants extends TunerConstants {
             .withStaticFeedforwardSign(StaticFeedforwardSignValue.UseClosedLoopSign);
 
     private static final Slot0Configs DRIVE_GAINS = new Slot0Configs() // from eve
-            .withKP(0.62183)
+            .withKP(0.6)
             .withKI(0)
             .withKD(0)
-            .withKS(0.10765) // TODO
-            .withKV(0.82491) // TODO
+            .withKS(0.09810)
+            .withKV(0.78628)
             .withKA(0.0040132);
 
     // TODO: is there still a canivore?

@@ -108,7 +108,7 @@ public class RobotContainer {
                 break;
         }
 
-        groundIntake = new GroundIntake();
+        // groundIntake = new GroundIntake();
 
         align = new AutoAlign(drive::getPose);
         if (Constants.currentMode == Constants.Mode.SIM) {
@@ -187,8 +187,8 @@ public class RobotContainer {
     public void setDefaultCommands() {
         drive.setDefaultCommand(DriveCommands.joystickDrive(
                 drive,
-                () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
-                () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
+                () -> exp(-driverController.getLeftY(), 2) * drive.getDriveMultiplier(),
+                () -> exp(-driverController.getLeftX(), 2) * drive.getDriveMultiplier(),
                 () -> -driverController.getRightX() * drive.getTurnMultiplier(),
                 true));
     }
@@ -212,5 +212,9 @@ public class RobotContainer {
                 "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
         Logger.recordOutput(
                 "FieldSimulation/Staged Algae", AlgaeHandler.getInstance().periodic());
+    }
+
+    public double exp(double val, double exp) {
+        return Math.copySign(Math.pow(val, exp), val);
     }
 }
