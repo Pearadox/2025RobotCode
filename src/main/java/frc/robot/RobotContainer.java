@@ -180,8 +180,9 @@ public class RobotContainer {
 
         setDefaultCommands();
         registerNamedCommands();
-        autoChooser = AutoBuilder.buildAutoChooser("2B_IJ-CS-KL-CS-KL");
-        autoChooser.addOption("Drive FF Ch", DriveCommands.feedforwardCharacterization(drive));
+        autoChooser = AutoBuilder.buildAutoChooser("Right");
+        // autoChooser.addOption("Drive FF Ch", DriveCommands.feedforwardCharacterization(drive));
+        // autoChooser.addOption("red barge 2 algae", new PathPlannerAuto("untested Center 2 Algae", true));
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 

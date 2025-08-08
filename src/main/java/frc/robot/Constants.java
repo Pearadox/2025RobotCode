@@ -157,7 +157,7 @@ public class Constants {
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.97 / 2.0); // 12.94 //12.97
 
         // target relative
-        public static final double REEF_ALIGN_MID_TX = 0.08; // 0.28575 // 0
+        public static final double REEF_ALIGN_MID_TX = -0.02; //0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
         public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
@@ -165,7 +165,7 @@ public class Constants {
 
         public static final Translation2d LEFT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, -BRANCH_SPACING);
         public static final Translation2d RIGHT_BRANCH_OFFSET = new Translation2d(REEF_ALIGN_TZ, BRANCH_SPACING);
-        public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, 0.0);
+        public static final Translation2d MID_OFFSET = new Translation2d(REEF_ALIGN_TZ, REEF_ALIGN_MID_TX);
         public static final Translation2d STATION_OFFSET = new Translation2d(REEF_STATION_ALIGN_TZ, 0.0);
 
         public static final double DRIVE_kP = 2.5; // m/s per m error
