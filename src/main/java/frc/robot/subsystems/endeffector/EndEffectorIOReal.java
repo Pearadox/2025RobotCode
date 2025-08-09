@@ -47,7 +47,7 @@ public class EndEffectorIOReal implements EndEffectorIO {
         inputs.statorCurrent = endEffector.getStatorCurrent().getValueAsDouble();
         inputs.supplyCurrent = endEffector.getSupplyCurrent().getValueAsDouble();
 
-        inputs.hasCoral = debouncer.calculate(inputs.statorCurrent > 30);
+        inputs.hasCoral = debouncer.calculate(inputs.statorCurrent > EndEffectorConstants.CORAL_CURRENT);
     }
 
     @Override

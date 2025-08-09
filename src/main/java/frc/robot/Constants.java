@@ -157,7 +157,7 @@ public class Constants {
         public static final double BRANCH_SPACING = Units.inchesToMeters(12.97 / 2.0); // 12.94 //12.97
 
         // target relative
-        public static final double REEF_ALIGN_MID_TX = -0.02; //0.08; // 0.28575 // 0
+        public static final double REEF_ALIGN_MID_TX = -0.02; // 0.08; // 0.28575 // 0
         public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.05 + 0.01;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.03 + 0.02;
         public static final double REEF_ALIGN_TZ = Units.inchesToMeters(18); // try lowering
@@ -369,6 +369,11 @@ public class Constants {
         public static final double HOLD_SPEED = -0.075;
 
         public static final int END_SENSOR_CHANNEL = 0;
+
+        public static final double PEARRACUDA_CORAL_CURRENT = 30;
+        public static final double EVE_CORAL_CURRENT = 45;
+
+        public static final double CORAL_CURRENT = Constants.IDENTITY == RobotIdentity.EVE ? 45 : 30;
     }
 
     public static final class LEDConstants {
