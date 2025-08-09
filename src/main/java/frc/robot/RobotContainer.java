@@ -219,7 +219,7 @@ public class RobotContainer {
         strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
                 drive,
                 () -> 0,
-                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()),
+                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) * 0.25,
                 () -> 0,
                 false));
 
