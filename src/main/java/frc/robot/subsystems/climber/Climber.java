@@ -40,11 +40,11 @@ public class Climber extends SubsystemBase {
     }
 
     public void climberAdjustUp() {
-        climberOffset += 10; // in rotations
+        climberOffset += 20; // in rotations
     }
 
     public void climberAdjustDown() {
-        climberOffset -= 10;
+        climberOffset -= 15;
     }
 
     public void zeroClimber() {

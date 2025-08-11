@@ -70,6 +70,11 @@ public class Elevator extends SubsystemBase {
             } else {
                 setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
             }
+            if (Constants.IDENTITY == RobotIdentity.EVE) {
+                double eveAdjustInches = -2;
+                setpoint +=
+                        eveAdjustInches * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
+            }
         }
         if (isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
