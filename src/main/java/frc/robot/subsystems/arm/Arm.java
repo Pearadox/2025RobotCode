@@ -81,6 +81,9 @@ public class Arm extends SubsystemBase {
                 if (Constants.currentMode == Constants.Mode.SIM) {
                     setpoint += 1;
                 }
+                if (Constants.IDENTITY == RobotIdentity.EVE) {
+                    setpoint += 2; // 12 degrees
+                }
             } else if (armMode == ArmMode.L4) {
                 // setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + armAdjust;
                 setpoint = ArmConstants.ARM_LEVEL_4_ROT + armAdjust;

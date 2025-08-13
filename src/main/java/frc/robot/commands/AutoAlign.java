@@ -6,9 +6,11 @@ import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.math.geometry.Transform2d;
 import edu.wpi.first.math.geometry.Translation2d;
 import edu.wpi.first.wpilibj2.command.Command;
+import frc.robot.Constants;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.FieldConstants;
 import frc.robot.subsystems.drive.Drive;
+import frc.robot.util.RobotIdentity;
 import java.util.function.Supplier;
 import lombok.Setter;
 import org.littletonrobotics.junction.AutoLogOutput;
@@ -23,6 +25,10 @@ public class AutoAlign {
 
     public AutoAlign(Supplier<Pose2d> robotPoseSupplier) {
         this.robotSupplier = robotPoseSupplier;
+
+        if (Constants.IDENTITY == RobotIdentity.EVE) {
+            isAlignedDebouncer.setDebounceTime(1);
+        }
     }
 
     public Command reefAlignLeft(Drive drive) {
