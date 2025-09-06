@@ -39,6 +39,7 @@ import frc.robot.subsystems.drive.GyroIOPigeon2;
 import frc.robot.subsystems.drive.GyroIOSim;
 import frc.robot.subsystems.drive.ModuleIOSim;
 import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.drive.ModuleIOThrifty;
 import frc.robot.subsystems.elevator.Elevator;
 import frc.robot.subsystems.elevator.ElevatorIO;
 import frc.robot.subsystems.elevator.ElevatorIOReal;
@@ -122,13 +123,28 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
 
             case REAL:
-                drive = new Drive(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
-                        (robotPose) -> {});
+
+                // Practice bot has one Thrifty Absolute Encoder; initiate the drivetrains differently
+
+                switch (RobotIdentity.getRobotIdentityString()) {
+                    case "EVE":
+                        drive = new Drive(
+                                new GyroIOPigeon2(),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
+                                new ModuleIOThrifty(Constants.TUNER_CONSTANTS.BackLeft),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
+                                (robotPose) -> {});
+                    case "PEARRACUDA":
+                        drive = new Drive(
+                                new GyroIOPigeon2(),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
+                                new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
+                                (robotPose) -> {});
+                }
+
                 vision = new Vision(drive::accept, new VisionIOLimelight(camera0Name, drive::getRotation));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
                 elevator = new Elevator(new ElevatorIOReal());
