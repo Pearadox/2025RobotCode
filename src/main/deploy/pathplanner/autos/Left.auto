@@ -7,6 +7,12 @@
         {
           "type": "named",
           "data": {
+            "name": "Set Coral"
+          }
+        },
+        {
+          "type": "named",
+          "data": {
             "name": "HoldCoral"
           }
         },

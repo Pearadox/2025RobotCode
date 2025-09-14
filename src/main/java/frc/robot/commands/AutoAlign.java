@@ -27,7 +27,7 @@ public class AutoAlign {
         this.robotSupplier = robotPoseSupplier;
 
         if (Constants.IDENTITY == RobotIdentity.EVE) {
-            isAlignedDebouncer.setDebounceTime(1);
+            isAlignedDebouncer.setDebounceTime(1.2);
         }
     }
 
