@@ -1,13 +1,13 @@
 package frc.robot;
 
-import static edu.wpi.first.units.Units.*;
+import static frc.robot.subsystems.vision.VisionConstants.*;
 
-import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
-import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
-import com.pathplanner.lib.commands.PathfindingCommand;
 import com.pathplanner.lib.events.EventTrigger;
+import edu.wpi.first.math.geometry.Pose2d;
+import edu.wpi.first.math.geometry.Pose3d;
+import edu.wpi.first.math.geometry.Rotation2d;
 import edu.wpi.first.wpilibj.DriverStation;
 import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
@@ -21,50 +21,60 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
-import frc.robot.Constants.AlignConstants;
-import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
+import frc.robot.commands.DriveCommands;
 import frc.robot.commands.ElevatorHold;
-import frc.robot.generated.TunerConstants;
-import frc.robot.subsystems.Arm;
-import frc.robot.subsystems.Arm.ArmMode;
-import frc.robot.subsystems.Climber;
-import frc.robot.subsystems.CommandSwerveDrivetrain;
-import frc.robot.subsystems.Elevator;
-import frc.robot.subsystems.EndEffector;
-import frc.robot.util.vision.PoseEstimation;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.Arm.ArmMode;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOReal;
+import frc.robot.subsystems.arm.ArmIOSim;
+import frc.robot.subsystems.climber.Climber;
+import frc.robot.subsystems.climber.ClimberIO;
+import frc.robot.subsystems.climber.ClimberIOReal;
+import frc.robot.subsystems.climber.ClimberIOSim;
+import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.GyroIOPigeon2;
+import frc.robot.subsystems.drive.GyroIOSim;
+import frc.robot.subsystems.drive.ModuleIOSim;
+import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOReal;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.endeffector.EndEffector;
+import frc.robot.subsystems.endeffector.EndEffectorIO;
+import frc.robot.subsystems.endeffector.EndEffectorIOReal;
+import frc.robot.subsystems.endeffector.EndEffectorIOSim;
+import frc.robot.subsystems.vision.Vision;
+import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.util.RobotIdentity;
+import frc.robot.util.SmarterDashboard;
+import frc.robot.util.simulation.AlgaeHandler;
+import org.ironmaple.simulation.SimulatedArena;
+import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
+import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private double MaxSpeed = TunerConstants.kSpeedAt12Volts.in(MetersPerSecond);
-    private double MaxAngularRate = RotationsPerSecond.of(0.75).in(RadiansPerSecond);
+    private Drive drive;
+    private Elevator elevator;
+    public static Arm arm;
+    private EndEffector endEffector;
+    private Vision vision;
+    private Climber climber;
+    public static AutoAlign align;
 
-    public static final Elevator elevator = Elevator.getInstance();
-    public static final Arm arm = Arm.getInstance();
-    public static final EndEffector endEffector = EndEffector.getInstance();
-    public static final Climber climber = Climber.getInstance();
-    public static final CommandSwerveDrivetrain drivetrain = TunerConstants.createDrivetrain();
-    public static final AutoAlign align = new AutoAlign(() -> drivetrain.getState().Pose);
+    private SwerveDriveSimulation driveSimulation = null;
 
-    public static final PoseEstimation poseEstimation = new PoseEstimation();
     //     public static final LEDStrip ledstrip = LEDStrip.getInstance();
-
-    private final SwerveRequest.FieldCentric fieldOrientedDrive = new SwerveRequest.FieldCentric()
-            .withDeadband(MaxSpeed * 0.1)
-            .withRotationalDeadband(MaxAngularRate * 0.1)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-    private final SwerveRequest.RobotCentric robotOrientedDrive = new SwerveRequest.RobotCentric()
-            .withDeadband(MaxSpeed * 0.1)
-            .withRotationalDeadband(MaxAngularRate * 0.1)
-            .withDriveRequestType(DriveRequestType.OpenLoopVoltage);
-
-    private final Telemetry logger = new Telemetry(MaxSpeed);
 
     // Controller
     public static final XboxController driverController = new XboxController(0);
     public static final XboxController opController = new XboxController(1);
 
-    // Driver Controller
+    // ---------------------------- Driver Controller --------------------------------- //
+
     private final JoystickButton resetHeading_Start =
             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
@@ -80,7 +90,8 @@ public class RobotContainer {
     private final Trigger strafe_Triggers = new Trigger(
             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
 
-    // Op Controller
+    // ----------------------------- Op Controller -------------------------------- //
+
     private final JoystickButton homeElevator_Start =
             new JoystickButton(opController, XboxController.Button.kStart.value);
     private final JoystickButton station_Back = new JoystickButton(opController, XboxController.Button.kBack.value);
@@ -106,102 +117,117 @@ public class RobotContainer {
     public final SendableChooser<Command> autoChooser;
 
     public RobotContainer() {
+        switch (Constants.currentMode) {
+
+                // Real robot, instantiate hardware IO implementations
+
+            case REAL:
+                drive = new Drive(
+                        new GyroIOPigeon2(),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
+                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
+                        (robotPose) -> {});
+                vision = new Vision(drive::accept, new VisionIOLimelight(camera0Name, drive::getRotation));
+                // new VisionIOLimelight(camera1Name, drive::getRotation));
+                elevator = new Elevator(new ElevatorIOReal());
+                arm = new Arm(new ArmIOReal());
+                endEffector = new EndEffector(new EndEffectorIOReal());
+                climber = new Climber(new ClimberIOReal());
+                break;
+
+                // Sim robot, instantiate physics sim IO implementations
+
+            case SIM:
+                driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new Rotation2d()));
+                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+
+                drive = new Drive(
+                        new GyroIOSim(driveSimulation.getGyroSimulation()),
+                        new ModuleIOSim(driveSimulation.getModules()[0]),
+                        new ModuleIOSim(driveSimulation.getModules()[1]),
+                        new ModuleIOSim(driveSimulation.getModules()[2]),
+                        new ModuleIOSim(driveSimulation.getModules()[3]),
+                        driveSimulation::setSimulationWorldPose);
+
+                elevator = new Elevator(new ElevatorIOSim());
+                arm = new Arm(new ArmIOSim());
+                endEffector = new EndEffector(new EndEffectorIOSim(
+                        () -> driveSimulation.getSimulatedDriveTrainPose(), // drivetrain.getState().Pose,
+                        () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
+                        () -> elevator.getElevatorPositionMeters(),
+                        () -> arm.getArmAngleRadsToHorizontal()));
+                vision = new Vision(drive::accept); // , new
+                // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
+                climber = new Climber(new ClimberIOSim());
+                break;
+
+                // Replayed robot, disable IO implementations
+
+            default:
+                elevator = new Elevator(new ElevatorIO() {});
+                arm = new Arm(new ArmIO() {});
+                endEffector = new EndEffector(new EndEffectorIO() {});
+                climber = new Climber(new ClimberIO() {});
+                break;
+        }
+
+        align = new AutoAlign(drive::getPose);
+        if (Constants.currentMode == Constants.Mode.SIM) {
+            align.setRobotSupplier(driveSimulation::getSimulatedDriveTrainPose);
+        }
+
         setDefaultCommands();
         registerNamedCommands();
-        autoChooser = AutoBuilder.buildAutoChooser("2R_EF-L4");
+        autoChooser = AutoBuilder.buildAutoChooser("Right");
+        // autoChooser.addOption("Drive FF Ch", DriveCommands.feedforwardCharacterization(drive));
+        // autoChooser.addOption("red barge 2 algae", new PathPlannerAuto("untested Center 2 Algae", true));
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 
-        PathfindingCommand.warmupCommand().schedule();
+        SmarterDashboard.putString("RoboRio Serial", RobotIdentity.getRoboRioSerial());
+        SmarterDashboard.putString("Robot Identity", RobotIdentity.getRobotIdentityString());
 
-        // Event Markers
+        // ------------------------------ Event Markers ---------------------------------- //
+
         new EventTrigger("LevelStation")
                 .onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
                         .andThen(new InstantCommand(() -> arm.setArmIntake())));
         new EventTrigger("LevelFour")
                 .onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
+
+        DriverStation.silenceJoystickConnectionWarning(true);
     }
 
     private void configureBindings() {
-        // Driver Bindings
-        resetHeading_Start.onTrue(drivetrain.runOnce(() -> drivetrain.seedFieldCentric()));
 
-        // climbAlign_Y.whileTrue(drivetrain.applyRequest(
-        //         () -> drive.withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-        //                         * MaxSpeed
-        //                         * drivetrain.getSpeedMultipler()) // Drive forward with negative Y (forward)
-        //                 .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-        //                         * MaxSpeed
-        //                         * drivetrain.getSpeedMultipler()) // Drive left with negative
-        //                 // X (left)
-        //                 .withRotationalRate(align.getAlignRotationSpeedPercent(
-        //                                 (DriverStation.getAlliance().orElse(Alliance.Blue) == Alliance.Red)
-        //                                         ? Rotation2d.kCW_90deg
-        //                                         : Rotation2d.kCCW_90deg)
-        //                         * MaxAngularRate) // Drive
-        //         // counterclockwise
-        //         // with negative X
-        //         // (left)
-        //         ));
+        // ------------------------------- Driver Bindings ------------------------------- //
 
-        stationAlign_PovUp.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                AlignConstants.STATION_ALIGN_TZ, align.getStationAlignTag(), VisionConstants.LL_B_NAME)
-                        * MaxSpeed)
-                .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                AlignConstants.STATION_ALIGN_TX, align.getStationAlignTag(), VisionConstants.LL_B_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(
-                        align.getAlignRotationSpeedPercent(align.getAlignAngleStation()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
+        // Reset gyro / odometry
+        final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
+                ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
+                : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+        resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-        reefAlignCenter_PovDown.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                AlignConstants.REEF_ALIGN_MID_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
+        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
+        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
+        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
+        stationAlign_PovUp.whileTrue(align.stationAlign(drive));
 
-        reefAlignLeft_PovLeft.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                AlignConstants.REEF_ALIGN_LEFT_TX, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                        * MaxSpeed)
-                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate)));
-        // .alongWith(ledstrip.aligning(() -> align.isAligned())));
+        strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
+                drive,
+                () -> 0,
+                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) * 0.25,
+                () -> 0,
+                false));
 
-        reefAlignRight_PovRight.whileTrue(
-                drivetrain.applyRequest(() -> robotOrientedDrive
-                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_TZ, align.getReefAlignTag(), VisionConstants.LL_NAME)
-                                * MaxSpeed)
-                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                        AlignConstants.REEF_ALIGN_RIGHT_TX,
-                                        align.getReefAlignTag(),
-                                        VisionConstants.LL_NAME)
-                                * MaxSpeed)
-                        .withRotationalRate(
-                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef()) * MaxAngularRate))
-                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                );
-
-        slowMode_A.onTrue(new InstantCommand(() -> drivetrain.changeSpeedMultiplier()));
+        slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
         zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
-        strafe_Triggers.whileTrue(drivetrain.applyRequest(() -> robotOrientedDrive
-                .withVelocityX(-driverController.getLeftY() * MaxSpeed)
-                .withVelocityY((driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis())
-                        * 0.1
-                        * MaxSpeed)
-                .withRotationalRate(-driverController.getRightX() * MaxAngularRate)));
+        // ------------------------------- Operator Bindings ------------------------------- //
 
-        // Operator Bindings
         homeElevator_Start
                 .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
                 .onFalse(new InstantCommand(() -> elevator.stopElevator())
@@ -231,11 +257,11 @@ public class RobotContainer {
 
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
-                .andThen(new InstantCommand(() -> endEffector.setCoral()))
-                .andThen(new InstantCommand(() -> endEffector.stop())));
+                .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
+                .andThen(new InstantCommand(() -> endEffector.stopEE())));
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
-                .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
 
         climberAdjustUp_PovUp
                 .whileTrue(new RunCommand(() -> climber.climberUp()))
@@ -244,7 +270,13 @@ public class RobotContainer {
                 .whileTrue(new RunCommand(() -> climber.climberDown()))
                 .onFalse(new InstantCommand(() -> climber.stop()));
         climberStateInc_PovLeft.onTrue(new InstantCommand(() -> climber.decrementClimbState()));
-        climberStateDec_PovRight.onTrue(new InstantCommand(() -> climber.incrementClimbState()));
+        climberStateDec_PovRight.onTrue(new InstantCommand(() -> {
+                    elevator.setElevatorStowedMode();
+                    arm.setAlgae();
+                    arm.setStowed();
+                })
+                .andThen(new WaitCommand(0.2))
+                .andThen(new InstantCommand(() -> climber.incrementClimbState())));
 
         elevatorAdjust.whileTrue(
                 new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
@@ -255,7 +287,10 @@ public class RobotContainer {
                 .onFalse(new InstantCommand(() -> arm.setAligning(false))
                         .andThen(new InstantCommand(() -> elevator.setAligning(false))));
 
-        drivetrain.registerTelemetry(logger::telemeterize);
+        // if (Constants.currentMode == Constants.Mode.SIM) {
+        //     csDropLB.onTrue(new InstantCommand(() -> dropCoralFromStation(false)).ignoringDisable(true));
+        //     csDropRB.onTrue(new InstantCommand(() -> dropCoralFromStation(true)).ignoringDisable(true));
+        // }
     }
 
     public Command getAutonomousCommand() {
@@ -269,6 +304,8 @@ public class RobotContainer {
         }
         return false;
     }
+
+    // -------------------------------- PathPlanner Commands -------------------------------- /w
 
     public void registerNamedCommands() {
         NamedCommands.registerCommand(
@@ -291,9 +328,9 @@ public class RobotContainer {
                                 new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
                         .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.coralOut()));
+        NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.outtakeCoral()));
         NamedCommands.registerCommand(
-                "Intake", new RunCommand(() -> endEffector.coralIn()).until(() -> endEffector.hasCoral()));
+                "Intake", new RunCommand(() -> endEffector.intakeCoral()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
         NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
         NamedCommands.registerCommand(
@@ -305,127 +342,73 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> elevator.zeroElevator()))
                         .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        NamedCommands.registerCommand(
-                "Stop",
-                drivetrain
-                        .applyRequest(() -> robotOrientedDrive
-                                .withVelocityX(0)
-                                .withVelocityY(0)
-                                .withRotationalRate(0))
-                        .withTimeout(0.05));
+        NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.stopWithX()));
 
         NamedCommands.registerCommand(
                 "Auto Align Left",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(
-                                        () -> robotOrientedDrive
-                                                .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_TZ,
-                                                                align.getReefAlignTag(),
-                                                                VisionConstants.LL_NAME)
-                                                        * MaxSpeed)
-                                                .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                                AlignConstants.REEF_ALIGN_LEFT_TX,
-                                                                align.getReefAlignTag(),
-                                                                VisionConstants.LL_NAME)
-                                                        * MaxSpeed)
-                                                .withRotationalRate(
-                                                        align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                                * MaxAngularRate) // Drive counterclockwise with
-                                        // negative X (left)
-                                        )
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest())
-                                .withTimeout(3))
-                        .andThen(new WaitCommand(0.2)));
+                align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
 
         NamedCommands.registerCommand(
-                "Auto Align Mid",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_MID_TX,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate))
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest()))
-                        .andThen(new WaitCommand(0.2)));
+                "Auto Align Mid", align.reefAlignMid(drive).withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Auto Align Right",
-                new InstantCommand(() -> align.setReefAlignTagIDtoClosest())
-                        .andThen((drivetrain.applyRequest(() -> robotOrientedDrive
-                                        .withVelocityX(align.getAlignForwardSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_TZ,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withVelocityY(align.getAlignStrafeSpeedPercent(
-                                                        AlignConstants.REEF_ALIGN_RIGHT_TX,
-                                                        align.getReefAlignTag(),
-                                                        VisionConstants.LL_NAME)
-                                                * MaxSpeed)
-                                        .withRotationalRate(
-                                                align.getAlignRotationSpeedPercent(align.getAlignAngleReef())
-                                                        * MaxAngularRate))
-                                // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                                )
-                                .until(() -> align.isAlignedTest())
-                                .withTimeout(3)
-                                .andThen(new WaitCommand(0.2))));
+                align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Auto Align Station",
-                (drivetrain.applyRequest(() -> robotOrientedDrive
-                                .withVelocityX(-align.getAlignForwardSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TZ,
-                                                align.getStationAlignTag(),
-                                                VisionConstants.LL_B_NAME)
-                                        * MaxSpeed)
-                                .withVelocityY(-align.getAlignStrafeSpeedPercent(
-                                                AlignConstants.STATION_ALIGN_TX,
-                                                align.getStationAlignTag(),
-                                                VisionConstants.LL_B_NAME)
-                                        * MaxSpeed)
-                                .withRotationalRate(align.getAlignRotationSpeedPercent(align.getAlignAngleStation())
-                                        * MaxAngularRate)))
-                        // .alongWith(ledstrip.aligning(() -> align.isAligned()))
-                        .withTimeout(0.5));
+                align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(2));
 
         NamedCommands.registerCommand(
                 "Set Algae",
                 new InstantCommand(() -> elevator.setAlgae())
                         .andThen(new InstantCommand(() -> arm.setAlgae()))
-                        .andThen(new InstantCommand(() -> endEffector.setAlgae())));
+                        .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
+        NamedCommands.registerCommand(
+                "Set Coral",
+                new InstantCommand(() -> elevator.setAlgae())
+                        .andThen(new InstantCommand(() -> arm.setCoral()))
+                        .andThen(new InstantCommand(() -> endEffector.setCoralMode())));
 
         NamedCommands.registerCommand(
-                "Algae Intake", new RunCommand(() -> endEffector.algaeIn()).until(() -> endEffector.hasCoral()));
+                "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() -> endEffector.hasCoral()));
+        NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.outtakeAlgae()));
     }
 
-    public void setDefaultCommands() {
-        drivetrain.setDefaultCommand(drivetrain.applyRequest(() -> fieldOrientedDrive
-                .withVelocityX(drivetrain.frontLimiter.calculate(-driverController.getLeftY())
-                        * MaxSpeed
-                        * drivetrain.getSpeedMultipler())
-                .withVelocityY(drivetrain.sideLimiter.calculate(-driverController.getLeftX())
-                        * MaxSpeed
-                        * drivetrain.getSpeedMultipler())
-                .withRotationalRate(drivetrain.turnLimiter.calculate(-driverController.getRightX()) * MaxAngularRate)));
+    // ----------------------------------- Default Commands -------------------------------- //
 
-        elevator.setDefaultCommand(new ElevatorHold());
-        arm.setDefaultCommand(new ArmHold());
+    public void setDefaultCommands() {
+        drive.setDefaultCommand(DriveCommands.joystickDrive(
+                drive,
+                () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
+                () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
+                () -> -driverController.getRightX() * drive.getTurnMultiplier(),
+                true));
+
+        elevator.setDefaultCommand(new ElevatorHold(elevator));
+        arm.setDefaultCommand(new ArmHold(arm));
         // climber.setDefaultCommand(new ClimbCommand());
         // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
+    }
+
+    public void resetSimulation() {
+        if (Constants.currentMode != Constants.Mode.SIM) return;
+
+        drive.resetOdometry(new Pose2d(12, 2, new Rotation2d()));
+        SimulatedArena.getInstance().resetFieldForAuto();
+        AlgaeHandler.getInstance().reset();
+    }
+
+    public void displaySimFieldToAdvantageScope() {
+        if (Constants.currentMode != Constants.Mode.SIM) return;
+
+        SimulatedArena.getInstance().simulationPeriodic();
+        Logger.recordOutput("FieldSimulation/Pose", new Pose3d(driveSimulation.getSimulatedDriveTrainPose()));
+        Logger.recordOutput(
+                "FieldSimulation/Coral", SimulatedArena.getInstance().getGamePiecesArrayByType("Coral"));
+        Logger.recordOutput(
+                "FieldSimulation/Algae", SimulatedArena.getInstance().getGamePiecesArrayByType("Algae"));
+        Logger.recordOutput(
+                "FieldSimulation/Staged Algae", AlgaeHandler.getInstance().periodic());
     }
 }

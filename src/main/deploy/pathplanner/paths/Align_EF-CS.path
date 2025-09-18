@@ -16,16 +16,16 @@
     },
     {
       "anchor": {
-        "x": 1.0725,
-        "y": 0.7977499999999997
+        "x": 1.286335227272727,
+        "y": 0.6296732954545451
       },
       "prevControl": {
-        "x": 2.301,
-        "y": 1.1584999999999996
+        "x": 2.514835227272725,
+        "y": 0.9904232954545452
       },
       "nextControl": null,
       "isLocked": false,
-      "linkedName": null
+      "linkedName": "CSP"
     }
   ],
   "rotationTargets": [],

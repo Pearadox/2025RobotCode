@@ -5,15 +5,16 @@
 package frc.robot.commands;
 
 import edu.wpi.first.wpilibj2.command.Command;
-import frc.robot.subsystems.Elevator;
+import frc.robot.subsystems.elevator.Elevator;
 
 /* You should consider using the more terse Command factories API instead https://docs.wpilib.org/en/stable/docs/software/commandbased/organizing-command-based.html#defining-commands */
 public class ElevatorHold extends Command {
 
-    private Elevator elevator = Elevator.getInstance();
+    private Elevator elevator;
     /** Creates a new ElevatorHold. */
-    public ElevatorHold() {
+    public ElevatorHold(Elevator elevator) {
         // Use addRequirements() here to declare subsystem dependencies.
+        this.elevator = elevator;
         addRequirements(elevator);
     }
 
