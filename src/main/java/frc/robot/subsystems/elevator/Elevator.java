@@ -89,6 +89,10 @@ public class Elevator extends SubsystemBase {
                 //                 + elevatorOffset;
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
 
+                if (Constants.IDENTITY == RobotIdentity.EVE) {
+                    setpoint = elevatorOffset;
+                }
+
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 // if (DriverStation.isAutonomous()) {
                 //     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)

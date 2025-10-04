@@ -272,7 +272,7 @@ public class Constants {
         public static final double ARM_LEVEL_4_ROT =
                 Units.degreesToRotations(156) * ARM_GEAR_RATIO - 0.52; // -170 //-180 //0155.94 //-161
         public static final double ARM_LEVEL_3_ROT =
-                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3 - 0.19; // was -78 //79.08 // -66
+                Units.degreesToRotations(147) * ARM_GEAR_RATIO - 0.3 - 0.19 + 2; // was -78 //79.08 // -66
 
         public static final double ARM_LEVEL_2_ROT =
                 Units.degreesToRotations(147) * ARM_GEAR_RATIO - 6.382; // was -85, then -74.455078125[\] //79.08

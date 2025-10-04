@@ -366,7 +366,7 @@ public class RobotContainer {
                         .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
         NamedCommands.registerCommand(
                 "Set Coral",
-                new InstantCommand(() -> elevator.setAlgae())
+                new InstantCommand(() -> elevator.setCoral())
                         .andThen(new InstantCommand(() -> arm.setCoral()))
                         .andThen(new InstantCommand(() -> endEffector.setCoralMode())));
 
