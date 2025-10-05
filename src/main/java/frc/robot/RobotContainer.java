@@ -4,6 +4,7 @@ import static frc.robot.subsystems.vision.VisionConstants.*;
 
 import com.pathplanner.lib.auto.AutoBuilder;
 import com.pathplanner.lib.auto.NamedCommands;
+import com.pathplanner.lib.commands.PathPlannerAuto;
 import com.pathplanner.lib.events.EventTrigger;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
@@ -182,7 +183,7 @@ public class RobotContainer {
         registerNamedCommands();
         autoChooser = AutoBuilder.buildAutoChooser("Right");
         // autoChooser.addOption("Drive FF Ch", DriveCommands.feedforwardCharacterization(drive));
-        // autoChooser.addOption("red barge 2 algae", new PathPlannerAuto("untested Center 2 Algae", true));
+        autoChooser.addOption("red barge 2 algae", new PathPlannerAuto("Center 2 Algae", true));
         SmartDashboard.putData("Auto Mode", autoChooser);
         configureBindings();
 

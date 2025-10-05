@@ -20,7 +20,7 @@ public class Arm extends SubsystemBase {
     private boolean isCoral = true;
     private boolean isAligning = false;
     private double lastAngle = 0.0;
-    private double armAdjust = Constants.IDENTITY == RobotIdentity.EVE ? -0.71 : 0.0;
+    private double armAdjust = Constants.IDENTITY == RobotIdentity.EVE ? -0.71 : -1.62;
 
     public enum ArmMode {
         Intake,
@@ -80,8 +80,6 @@ public class Arm extends SubsystemBase {
 
                 if (Constants.currentMode == Constants.Mode.SIM) {
                     setpoint += 1;
-                } else if (Constants.IDENTITY == RobotIdentity.EVE) {
-                    setpoint -= 1;
                 }
             } else if (armMode == ArmMode.L4) {
                 // setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT) + armAdjust;
@@ -89,6 +87,8 @@ public class Arm extends SubsystemBase {
 
                 if (Constants.IDENTITY == RobotIdentity.PEARRACUDA) {
                     setpoint += 1;
+                } else if (Constants.IDENTITY == RobotIdentity.EVE) {
+                    setpoint += 1.91;
                 }
             }
         } else if (!isCoral) {

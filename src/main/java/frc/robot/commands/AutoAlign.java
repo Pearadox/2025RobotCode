@@ -32,7 +32,7 @@ public class AutoAlign {
     }
 
     public Command reefAlignLeft(Drive drive) {
-        return reefAlign(drive, AlignConstants.LEFT_BRANCH_OFFSET);
+        return reefAlign(drive, getLeftOffset());
     }
 
     public Command reefAlignMid(Drive drive) {
@@ -40,7 +40,7 @@ public class AutoAlign {
     }
 
     public Command reefAlignRight(Drive drive) {
-        return reefAlign(drive, AlignConstants.RIGHT_BRANCH_OFFSET);
+        return reefAlign(drive, getRightOffset());
     }
 
     private Command reefAlign(Drive drive, Translation2d offset) {
@@ -78,5 +78,17 @@ public class AutoAlign {
     @AutoLogOutput
     public boolean isAlignedDebounced() {
         return isAlignedDebouncer.calculate(isAligned());
+    }
+
+    private Translation2d getLeftOffset() {
+        return Constants.IDENTITY == RobotIdentity.EVE
+                ? AlignConstants.LEFT_BRANCH_OFFSET_EVE
+                : AlignConstants.LEFT_BRANCH_OFFSET;
+    }
+
+    private Translation2d getRightOffset() {
+        return Constants.IDENTITY == RobotIdentity.EVE
+                ? AlignConstants.RIGHT_BRANCH_OFFSET_EVE
+                : AlignConstants.RIGHT_BRANCH_OFFSET;
     }
 }

@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger;
 public class Elevator extends SubsystemBase {
     // private InverseKinematics ik = new InverseKinematics();
 
-    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? 0.6814 : 0.0;
+    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? 0.6814 : -0.3;
 
     private boolean isCoral = true;
     private boolean isAligning = false;
@@ -89,10 +89,6 @@ public class Elevator extends SubsystemBase {
                 //                 + elevatorOffset;
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
 
-                if (Constants.IDENTITY == RobotIdentity.EVE) {
-                    setpoint = elevatorOffset;
-                }
-
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 // if (DriverStation.isAutonomous()) {
                 //     setpoint = ik.getElevatorHeightRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L4_HEIGHT)
@@ -105,6 +101,10 @@ public class Elevator extends SubsystemBase {
                 // }
 
                 setpoint = ElevatorConstants.LEVEL_FOUR_ROT + elevatorOffset;
+
+                if (Constants.IDENTITY == RobotIdentity.EVE) {
+                    setpoint -= 1.5;
+                }
             }
         } else if (!isCoral) {
             if (elevatorMode == ElevatorMode.LEVEL_TWO) {
@@ -115,6 +115,8 @@ public class Elevator extends SubsystemBase {
                 setpoint = ElevatorConstants.BARGE_ROT + elevatorOffset;
             }
         }
+
+        setpoint = Math.max(0, setpoint);
 
         if (!isZeroing) {
             io.reachGoal(setpoint);
