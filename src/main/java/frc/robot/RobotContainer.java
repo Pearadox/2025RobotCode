@@ -333,7 +333,12 @@ public class RobotContainer {
         NamedCommands.registerCommand(
                 "Intake", new RunCommand(() -> endEffector.intakeCoral()).until(() -> endEffector.hasCoral()));
         NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
-        NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
+        NamedCommands.registerCommand(
+                "Hold Coral",
+                new InstantCommand(() -> elevator.setCoral())
+                        .andThen(new InstantCommand(() -> arm.setCoral()))
+                        .andThen(new InstantCommand(() -> endEffector.setCoralMode())
+                                .andThen(new InstantCommand(() -> endEffector.holdCoral()))));
         NamedCommands.registerCommand(
                 "Home Elevator",
                 new InstantCommand(() -> elevator.setZeroing(true))

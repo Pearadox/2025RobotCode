@@ -16,7 +16,7 @@ import org.littletonrobotics.junction.Logger;
 public class Elevator extends SubsystemBase {
     // private InverseKinematics ik = new InverseKinematics();
 
-    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? -0.3 : 0.61;
+    private double elevatorOffset = Constants.IDENTITY == RobotIdentity.EVE ? -0.3 : 0.61; // 0.61 comp
 
     private boolean isCoral = true;
     private boolean isAligning = false;
@@ -70,8 +70,8 @@ public class Elevator extends SubsystemBase {
             } else {
                 setpoint = ElevatorConstants.STATION_ROT + elevatorOffset;
             }
-            if (Constants.IDENTITY == RobotIdentity.EVE) {
-                double eveAdjustInches = -2;
+            if (Constants.IDENTITY == RobotIdentity.PEARRACUDA) {
+                double eveAdjustInches = -1.5;
                 setpoint +=
                         eveAdjustInches * ElevatorConstants.GEAR_RATIO / (Math.PI * ElevatorConstants.PULLEY_DIAMETER);
             }
@@ -88,6 +88,10 @@ public class Elevator extends SubsystemBase {
                 // AlignConstants.L3_HEIGHT))
                 //                 + elevatorOffset;
                 setpoint = ElevatorConstants.LEVEL_THREE_ROT + elevatorOffset;
+
+                if (Constants.IDENTITY == RobotIdentity.EVE) {
+                    setpoint -= 0.5;
+                }
 
             } else if (elevatorMode == ElevatorMode.LEVEL_FOUR) {
                 // if (DriverStation.isAutonomous()) {
