@@ -1,0 +1,32 @@
+IO FRAMEWORK:
+ - IO Interface has @autologged inputs that transfer across both REAL and SIM
+    - necessitates an updateInputs(IOThingAutoLogged parameter) default function to periodically update them
+    - creates toLog and fromLog functions (you mostly won't be using them)
+ - also has any other NON-LOGIC default functions that need to be in both sections
+    - runPosition, runVelocity, setTarget, etc.
+
+REAL IMPLEMENTATION:
+ - creates motor object and configs object to use in functions
+    - instantiated like normal (in the constructor)
+ - update frequency for useful parameters (position, velocity, voltage, current, etc.) should be set to 50ms (in constants)
+    - faster running bc less checks
+ - implemetations for inherited functions is like normal (do what you need to do and not much else)
+
+SIM IMPLEMENTATION:
+ - creates motor object, configs object, and SIM STATE OBJECT, and MECHANISM2D OBJECT
+    - SIM STATE object is a part of TalonFX class that essentially places a real motor into simulation
+    - MECHANISM2D OBJECT is the simulation of the SIM STATE object
+ - update frequency is also set here to be 50ms (because simulated robots need to run fast too)
+ - there's ALSO an updateSim function that updates the MECHANISM2D object given the SIM STATE object's data
+    - should be called in updateInputs (i.e. called periodically)
+
+ACTUAL FILE:
+ - all logic is handled here
+ - basically the same as usual, only difference is using an io object because of the ambiguity of reality/simulation
+    - NO GET INSTANCE FUNCTION - instance is determined in RobotContainer based on real/sim
+
+HOLD COMMAND:
+ - literally just a normal hold command
+
+ROBOT CONTAINER:
+ - real or sim is determined here, then objects are created, then button logic is implemented

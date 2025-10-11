@@ -353,6 +353,9 @@ public class Constants {
 
         // CAN ID for roller
         public static final int ROLLER_ID = 41;
+
+        public static final double ROLLER_INTAKE_SPEED = 1;
+        public static final double ROLLER_OUTAKE_SPEED = -1;
     }
 
     public static final class EndEffectorConstants {
