@@ -399,6 +399,11 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         }
     }
 
+    public void setSpeedMultiplier(double newDriveMultiplier, double newTurnMultiplier) {
+        driveMultiplier = newDriveMultiplier;
+        turnMultiplier = newTurnMultiplier;
+    }
+
     public double getDriveMultiplier() {
         return driveMultiplier;
     }

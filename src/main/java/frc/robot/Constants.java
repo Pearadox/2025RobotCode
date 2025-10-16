@@ -258,6 +258,8 @@ public class Constants {
 
         public static final double ELEVATOR_OFFSET = 0.075;
 
+        public static final double ELEVATOR_THRESHOLD = 23.0; // Inches
+
         public static final double kG = 0.29; // 0.3
         public static final double kS = 0.11; // 0
         public static final double kV = 0.1; // 0

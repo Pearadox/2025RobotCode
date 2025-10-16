@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.ElevatorConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.DriveCommands;
@@ -85,6 +86,8 @@ public class RobotContainer {
     private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
 
     private final JoystickButton slowMode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
+    private final Trigger elevatorTippingThreshold = new Trigger(() -> elevator.getElevatorPositionInches() > ElevatorConstants.ELEVATOR_THRESHOLD);
+
     private final JoystickButton zeroClimber_back =
             new JoystickButton(driverController, XboxController.Button.kBack.value);
 
@@ -225,6 +228,8 @@ public class RobotContainer {
                 false));
 
         slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
+        elevatorTippingThreshold.onTrue(new InstantCommand(() -> drive.setSpeedMultiplier(0.6, 0.8)));
+
         zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
