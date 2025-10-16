@@ -170,7 +170,7 @@ public class Arm extends SubsystemBase {
 
     public double getArmAngleRadsToHorizontal() {
         return Units.rotationsToRadians(inputs.positionRots / ArmConstants.ARM_GEAR_RATIO)
-                + SimulationConstants.STARTING_ANGLE;
+                + SimulationConstants.ARM_STARTING_ANGLE;
     }
 
     public double getFeedforwardVolts() {

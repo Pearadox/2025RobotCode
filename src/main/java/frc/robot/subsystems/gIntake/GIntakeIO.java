@@ -7,13 +7,12 @@ public interface GIntakeIO {
     public static class GIntakeIOInputs {
         // put anything you want to log in here
         public double positionRots = 0;
-        public double rollerSpeedRots = 0;
+        public double rollerSpeedRps = 0;
 
-        // public double P = 0;
-        // public double I = 0;
-        // public double D = 0; // logging PID good for initial troubleshooting I guess
-
-        public double pivotCurrent = 0; // whats the difference between stator and supply current?
+        public double pivotStatorCurrent = 0;
+        public double pivotSupplyCurrent = 0;
+        // stator current is the MOTOR->OUTPUT current - controls TORQUE
+        // supply current is the BATTERY->MOTOR current - controls POWER
     }
 
     public void updateInputs(GIntakeIOInputsAutoLogged GIntakeIOInputs);

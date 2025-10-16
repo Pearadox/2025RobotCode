@@ -1,3 +1,8 @@
+notes:
+ - autologged and updateInputs are for logging (and logged replay but that's later)
+ - stator is output, supply is input (VERY basically)
+ - the TalonFXSimState takes in data from the WPISim (SingleJointedArmSim in this case), not the other way around
+
 IO FRAMEWORK:
  - IO Interface has @autologged inputs that transfer across both REAL and SIM
     - necessitates an updateInputs(IOThingAutoLogged parameter) default function to periodically update them
@@ -5,20 +10,20 @@ IO FRAMEWORK:
  - also has any other NON-LOGIC default functions that need to be in both sections
     - runPosition, runVelocity, setTarget, etc.
 
-REAL IMPLEMENTATION:
- - creates motor object and configs object to use in functions
-    - instantiated like normal (in the constructor)
- - update frequency for useful parameters (position, velocity, voltage, current, etc.) should be set to 50ms (in constants)
-    - faster running bc less checks
- - implemetations for inherited functions is like normal (do what you need to do and not much else)
+    REAL IMPLEMENTATION:
+     - creates motor object and configs object to use in functions
+        - instantiated like normal (in the constructor)
+     - update frequency for useful parameters (position, velocity, voltage, current, etc.) should be set to 50ms (in constants)
+        - faster running bc less checks
+     - implemetations for inherited functions is like normal (do what you need to do and not much else)
 
-SIM IMPLEMENTATION:
- - creates motor object, configs object, and SIM STATE OBJECT, and MECHANISM2D OBJECT
-    - SIM STATE object is a part of TalonFX class that essentially places a real motor into simulation
-    - MECHANISM2D OBJECT is the simulation of the SIM STATE object
- - update frequency is also set here to be 50ms (because simulated robots need to run fast too)
- - there's ALSO an updateSim function that updates the MECHANISM2D object given the SIM STATE object's data
-    - should be called in updateInputs (i.e. called periodically)
+    SIM IMPLEMENTATION:
+     - creates motor object, configs object, and SIM STATE OBJECT + MECHANISM2D OBJECT
+        - SIM STATE object is a part of TalonFX class that essentially places a real motor into simulation
+        - MECHANISM2D object is the another visualization of the SIM STATE object (not AdvantageKit)
+     - update frequency is also set here to be 50ms (because simulated robots need to run fast too)
+     - there's ALSO an updateSim function that updates the SIM STATE object given the MECHANISM2D object's data
+        - should be called in updateInputs (i.e. called periodically)
 
 ACTUAL FILE:
  - all logic is handled here

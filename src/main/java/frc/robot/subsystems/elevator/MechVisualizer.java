@@ -81,7 +81,7 @@ public class MechVisualizer {
                     0,
                     0,
                     SimulationConstants.ARM_CAD_ZERO_Z + heightMeters,
-                    new Rotation3d(0, -armAngleRads + SimulationConstants.STARTING_ANGLE, 0)),
+                    new Rotation3d(0, -armAngleRads + SimulationConstants.ARM_STARTING_ANGLE, 0)),
             new Transform3d(
                     0,
                     SimulationConstants.CLIMBER_CAD_ZERO_Y,

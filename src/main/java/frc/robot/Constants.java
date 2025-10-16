@@ -327,7 +327,6 @@ public class Constants {
     public static final class IntakeConstants {
         public static final int PIVOT_ID = 40;
 
-        // public static final int PIVOT_GEAR_RATIO = 60;
         public static final NeutralModeValue MODE = NeutralModeValue.Brake;
         public static final int ROLLER_CURRENT_LIMIT = 30;
         public static final int PIVOT_CURRENT_LIMIT = 30;
@@ -356,6 +355,8 @@ public class Constants {
 
         public static final double ROLLER_INTAKE_SPEED = 1;
         public static final double ROLLER_OUTAKE_SPEED = -1;
+
+        public static final double ROLLER_GEARING = 60; // idk what it actually was this is just a placeholder
     }
 
     public static final class EndEffectorConstants {
@@ -399,7 +400,7 @@ public class Constants {
         public static final double ARM_MOI = SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS);
         public static final double MIN_ANGLE = Double.NEGATIVE_INFINITY;
         public static final double MAX_ANGLE = Double.POSITIVE_INFINITY;
-        public static final double STARTING_ANGLE = Units.degreesToRadians(-96);
+        public static final double ARM_STARTING_ANGLE = Units.degreesToRadians(-96);
 
         // joint of ee to bottom of coral
         public static final double CAM_LENGTH = Units.inchesToMeters(14.5);
@@ -425,5 +426,11 @@ public class Constants {
         public static final double CLIMBER_CAD_ZERO_Y = Units.inchesToMeters(13.5);
         public static final double CLIMBER_CAD_ZERO_Z = Units.inchesToMeters(9);
         public static final double CLIMBER_CAD_ANG_OFFSET = Units.degreesToRadians(65);
+
+        // gIntake
+        public static final double GINTAKE_MASS = Units.lbsToKilograms(10);
+        public static final double GINTAKE_LENGTH = Units.inchesToMeters(16);
+        public static final double GINTAKE_MOI = SingleJointedArmSim.estimateMOI(ARM_LENGTH, ARM_MASS);
+        public static final double GINTAKE_STARTING_ANGLE = Units.degreesToRadians(90);
     }
 }

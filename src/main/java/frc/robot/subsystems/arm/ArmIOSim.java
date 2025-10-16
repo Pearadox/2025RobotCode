@@ -22,7 +22,7 @@ public class ArmIOSim implements ArmIO {
             SimulationConstants.MIN_ANGLE,
             SimulationConstants.MAX_ANGLE,
             SimulationConstants.SIMULATE_GRAVITY,
-            SimulationConstants.STARTING_ANGLE);
+            SimulationConstants.ARM_STARTING_ANGLE);
 
     private PearadoxTalonFX pivot;
     private TalonFXConfiguration talonFXConfigs;
@@ -93,7 +93,7 @@ public class ArmIOSim implements ArmIO {
         armSim.update(0.02);
 
         pivotMotorSimState.setRawRotorPosition(
-                (Units.radiansToRotations(armSim.getAngleRads() - SimulationConstants.STARTING_ANGLE))
+                (Units.radiansToRotations(armSim.getAngleRads() - SimulationConstants.ARM_STARTING_ANGLE))
                         * ArmConstants.ARM_GEAR_RATIO);
 
         pivotMotorSimState.setRotorVelocity(
