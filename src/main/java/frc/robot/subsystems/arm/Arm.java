@@ -64,11 +64,12 @@ public class Arm extends SubsystemBase {
             if (armMode == ArmMode.Stowed) {
                 setpoint = ArmConstants.ARM_STOWED_ROT + armAdjust;
             } else if (armMode == ArmMode.Intake) {
-                if (isAligning) {
-                    setpoint = ArmConstants.ARM_STATION_BEHIND_CORAL + armAdjust;
+                // if (isAligning) {
+                //     setpoint = ArmConstants.ARM_STATION_BEHIND_CORAL + armAdjust;
+                setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
 
-                } else {
-                    setpoint = ArmConstants.ARM_INTAKE_ROT + armAdjust;
+                if (Constants.IDENTITY == RobotIdentity.PEARRACUDA) {
+                    setpoint += 1.5;
                 }
             } else if (armMode == ArmMode.L2) {
                 // setpoint = ik.getArmAngleRots(AlignConstants.REEF_ALIGN_TZ, AlignConstants.L2_HEIGHT) + armAdjust;

@@ -158,7 +158,7 @@ public class Constants {
 
         // target relative
         public static final double REEF_ALIGN_MID_TX = -0.02; // 0.08; // 0.28575 // 0
-        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.03;
+        public static final double REEF_ALIGN_LEFT_TX = -BRANCH_SPACING - 0.030;
         public static final double REEF_ALIGN_RIGHT_TX = BRANCH_SPACING - 0.015; // 0.03 comp changed to 0.015
         public static final double REEF_ALIGN_LEFT_TX_EVE = -BRANCH_SPACING - 0.02;
         public static final double REEF_ALIGN_RIGHT_TX_EVE = BRANCH_SPACING - 0.02;

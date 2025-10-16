@@ -18,7 +18,7 @@ import org.littletonrobotics.junction.AutoLogOutput;
 public class AutoAlign {
     private Pose2d targetPose = Pose2d.kZero;
 
-    private Debouncer isAlignedDebouncer = new Debouncer(0.2);
+    private Debouncer isAlignedDebouncer = new Debouncer(0.4);
 
     @Setter
     private Supplier<Pose2d> robotSupplier;
