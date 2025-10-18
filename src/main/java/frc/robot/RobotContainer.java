@@ -22,6 +22,7 @@ import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
+import frc.robot.Constants.VisionConstants;
 import frc.robot.commands.ArmHold;
 import frc.robot.commands.AutoAlign;
 import frc.robot.commands.DriveCommands;
@@ -50,6 +51,7 @@ import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
+import frc.robot.subsystems.vision.VisionIOPhotonVisionSim;
 import frc.robot.util.RobotIdentity;
 import frc.robot.util.SmarterDashboard;
 import frc.robot.util.simulation.AlgaeHandler;
@@ -159,8 +161,12 @@ public class RobotContainer {
                         () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                         () -> elevator.getElevatorPositionMeters(),
                         () -> arm.getArmAngleRadsToHorizontal()));
-                vision = new Vision(drive::accept); // , new
-                // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
+                vision = new Vision(
+                        drive::accept,
+                        new VisionIOPhotonVisionSim(
+                                VisionConstants.LL_NAME,
+                                frc.robot.subsystems.vision.VisionConstants.robotToCamera0,
+                                driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
                 break;
 

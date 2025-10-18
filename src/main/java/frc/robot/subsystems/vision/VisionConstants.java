@@ -15,6 +15,7 @@ package frc.robot.subsystems.vision;
 
 import edu.wpi.first.apriltag.AprilTagFieldLayout;
 import edu.wpi.first.apriltag.AprilTagFields;
+import edu.wpi.first.math.geometry.Rotation3d;
 import edu.wpi.first.math.geometry.Transform3d;
 
 public class VisionConstants {
@@ -29,7 +30,8 @@ public class VisionConstants {
     // (Not used by Limelight, configure in web UI instead)
     // TODO: find robot to camera
     public static Transform3d robotToCamera0 =
-            Transform3d.kZero; // new Transform3d(0.2, 0.0, 0.2, new Rotation3d(0.0, -0.4, 0.0));
+            // Transform3d.kZero;
+            new Transform3d(-0.1905, 0.28575, 0.4191, new Rotation3d(0.0, 0.0, Math.PI));
     public static Transform3d robotToCamera1 = Transform3d.kZero;
 
     // Basic filtering thresholds
