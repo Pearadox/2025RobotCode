@@ -4,11 +4,13 @@
 
 package frc.robot.subsystems.gIntake;
 
+import com.ctre.phoenix6.BaseStatusSignal;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import com.ctre.phoenix6.controls.PositionVoltage;
 import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.drivers.PearadoxTalonFX;
+import frc.robot.Constants.ArmConstants;
 import frc.robot.Constants.IntakeConstants;
 
 public class GIntakeIOReal implements GIntakeIO {
@@ -21,28 +23,29 @@ public class GIntakeIOReal implements GIntakeIO {
     /** Creates a new GIntakeIOReal. */
     public GIntakeIOReal() {
         pivot = new PearadoxTalonFX(
-            IntakeConstants.PIVOT_ID,
-            NeutralModeValue.Brake,
-            IntakeConstants.PIVOT_CURRENT_LIMIT,
-            false
-        );
-        
+                IntakeConstants.PIVOT_ID, NeutralModeValue.Brake, IntakeConstants.PIVOT_CURRENT_LIMIT, false);
+
         talonFXConfigs = new TalonFXConfiguration();
         var slot0Configs = talonFXConfigs.Slot0;
-        
+
         slot0Configs.kP = 0.1;
         slot0Configs.kI = 0.0;
         slot0Configs.kD = 0.1;
-        
+
         pivot.getConfigurator().apply(slot0Configs);
-        
-        
+
         roller = new PearadoxTalonFX(
-            IntakeConstants.ROLLER_ID,
-            NeutralModeValue.Coast, 
-            IntakeConstants.ROLLER_CURRENT_LIMIT,
-            false
-        );
+                IntakeConstants.ROLLER_ID, NeutralModeValue.Coast, IntakeConstants.ROLLER_CURRENT_LIMIT, false);
+
+        BaseStatusSignal.setUpdateFrequencyForAll(
+                ArmConstants.UPDATE_FREQ,
+                pivot.getPosition(),
+                pivot.getVelocity(),
+                pivot.getStatorCurrent(),
+                pivot.getSupplyCurrent(),
+                pivot.getMotorVoltage(),
+                roller.getVelocity(),
+                roller.getMotorVoltage());
     }
 
     // no getInstance function because instances are dependent on whether SIM or REAL - handled in RobotContainer
@@ -50,7 +53,7 @@ public class GIntakeIOReal implements GIntakeIO {
     public void updateInputs(GIntakeIOInputsAutoLogged inputs) {
         inputs.positionRots = pivot.getPosition().getValueAsDouble();
         inputs.rollerSpeedRps = roller.getVelocity().getValueAsDouble();
-        
+
         inputs.pivotStatorCurrent = pivot.getStatorCurrent().getValueAsDouble();
         inputs.pivotSupplyCurrent = pivot.getSupplyCurrent().getValueAsDouble();
     }

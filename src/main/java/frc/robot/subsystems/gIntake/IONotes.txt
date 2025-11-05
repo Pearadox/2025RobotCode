@@ -1,28 +1,42 @@
-notes:
- - autologged and updateInputs are for logging (and logged replay but that's later)
- - stator is output, supply is input (VERY basically)
- - the TalonFXSimState takes in data from the WPISim (SingleJointedArmSim in this case), not the other way around
+OTHER NOTES:
+ - SUPPLY CURRENT is the current being supplied to the motor from the battery
+ - STATOR CURRENT is the current outputted by the motor
+    - stator current can be greater than supply current
+    - V_supply * I_supply = V_stator * I_stator (ideal)
+ - TORQUE CURRENT -> current supplied for accel in direction relative to motion (+ if same, - if different)
+    - stator current is also abs of torque current
 
 IO FRAMEWORK:
+ - all of these things carry over both REAL and SIM
+
  - IO Interface has @autologged inputs that transfer across both REAL and SIM
     - necessitates an updateInputs(IOThingAutoLogged parameter) default function to periodically update them
     - creates toLog and fromLog functions (you mostly won't be using them)
+    - these functions are for LOGGING and LOGGED REPLAY
+
  - also has any other NON-LOGIC default functions that need to be in both sections
     - runPosition, runVelocity, setTarget, etc.
 
+ - not written but it's important to note that both should have BaseStatusSignal.setUpdateFrequenceForAll() ... 50ms
+    - sets the update freq for IMPORTANT data to 50ms and not unimportant data to speed up runtime
+    - this affects how often the TalonFX sends information to the Rio
+       - the info can be used for lots of things (logging, logic, etc.)
+
+
+
     REAL IMPLEMENTATION:
-     - creates motor object and configs object to use in functions
+    - creates motor object and configs object to use in functions
         - instantiated like normal (in the constructor)
-     - update frequency for useful parameters (position, velocity, voltage, current, etc.) should be set to 50ms (in constants)
-        - faster running bc less checks
-     - implemetations for inherited functions is like normal (do what you need to do and not much else)
+    - implemetations for inherited functions is like normal (do what you need to do and not much else)
 
     SIM IMPLEMENTATION:
-     - creates motor object, configs object, and SIM STATE OBJECT + MECHANISM2D OBJECT
-        - SIM STATE object is a part of TalonFX class that essentially places a real motor into simulation
-        - MECHANISM2D object is the another visualization of the SIM STATE object (not AdvantageKit)
-     - update frequency is also set here to be 50ms (because simulated robots need to run fast too)
-     - there's ALSO an updateSim function that updates the SIM STATE object given the MECHANISM2D object's data
+    - creates motor object, configs object, and SIM STATE OBJECT + MECHANISM2D OBJECT
+
+    - SIM STATE object is a part of TalonFX class, MECHANISM2D object is a separate simulation
+       - the SIM STATE object only simulates POWER/VOLTAGE and is unaware of position or velocity
+       - the MECHANISM2D object simulates load, weight, gravity, etc. that would affect the result of power
+    - tl;dr: SIM STATE simulates the motor, MECHANISM2D simulates the subsystem (idk why that was so hard for me to understand)
+    - there's an updateSim function that passes their parameters into each other (SIM STATE receives pos/v, MECHANISM2D receives V_in)
         - should be called in updateInputs (i.e. called periodically)
 
 ACTUAL FILE:
