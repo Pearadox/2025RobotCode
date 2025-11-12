@@ -17,5 +17,5 @@ public interface GIntakeIO {
 
     public void updateInputs(GIntakeIOInputsAutoLogged GIntakeIOInputs);
 
-    public void runPosition(double setpoint, boolean isIntaking, double feedforward);
+    public void runPosition(double setpoint, double rollerSpeed);
 }

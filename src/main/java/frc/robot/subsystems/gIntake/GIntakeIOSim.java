@@ -12,6 +12,7 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
+import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
@@ -24,7 +25,7 @@ public class GIntakeIOSim implements GIntakeIO {
 
     private TalonFXSimState pivotSimState;
 
-    private TalonFXConfiguration TalonFXConfigs;
+    private TalonFXConfiguration talonFXConfigs;
 
     private PearadoxTalonFX roller;
     private TalonFXSimState rollerSimState;
@@ -52,25 +53,21 @@ public class GIntakeIOSim implements GIntakeIO {
 
     public GIntakeIOSim() {
         pivot = new PearadoxTalonFX(
-                IntakeConstants.PIVOT_ID,
+                GIntakeConstants.PIVOT_ID,
                 NeutralModeValue.Brake,
-                IntakeConstants.PIVOT_CURRENT_LIMIT,
+                GIntakeConstants.PIVOT_CURRENT_LIMIT,
                 false); // instantiating a TalonFX object to simulate
 
-        TalonFXConfigs = new TalonFXConfiguration();
-        var slot0Configs = TalonFXConfigs.Slot0;
+        talonFXConfigs = new TalonFXConfiguration();
+        talonFXConfigs.Slot0 = GIntakeConstants.getConfig();
 
-        slot0Configs.kP = 0.1;
-        slot0Configs.kI = 0.0;
-        slot0Configs.kD = 0.1;
-
-        pivot.getConfigurator().apply(slot0Configs);
+        pivot.getConfigurator().apply(talonFXConfigs.Slot0);
         // PID and FF configurations for the motor
 
         roller = new PearadoxTalonFX(
-                IntakeConstants.ROLLER_ID,
+                GIntakeConstants.ROLLER_ID,
                 NeutralModeValue.Coast,
-                IntakeConstants.ROLLER_CURRENT_LIMIT,
+                GIntakeConstants.ROLLER_CURRENT_LIMIT,
                 false); // instantiating another TalonFX object to simulate
 
         pivotSimState = pivot.getSimState();
@@ -99,11 +96,10 @@ public class GIntakeIOSim implements GIntakeIO {
         inputs.pivotSupplyCurrent = pivot.getSupplyCurrent().getValueAsDouble();
     }
 
-    public void runPosition(double setpoint, boolean isIntaking, double feedForward) {
+    public void runPosition(double setpoint, double rollerSpeed) {
         PositionVoltage pivotPositionRequest = new PositionVoltage(setpoint);
 
-        VoltageOut rollerVoltageOut =
-                new VoltageOut(isIntaking ? IntakeConstants.ROLLER_INTAKE_SPEED : IntakeConstants.ROLLER_OUTAKE_SPEED);
+        VoltageOut rollerVoltageOut = new VoltageOut(rollerSpeed);
 
         pivot.setControl(pivotPositionRequest);
         roller.setControl(rollerVoltageOut);
@@ -111,15 +107,12 @@ public class GIntakeIOSim implements GIntakeIO {
 
     public void updateSim() {
         pivotSimState.setSupplyVoltage(12);
-        rollerSimState.setSupplyVoltage(12);
+        rollerSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
 
         pivotSim.setInputVoltage(pivotSimState.getMotorVoltage());
-        // rollerSim.setInputVoltage(rollerSimState.getMotorVoltage());
-        // sets mech2d simulation's input voltage to motor's simulated applied voltage
+
         pivotSim.update(0.02); // updates the simulation every 20ms
 
-        // apparently the TalonFXSimState isn't smart enough to solve for it's own position or velocity
-        // we need to tell it where it is/how fast it's going
         pivotSimState.setRawRotorPosition(Units.radiansToRotations(pivotSim.getAngleRads()));
         pivotSimState.setRotorVelocity(Units.radiansToRotations(pivotSim.getVelocityRadPerSec()));
 

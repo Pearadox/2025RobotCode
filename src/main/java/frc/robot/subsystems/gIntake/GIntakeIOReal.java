@@ -11,7 +11,6 @@ import com.ctre.phoenix6.controls.VoltageOut;
 import com.ctre.phoenix6.signals.NeutralModeValue;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.IntakeConstants;
 
 public class GIntakeIOReal implements GIntakeIO {
 
@@ -23,19 +22,15 @@ public class GIntakeIOReal implements GIntakeIO {
     /** Creates a new GIntakeIOReal. */
     public GIntakeIOReal() {
         pivot = new PearadoxTalonFX(
-                IntakeConstants.PIVOT_ID, NeutralModeValue.Brake, IntakeConstants.PIVOT_CURRENT_LIMIT, false);
+                GIntakeConstants.PIVOT_ID, NeutralModeValue.Brake, GIntakeConstants.PIVOT_CURRENT_LIMIT, false);
 
         talonFXConfigs = new TalonFXConfiguration();
-        var slot0Configs = talonFXConfigs.Slot0;
+        talonFXConfigs.Slot0 = GIntakeConstants.getConfig();
 
-        slot0Configs.kP = 0.1;
-        slot0Configs.kI = 0.0;
-        slot0Configs.kD = 0.1;
-
-        pivot.getConfigurator().apply(slot0Configs);
+        pivot.getConfigurator().apply(talonFXConfigs.Slot0);
 
         roller = new PearadoxTalonFX(
-                IntakeConstants.ROLLER_ID, NeutralModeValue.Coast, IntakeConstants.ROLLER_CURRENT_LIMIT, false);
+                GIntakeConstants.ROLLER_ID, NeutralModeValue.Coast, GIntakeConstants.ROLLER_CURRENT_LIMIT, false);
 
         BaseStatusSignal.setUpdateFrequencyForAll(
                 ArmConstants.UPDATE_FREQ,
@@ -58,13 +53,12 @@ public class GIntakeIOReal implements GIntakeIO {
         inputs.pivotSupplyCurrent = pivot.getSupplyCurrent().getValueAsDouble();
     }
 
-    public void runPosition(double setpoint, boolean isIntaking, double feedforward) {
+    public void runPosition(double setpoint, double rollerSpeed) {
         PositionVoltage pivotPositionRequest = new PositionVoltage(setpoint);
         // PositionVoltage is a control setting that sets a motor's desired position and applies voltage based on PID
         // and FF to best get to that position
 
-        VoltageOut rollerVoltageOut =
-                new VoltageOut(isIntaking ? IntakeConstants.ROLLER_INTAKE_SPEED : IntakeConstants.ROLLER_OUTAKE_SPEED);
+        VoltageOut rollerVoltageOut = new VoltageOut(rollerSpeed);
         // VoltageOut is a control setting that simply sets a motor's voltage output
 
         pivot.setControl(pivotPositionRequest);

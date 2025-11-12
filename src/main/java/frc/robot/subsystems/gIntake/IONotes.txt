@@ -5,6 +5,8 @@ OTHER NOTES:
     - V_supply * I_supply = V_stator * I_stator (ideal)
  - TORQUE CURRENT -> current supplied for accel in direction relative to motion (+ if same, - if different)
     - stator current is also abs of torque current
+ - suppliers can be used as parameters in order to make them flexible
+ - enums can function similarly to classes to be used as state machines (check GIntakeConstants)
 
 IO FRAMEWORK:
  - all of these things carry over both REAL and SIM
