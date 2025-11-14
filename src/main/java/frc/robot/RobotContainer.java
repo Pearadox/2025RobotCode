@@ -47,6 +47,9 @@ import frc.robot.subsystems.endeffector.EndEffector;
 import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
+import frc.robot.subsystems.gIntake.GIntake;
+import frc.robot.subsystems.gIntake.GIntakeIOReal;
+import frc.robot.subsystems.gIntake.GIntakeIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
@@ -65,6 +68,8 @@ public class RobotContainer {
     private Climber climber;
     public static AutoAlign align;
 
+    public GIntake gIntake;
+
     private SwerveDriveSimulation driveSimulation = null;
 
     //     public static final LEDStrip ledstrip = LEDStrip.getInstance();
@@ -74,21 +79,32 @@ public class RobotContainer {
     public static final XboxController opController = new XboxController(1);
 
     // ---------------------------- Driver Controller --------------------------------- //
+    // Don't mind me replacing all the Driver Controls to test G Intake please          //
 
-    private final JoystickButton resetHeading_Start =
-            new JoystickButton(driverController, XboxController.Button.kStart.value);
+    //     private final JoystickButton resetHeading_Start =
+    //             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
-    private final POVButton reefAlignLeft_PovLeft = new POVButton(driverController, 270);
-    private final POVButton reefAlignCenter_PovDown = new POVButton(driverController, 180);
-    private final POVButton reefAlignRight_PovRight = new POVButton(driverController, 90);
-    private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
+    //     private final POVButton reefAlignLeft_PovLeft = new POVButton(driverController, 270);
+    //     private final POVButton reefAlignCenter_PovDown = new POVButton(driverController, 180);
+    //     private final POVButton reefAlignRight_PovRight = new POVButton(driverController, 90);
+    //     private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
 
-    private final JoystickButton slowMode_A = new JoystickButton(driverController, XboxController.Button.kA.value);
-    private final JoystickButton zeroClimber_back =
-            new JoystickButton(driverController, XboxController.Button.kBack.value);
+    //     private final JoystickButton slowMode_A = new JoystickButton(driverController,
+    // XboxController.Button.kA.value);
+    //     private final JoystickButton zeroClimber_back =
+    //             new JoystickButton(driverController, XboxController.Button.kBack.value);
 
-    private final Trigger strafe_Triggers = new Trigger(
-            () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) > 0.1);
+    //     private final Trigger strafe_Triggers = new Trigger(
+    //             () -> Math.abs(driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) >
+    // 0.1);
+
+    private final JoystickButton GIntake_A = new JoystickButton(driverController, XboxController.Button.kA.value);
+    private final JoystickButton GOuttake_B = new JoystickButton(driverController, XboxController.Button.kB.value);
+
+    private final Trigger GIntakeAdjust_Triggers = new Trigger(
+            () -> (driverController.getRightTriggerAxis() > 0.1 || driverController.getLeftTriggerAxis() > 0.1));
+    private final JoystickButton GIntakeResetAdjust_X =
+            new JoystickButton(driverController, XboxController.Button.kX.value);
 
     // ----------------------------- Op Controller -------------------------------- //
 
@@ -135,6 +151,8 @@ public class RobotContainer {
                 arm = new Arm(new ArmIOReal());
                 endEffector = new EndEffector(new EndEffectorIOReal());
                 climber = new Climber(new ClimberIOReal());
+
+                gIntake = new GIntake(new GIntakeIOReal());
                 break;
 
                 // Sim robot, instantiate physics sim IO implementations
@@ -161,6 +179,8 @@ public class RobotContainer {
                 vision = new Vision(drive::accept); // , new
                 // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
+
+                gIntake = new GIntake(new GIntakeIOSim());
                 break;
 
                 // Replayed robot, disable IO implementations
@@ -209,22 +229,31 @@ public class RobotContainer {
         final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
                 ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
                 : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
-        resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
+        // resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
-        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
-        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
-        stationAlign_PovUp.whileTrue(align.stationAlign(drive));
+        // reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
+        // reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
+        // reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
+        // stationAlign_PovUp.whileTrue(align.stationAlign(drive));
 
-        strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
-                drive,
-                () -> 0,
-                () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) * 0.25,
-                () -> 0,
-                false));
+        // strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
+        //         drive,
+        //         () -> 0,
+        //         () -> (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()) * 0.25,
+        //         () -> 0,
+        //         false));
 
-        slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
-        zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
+        // slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
+        // zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
+
+        GIntake_A.onTrue(new InstantCommand(() -> gIntake.setIntake()))
+                .onFalse(new InstantCommand(() -> gIntake.setStowed()));
+        GOuttake_B.onTrue(new InstantCommand(() -> gIntake.setOuttake()))
+                .onFalse(new InstantCommand(() -> gIntake.setStowed()));
+
+        GIntakeAdjust_Triggers.whileTrue(new InstantCommand(() -> gIntake.adjustSetpoint(
+                0.1 * (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()))));
+        GIntakeResetAdjust_X.onTrue(new InstantCommand(() -> gIntake.resetAdjust()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 
@@ -258,10 +287,12 @@ public class RobotContainer {
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
                 .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
-                .andThen(new InstantCommand(() -> endEffector.stopEE())));
+                .andThen(new InstantCommand(() -> endEffector.stopEE()))
+                .andThen(new InstantCommand(() -> gIntake.setCoral())));
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
-                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
+                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode()))
+                .andThen(new InstantCommand(() -> gIntake.setAlgae())));
 
         climberAdjustUp_PovUp
                 .whileTrue(new RunCommand(() -> climber.climberUp()))

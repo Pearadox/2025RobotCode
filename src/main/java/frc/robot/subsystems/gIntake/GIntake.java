@@ -6,13 +6,15 @@ package frc.robot.subsystems.gIntake;
 
 import edu.wpi.first.math.util.Units;
 import edu.wpi.first.wpilibj2.command.SubsystemBase;
+import frc.robot.subsystems.elevator.MechVisualizer;
 import frc.robot.subsystems.gIntake.GIntakeConstants.GIntakeState;
+import frc.robot.util.SmarterDashboard;
 
 public class GIntake extends SubsystemBase {
 
-    private GIntakeState gIntakeState = GIntakeState.STOWED;
+    private GIntakeState gIntakeState = GIntakeState.CORAL_STOWED;
 
-    private double setpoint;
+    private boolean isCoral = true;
 
     private GIntakeIO io;
 
@@ -29,39 +31,58 @@ public class GIntake extends SubsystemBase {
         io.updateInputs(inputs);
 
         io.runPosition(gIntakeState.getPivotSetpoint(), gIntakeState.getRollerSpeed());
+
+        SmarterDashboard.putString("GIntake/State", gIntakeState.toString());
+        SmarterDashboard.putNumber("GIntake/Angle", getAngleRads());
+        SmarterDashboard.putNumber("GIntake/setpoint", gIntakeState.getPivotSetpoint());
+        SmarterDashboard.putNumber("Gintake/Adjust", gIntakeState.getAdjust());
+
+        MechVisualizer.getInstance().updateGIntakeAngle(getAngleRads());
     }
 
     public GIntakeState getState() {
         return gIntakeState;
     }
-    
-    public double getPivotRawPosition() {
-        return inputs.positionRots / GIntakeConstants.PIVOT_GEARING; // divide by gearing bc the pivot's position is not exact to the motor's position
+
+    public double getAngleRads() {
+        return Units.rotationsToRadians(inputs.positionRots / GIntakeConstants.PIVOT_GEARING)
+                + GIntakeConstants
+                        .GINTAKE_STARTING_ANGLE; // divide by gearing bc the pivot's position is not exact to the
+        // motor's
+        // position
     }
-    
-    public double getPivotAngleDegrees() {
-        return Units.rotationsToDegrees(getPivotRawPosition());
+
+    public double getArmAngleDegrees() {
+        return Units.radiansToDegrees(getAngleRads());
     }
 
     // vvv state modifiers vvv
 
     public void setStowed() {
-        gIntakeState = GIntakeState.STOWED;
+        gIntakeState = (isCoral ? GIntakeState.CORAL_STOWED : GIntakeState.ALGAE_STOWED);
     }
 
     public void setIntake() {
-        gIntakeState = GIntakeState.INTAKE;
+        gIntakeState = (isCoral ? GIntakeState.CORAL_INTAKE : GIntakeState.ALGAE_INTAKE);
     }
 
     public void setOuttake() {
-        gIntakeState = GIntakeState.OUTTAKE;
+        gIntakeState = (isCoral ? GIntakeState.CORAL_OUTTAKE : GIntakeState.ALGAE_OUTTAKE);
+    }
+
+    public void setCoral() {
+        isCoral = true;
     }
 
     public void setAlgae() {
-        gIntakeState = GIntakeState.ALGAE;
+        isCoral = false;
     }
 
     public void adjustSetpoint(double rotations) {
         gIntakeState.adjustSetpoint(rotations);
+    }
+
+    public void resetAdjust() {
+        gIntakeState.resetAdjust();
     }
 }

@@ -1,13 +1,3 @@
-OTHER NOTES:
- - SUPPLY CURRENT is the current being supplied to the motor from the battery
- - STATOR CURRENT is the current outputted by the motor
-    - stator current can be greater than supply current
-    - V_supply * I_supply = V_stator * I_stator (ideal)
- - TORQUE CURRENT -> current supplied for accel in direction relative to motion (+ if same, - if different)
-    - stator current is also abs of torque current
- - suppliers can be used as parameters in order to make them flexible
- - enums can function similarly to classes to be used as state machines (check GIntakeConstants)
-
 IO FRAMEWORK:
  - all of these things carry over both REAL and SIM
 
@@ -18,18 +8,21 @@ IO FRAMEWORK:
 
  - also has any other NON-LOGIC default functions that need to be in both sections
     - runPosition, runVelocity, setTarget, etc.
+    - can be motor-specific (i.e. runPivotPosition, runRollerSpeed, etc.) if necessary - more flexibility
 
  - not written but it's important to note that both should have BaseStatusSignal.setUpdateFrequenceForAll() ... 50ms
     - sets the update freq for IMPORTANT data to 50ms and not unimportant data to speed up runtime
     - this affects how often the TalonFX sends information to the Rio
        - the info can be used for lots of things (logging, logic, etc.)
+    - what's default update freq? I couldn't find it in docs lol
 
 
 
     REAL IMPLEMENTATION:
     - creates motor object and configs object to use in functions
-        - instantiated like normal (in the constructor)
-    - implemetations for inherited functions is like normal (do what you need to do and not much else)
+       - instantiated + applied in the constructor
+    - implemetations for inherited functions mainly is just using parameters (usually setpoints/voltages) and controlModes
+       - eg. PositionControl, VoltageControl, MotionMagicControl, etc.
 
     SIM IMPLEMENTATION:
     - creates motor object, configs object, and SIM STATE OBJECT + MECHANISM2D OBJECT
@@ -40,14 +33,36 @@ IO FRAMEWORK:
     - tl;dr: SIM STATE simulates the motor, MECHANISM2D simulates the subsystem (idk why that was so hard for me to understand)
     - there's an updateSim function that passes their parameters into each other (SIM STATE receives pos/v, MECHANISM2D receives V_in)
         - should be called in updateInputs (i.e. called periodically)
+    - other than that it's pretty much the same as the REAL implementation (in this case)
+       - doesn't extend the REAL implementation because it's not best practice - what if sim and real are very different?
 
 ACTUAL FILE:
  - all logic is handled here
- - basically the same as usual, only difference is using an io object because of the ambiguity of reality/simulation
-    - NO GET INSTANCE FUNCTION - instance is determined in RobotContainer based on real/sim
+ - NO GET INSTANCE FUNCTION - instance is determined in RobotContainer based on real/sim
+ - with a STATE MACHINE (cool looking enum) you can simplify the "Hold" function to one line :D
+ - calls the MechVisualizer in order to visualize the simulation (parse in the angle)
 
-HOLD COMMAND:
- - literally just a normal hold command
+MECHVISUALIZER:
+ - every subsystem needs at least 2 things for mech2d besides the visualization window: root + ligament
+ - ligament is appended to root to "link" them
+ - updates the displayed angle with a updateAngle(double angleRads) function (although display is in DEG)
+
+STATE MACHINE:
+ - enum {NAME(parameters)}
+    - requires instance variables and a constructor
+    - can have getters/mutators (usually not setters though I think)
+ - allows for every state to be easily accessed from one point (the enum)
+
 
 ROBOT CONTAINER:
- - real or sim is determined here, then objects are created, then button logic is implemented
+ - real or sim is determined here, then objects are created, then button logic is implemented (typical implementation)
+
+OTHER NOTES:
+ - SUPPLY CURRENT is the current being supplied to the motor from the battery
+ - STATOR CURRENT is the current outputted by the motor
+    - stator current can be greater than supply current
+    - V_supply * I_supply = V_stator * I_stator (ideal)
+ - TORQUE CURRENT -> current supplied for accel in direction relative to motion (+ if same, - if different)
+    - stator current is also abs of torque current
+ - suppliers can be used as parameters in order to make them flexible
+ - enums can function similarly to classes to be used as state machines (check GIntakeConstants)

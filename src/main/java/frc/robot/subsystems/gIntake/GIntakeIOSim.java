@@ -12,12 +12,9 @@ import com.ctre.phoenix6.signals.NeutralModeValue;
 import com.ctre.phoenix6.sim.TalonFXSimState;
 import edu.wpi.first.math.system.plant.DCMotor;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.motorcontrol.Talon;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 import frc.lib.drivers.PearadoxTalonFX;
 import frc.robot.Constants.ArmConstants;
-import frc.robot.Constants.IntakeConstants;
-import frc.robot.Constants.SimulationConstants;
 
 public class GIntakeIOSim implements GIntakeIO {
     /** Creates a new GIntakeIOSim. */
@@ -32,13 +29,13 @@ public class GIntakeIOSim implements GIntakeIO {
 
     private SingleJointedArmSim pivotSim = new SingleJointedArmSim(
             DCMotor.getKrakenX60(1),
-            IntakeConstants.PIVOT_GEARING,
-            SimulationConstants.GINTAKE_MOI,
-            SimulationConstants.GINTAKE_LENGTH,
-            SimulationConstants.MIN_ANGLE,
-            SimulationConstants.MAX_ANGLE,
-            SimulationConstants.SIMULATE_GRAVITY,
-            SimulationConstants.GINTAKE_STARTING_ANGLE);
+            GIntakeConstants.PIVOT_GEARING,
+            GIntakeConstants.GINTAKE_MOI,
+            GIntakeConstants.GINTAKE_LENGTH,
+            Double.NEGATIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            true,
+            GIntakeConstants.GINTAKE_STARTING_ANGLE);
 
     // private SingleJointedArmSim rollerSim = new SingleJointedArmSim(
     //     DCMotor.getKrakenX60(1),
@@ -107,7 +104,7 @@ public class GIntakeIOSim implements GIntakeIO {
 
     public void updateSim() {
         pivotSimState.setSupplyVoltage(12);
-        rollerSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
+        // rollerSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
 
         pivotSim.setInputVoltage(pivotSimState.getMotorVoltage());
 

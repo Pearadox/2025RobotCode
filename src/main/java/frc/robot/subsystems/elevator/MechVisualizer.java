@@ -35,6 +35,10 @@ public class MechVisualizer {
             3,
             new Color8Bit(Color.kLightSteelBlue)));
 
+    private LoggedMechanismRoot2d gIntakeRoot = mech2d.getRoot("GIntake Root", Units.inchesToMeters(15), 0);
+    private LoggedMechanismLigament2d gIntakePivot =
+            gIntakeRoot.append(new LoggedMechanismLigament2d("GIntake", Units.inchesToMeters(10), 90));
+
     // End effector segments (derived from CAD)
     private LoggedMechanismLigament2d ee23a = arm.append(new LoggedMechanismLigament2d(
             "EE23a", Units.inchesToMeters(5.6102), 180 - 109.295, 7, new Color8Bit(Color.kDarkSeaGreen)));
@@ -62,6 +66,8 @@ public class MechVisualizer {
     private double heightMeters = 0.0;
     private double armAngleRads = 0.0;
     private double climbAngRads = 0.0;
+
+    private double gIntakeAngleRads = 0.0;
 
     private static final MechVisualizer instance = new MechVisualizer();
 
@@ -103,5 +109,10 @@ public class MechVisualizer {
     public void updateClimberRoll(double angleRads) {
         this.climbAngRads = angleRads;
         climber.setAngle(180 - Units.radiansToDegrees(climbAngRads));
+    }
+
+    public void updateGIntakeAngle(double angleRads) {
+        this.gIntakeAngleRads = angleRads;
+        gIntakePivot.setAngle(Units.radiansToDegrees(gIntakeAngleRads));
     }
 }
