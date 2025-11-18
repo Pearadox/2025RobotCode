@@ -3,18 +3,17 @@ package frc.robot.subsystems.gIntake;
 import com.ctre.phoenix6.configs.Slot0Configs;
 import com.ctre.phoenix6.configs.TalonFXConfiguration;
 import edu.wpi.first.math.util.Units;
-import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
 
 public class GIntakeConstants {
-    public static enum GIntakeState { // NAME(pivot angle in degrees, roller speed)
-        CORAL_STOWED(0.0, 0.0),
-        CORAL_INTAKE(105.0, 1.0),
-        CORAL_OUTTAKE(10.0, -1.0),
-        ALGAE_STOWED(40.0, 0.0),
-        ALGAE_INTAKE(40.0, -1.0),
-        ALGAE_OUTTAKE(40.0, 1.0);
+    public static enum GIntakeState { // NAME(pivot angle in degrees (relative to starting), roller speed)
+        CORAL_STOWED(-95.0, 0.0),
+        CORAL_INTAKE(0.0, 1.0),
+        CORAL_OUTTAKE(-75.0, -1.0),
+        ALGAE_STOWED(-120.0, 0.0),
+        ALGAE_INTAKE(-120.0, -1.0),
+        ALGAE_OUTTAKE(-120.0, 1.0);
 
-        private double setpoint;
+        private double setpoint; // setpoint of the mechanism - divide by gearing to get motor setpoint
         private double adjust;
         private double speed;
 
@@ -71,25 +70,36 @@ public class GIntakeConstants {
     public static final int ROLLER_CURRENT_LIMIT = 30;
 
     public static final int PIVOT_GEARING = 60;
-    public static final int ROLLER_GEARING = 0;
+    public static final int ROLLER_GEARING = 25;
 
     public static final TalonFXConfiguration PIVOT_CONFIGS = new TalonFXConfiguration();
     public static final Slot0Configs SLOT_0_CONFIGS = PIVOT_CONFIGS.Slot0;
 
-    public static final Slot0Configs getConfig() {
-        SLOT_0_CONFIGS.kG = 0.0;
+    public static final Slot0Configs getPivotConfig() {
+        SLOT_0_CONFIGS.kG = (PIVOT_MASS * PIVOT_LENGTH) / ((7.09 / 12) * PIVOT_GEARING);
         SLOT_0_CONFIGS.kS = 0.0;
         SLOT_0_CONFIGS.kV = 0.0;
         SLOT_0_CONFIGS.kA = 0.0;
-        SLOT_0_CONFIGS.kP = 1.0;
+        SLOT_0_CONFIGS.kP = 0.5;
         SLOT_0_CONFIGS.kI = 0.0;
         SLOT_0_CONFIGS.kD = 0.0;
         return SLOT_0_CONFIGS;
+
+        /* kG is volts required to counter gravity
+         * how to find it:
+         * (mass * g * radius) / (torque/volt * gear ratio)
+         * for a kraken, we'll use stall torque (torque needed to stop it at max voltage) and 12V
+         * hopefully this makes sense after I finish physics 1 :pray:
+         */
+
+        // kS is volts required to counter static friction, maybe can't determine in sim
     }
 
     // sim
-    public static final double GINTAKE_MASS = Units.lbsToKilograms(10);
-    public static final double GINTAKE_LENGTH = Units.inchesToMeters(16);
-    public static final double GINTAKE_MOI = SingleJointedArmSim.estimateMOI(GINTAKE_LENGTH, GINTAKE_MASS);
-    public static final double GINTAKE_STARTING_ANGLE = Units.degreesToRadians(90);
+    public static final double PIVOT_MASS = Units.lbsToKilograms(10);
+    public static final double PIVOT_LENGTH = Units.inchesToMeters(11);
+    public static final double PIVOT_STARTING_ANGLE = Units.degreesToRadians(180);
+
+    public static final double ROLLER_MASS = Units.lbsToKilograms(2);
+    public static final double ROLLER_WHEEL_RADIUS = Units.inchesToMeters(1);
 }

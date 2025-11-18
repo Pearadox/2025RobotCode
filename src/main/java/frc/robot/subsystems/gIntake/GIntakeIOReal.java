@@ -25,7 +25,7 @@ public class GIntakeIOReal implements GIntakeIO {
                 GIntakeConstants.PIVOT_ID, NeutralModeValue.Brake, GIntakeConstants.PIVOT_CURRENT_LIMIT, false);
 
         talonFXConfigs = new TalonFXConfiguration();
-        talonFXConfigs.Slot0 = GIntakeConstants.getConfig();
+        talonFXConfigs.Slot0 = GIntakeConstants.getPivotConfig();
 
         pivot.getConfigurator().apply(talonFXConfigs.Slot0);
 
@@ -46,26 +46,38 @@ public class GIntakeIOReal implements GIntakeIO {
     // no getInstance function because instances are dependent on whether SIM or REAL - handled in RobotContainer
 
     public void updateInputs(GIntakeIOInputsAutoLogged inputs) {
-        inputs.positionRots = pivot.getPosition().getValueAsDouble();
-        inputs.rollerSpeedRps = roller.getVelocity().getValueAsDouble();
+        inputs.pivotPositionRots = pivot.getPosition().getValueAsDouble();
+        inputs.pivotSpeedRps = pivot.getVelocity().getValueAsDouble();
 
         inputs.pivotStatorCurrent = pivot.getStatorCurrent().getValueAsDouble();
         inputs.pivotSupplyCurrent = pivot.getSupplyCurrent().getValueAsDouble();
+
+        inputs.pivotMotorVoltage = pivot.getMotorVoltage().getValueAsDouble();
+
+        inputs.rollerPositionRots = roller.getPosition().getValueAsDouble();
+        inputs.rollerSpeedRps = roller.getVelocity().getValueAsDouble();
+
+        inputs.rollerVoltage = roller.getMotorVoltage().getValueAsDouble();
     }
 
-    public void runPosition(double setpoint, double rollerSpeed) {
+    public void runPivotPosition(double setpoint) {
         PositionVoltage pivotPositionRequest = new PositionVoltage(setpoint);
         // PositionVoltage is a control setting that sets a motor's desired position and applies voltage based on PID
-        // and FF to best get to that position
-
-        VoltageOut rollerVoltageOut = new VoltageOut(rollerSpeed);
-        // VoltageOut is a control setting that simply sets a motor's voltage output
-
         pivot.setControl(pivotPositionRequest);
-        roller.setControl(rollerVoltageOut);
         /*
         setControl function sets the control mode of the motor based on the input, in this case we're using a PositionVoltage and a VoltageOut
         you could also just make a new object in the set control function but this is easier to read imo
         */
+    }
+
+    public void runPivotVoltage(double voltage) {
+        pivot.setControl(new VoltageOut(voltage));
+    }
+
+    public void runRollerVoltage(double voltage) {
+        VoltageOut rollerVoltageOut = new VoltageOut(voltage);
+        // VoltageOut is a control setting that simply sets a motor's voltage output
+
+        roller.setControl(rollerVoltageOut);
     }
 }

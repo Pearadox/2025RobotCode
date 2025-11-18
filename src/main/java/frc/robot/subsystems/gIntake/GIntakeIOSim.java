@@ -30,23 +30,22 @@ public class GIntakeIOSim implements GIntakeIO {
     private SingleJointedArmSim pivotSim = new SingleJointedArmSim(
             DCMotor.getKrakenX60(1),
             GIntakeConstants.PIVOT_GEARING,
-            GIntakeConstants.GINTAKE_MOI,
-            GIntakeConstants.GINTAKE_LENGTH,
+            SingleJointedArmSim.estimateMOI(GIntakeConstants.PIVOT_LENGTH, GIntakeConstants.PIVOT_MASS),
+            GIntakeConstants.PIVOT_LENGTH,
             Double.NEGATIVE_INFINITY,
             Double.POSITIVE_INFINITY,
             true,
-            GIntakeConstants.GINTAKE_STARTING_ANGLE);
+            GIntakeConstants.PIVOT_STARTING_ANGLE);
 
-    // private SingleJointedArmSim rollerSim = new SingleJointedArmSim(
-    //     DCMotor.getKrakenX60(1),
-    //     IntakeConstants.ROLLER_GEARING,
-    //     SingleJointedArmSim.estimateMOI(0.1, 0.5),
-    //     0.1,
-    //     SimulationConstants.MIN_ANGLE,
-    //     SimulationConstants.MAX_ANGLE,
-    //     SimulationConstants.SIMULATE_GRAVITY,
-    //     0
-    // );
+    private SingleJointedArmSim rollerSim = new SingleJointedArmSim(
+            DCMotor.getKrakenX60(1),
+            GIntakeConstants.ROLLER_GEARING,
+            SingleJointedArmSim.estimateMOI(0.1, 0.5),
+            0.1,
+            Double.NEGATIVE_INFINITY,
+            Double.POSITIVE_INFINITY,
+            true,
+            0);
 
     public GIntakeIOSim() {
         pivot = new PearadoxTalonFX(
@@ -56,7 +55,7 @@ public class GIntakeIOSim implements GIntakeIO {
                 false); // instantiating a TalonFX object to simulate
 
         talonFXConfigs = new TalonFXConfiguration();
-        talonFXConfigs.Slot0 = GIntakeConstants.getConfig();
+        talonFXConfigs.Slot0 = GIntakeConstants.getPivotConfig();
 
         pivot.getConfigurator().apply(talonFXConfigs.Slot0);
         // PID and FF configurations for the motor
@@ -85,34 +84,52 @@ public class GIntakeIOSim implements GIntakeIO {
     public void updateInputs(GIntakeIOInputsAutoLogged inputs) {
         updateSim(); // updates the position and velocities of simulated motors
 
-        inputs.positionRots = pivot.getPosition().getValueAsDouble();
-        inputs.rollerSpeedRps = roller.getVelocity().getValueAsDouble();
-        // updates inputs based on updated positions
+        inputs.pivotPositionRots = pivot.getPosition().getValueAsDouble();
+        inputs.pivotSpeedRps = pivot.getVelocity().getValueAsDouble();
 
         inputs.pivotStatorCurrent = pivot.getStatorCurrent().getValueAsDouble();
         inputs.pivotSupplyCurrent = pivot.getSupplyCurrent().getValueAsDouble();
+
+        inputs.pivotMotorVoltage = pivot.getMotorVoltage().getValueAsDouble();
+
+        inputs.rollerPositionRots = roller.getPosition().getValueAsDouble();
+        inputs.rollerSpeedRps = roller.getVelocity().getValueAsDouble();
+
+        inputs.rollerVoltage = roller.getMotorVoltage().getValueAsDouble();
     }
 
-    public void runPosition(double setpoint, double rollerSpeed) {
-        PositionVoltage pivotPositionRequest = new PositionVoltage(setpoint);
+    public void runPivotPosition(double setpoint) {
+        pivot.setControl(new PositionVoltage(setpoint));
+    }
 
-        VoltageOut rollerVoltageOut = new VoltageOut(rollerSpeed);
+    public void runPivotVoltage(double voltage) {
+        pivot.setControl(new VoltageOut(voltage));
+    }
 
-        pivot.setControl(pivotPositionRequest);
-        roller.setControl(rollerVoltageOut);
+    public void runRollerVoltage(double voltage) {
+        roller.setControl(new VoltageOut(voltage));
     }
 
     public void updateSim() {
-        pivotSimState.setSupplyVoltage(12);
-        // rollerSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
+        pivotSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
 
         pivotSim.setInputVoltage(pivotSimState.getMotorVoltage());
 
-        pivotSim.update(0.02); // updates the simulation every 20ms
+        pivotSimState.setRawRotorPosition(
+                Units.radiansToRotations(pivotSim.getAngleRads() * GIntakeConstants.PIVOT_GEARING));
+        pivotSimState.setRotorVelocity(
+                Units.radiansToRotations(pivotSim.getVelocityRadPerSec() * GIntakeConstants.PIVOT_GEARING));
 
-        pivotSimState.setRawRotorPosition(Units.radiansToRotations(pivotSim.getAngleRads()));
-        pivotSimState.setRotorVelocity(Units.radiansToRotations(pivotSim.getVelocityRadPerSec()));
+        rollerSimState.setSupplyVoltage(12); // supply voltage is 12 bc 12V batteries
 
-        // rollerSimState.setRotorVelocity(Units.radiansToRotations(pivotSim.getVelocityRadPerSec()));
+        rollerSim.setInputVoltage(rollerSimState.getMotorVoltage());
+
+        rollerSimState.setRawRotorPosition(
+                Units.radiansToRotations(rollerSim.getAngleRads() * GIntakeConstants.ROLLER_GEARING));
+        rollerSimState.setRotorVelocity(
+                Units.radiansToRotations(rollerSim.getVelocityRadPerSec()) * GIntakeConstants.ROLLER_GEARING);
+
+        pivotSim.update(0.02);
+        rollerSim.update(0.02); // updates the simulation every 20ms
     }
 }

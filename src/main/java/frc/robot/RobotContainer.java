@@ -103,8 +103,8 @@ public class RobotContainer {
 
     private final Trigger GIntakeAdjust_Triggers = new Trigger(
             () -> (driverController.getRightTriggerAxis() > 0.1 || driverController.getLeftTriggerAxis() > 0.1));
-    private final JoystickButton GIntakeResetAdjust_X =
-            new JoystickButton(driverController, XboxController.Button.kX.value);
+    private final JoystickButton GIntakeResetAdjust_Start =
+            new JoystickButton(driverController, XboxController.Button.kStart.value);
 
     // ----------------------------- Op Controller -------------------------------- //
 
@@ -251,9 +251,12 @@ public class RobotContainer {
         GOuttake_B.onTrue(new InstantCommand(() -> gIntake.setOuttake()))
                 .onFalse(new InstantCommand(() -> gIntake.setStowed()));
 
+        // GIntake_A.onTrue(new InstantCommand(() -> gIntake.incrementAppliedVoltage(0.05)));
+        // GOuttake_B.onTrue(new InstantCommand(() -> gIntake.incrementAppliedVoltage(-0.05)));
+
         GIntakeAdjust_Triggers.whileTrue(new InstantCommand(() -> gIntake.adjustSetpoint(
                 0.1 * (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()))));
-        GIntakeResetAdjust_X.onTrue(new InstantCommand(() -> gIntake.resetAdjust()));
+        GIntakeResetAdjust_Start.onTrue(new InstantCommand(() -> gIntake.resetAdjust()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 

@@ -9,6 +9,7 @@ import edu.wpi.first.wpilibj.util.Color8Bit;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.ClimbConstants;
 import frc.robot.Constants.SimulationConstants;
+import frc.robot.subsystems.gIntake.GIntakeConstants;
 import org.littletonrobotics.junction.Logger;
 import org.littletonrobotics.junction.mechanism.LoggedMechanism2d;
 import org.littletonrobotics.junction.mechanism.LoggedMechanismLigament2d;
@@ -35,9 +36,15 @@ public class MechVisualizer {
             3,
             new Color8Bit(Color.kLightSteelBlue)));
 
-    private LoggedMechanismRoot2d gIntakeRoot = mech2d.getRoot("GIntake Root", Units.inchesToMeters(15), 0);
-    private LoggedMechanismLigament2d gIntakePivot =
-            gIntakeRoot.append(new LoggedMechanismLigament2d("GIntake", Units.inchesToMeters(10), 90));
+    private LoggedMechanismRoot2d gIntakeRoot =
+            mech2d.getRoot("GIntake Root", Units.inchesToMeters(17.5), Units.inchesToMeters(5));
+    private LoggedMechanismLigament2d gIntakePivot = gIntakeRoot.append(new LoggedMechanismLigament2d(
+            "GIntake", GIntakeConstants.PIVOT_LENGTH, GIntakeConstants.PIVOT_STARTING_ANGLE));
+    private LoggedMechanismLigament2d gIntakeSegment = gIntakePivot.append(
+            new LoggedMechanismLigament2d("Segment", Units.inchesToMeters(4), 45, 10, new Color8Bit(Color.kGray)));
+
+    private LoggedMechanismLigament2d gIntakeRoller = gIntakeSegment.append(new LoggedMechanismLigament2d(
+            "Roller", GIntakeConstants.ROLLER_WHEEL_RADIUS, 0, 5, new Color8Bit(Color.kGold)));
 
     // End effector segments (derived from CAD)
     private LoggedMechanismLigament2d ee23a = arm.append(new LoggedMechanismLigament2d(
@@ -67,7 +74,8 @@ public class MechVisualizer {
     private double armAngleRads = 0.0;
     private double climbAngRads = 0.0;
 
-    private double gIntakeAngleRads = 0.0;
+    private double gIntakePivotAngleRads = 0.0;
+    private double gIntakeRollerAngleRads = 0.0;
 
     private static final MechVisualizer instance = new MechVisualizer();
 
@@ -111,8 +119,13 @@ public class MechVisualizer {
         climber.setAngle(180 - Units.radiansToDegrees(climbAngRads));
     }
 
-    public void updateGIntakeAngle(double angleRads) {
-        this.gIntakeAngleRads = angleRads;
-        gIntakePivot.setAngle(Units.radiansToDegrees(gIntakeAngleRads));
+    public void updateGIntakePivotAngle(double angleRads) {
+        this.gIntakePivotAngleRads = angleRads;
+        gIntakePivot.setAngle(Units.radiansToDegrees(gIntakePivotAngleRads));
+    }
+
+    public void updateGIntakeRollerAngle(double angleRads) {
+        this.gIntakeRollerAngleRads = angleRads;
+        gIntakeRoller.setAngle(Units.radiansToDegrees(gIntakeRollerAngleRads));
     }
 }
