@@ -47,9 +47,6 @@ import frc.robot.subsystems.endeffector.EndEffector;
 import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
-import frc.robot.subsystems.gIntake.GIntake;
-import frc.robot.subsystems.gIntake.GIntakeIOReal;
-import frc.robot.subsystems.gIntake.GIntakeIOSim;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
@@ -67,8 +64,6 @@ public class RobotContainer {
     private Vision vision;
     private Climber climber;
     public static AutoAlign align;
-
-    public GIntake gIntake;
 
     private SwerveDriveSimulation driveSimulation = null;
 
@@ -99,12 +94,12 @@ public class RobotContainer {
     // 0.1);
 
     private final JoystickButton GIntake_A = new JoystickButton(driverController, XboxController.Button.kA.value);
-    private final JoystickButton GOuttake_B = new JoystickButton(driverController, XboxController.Button.kB.value);
+//     private final JoystickButton GOuttake_B = new JoystickButton(driverController, XboxController.Button.kB.value);
 
-    private final Trigger GIntakeAdjust_Triggers = new Trigger(
-            () -> (driverController.getRightTriggerAxis() > 0.1 || driverController.getLeftTriggerAxis() > 0.1));
-    private final JoystickButton GIntakeResetAdjust_Start =
-            new JoystickButton(driverController, XboxController.Button.kStart.value);
+//     private final Trigger GIntakeAdjust_Triggers = new Trigger(
+//             () -> (driverController.getRightTriggerAxis() > 0.1 || driverController.getLeftTriggerAxis() > 0.1));
+//     private final JoystickButton GIntakeResetAdjust_Start =
+//             new JoystickButton(driverController, XboxController.Button.kStart.value);
 
     // ----------------------------- Op Controller -------------------------------- //
 
@@ -152,7 +147,6 @@ public class RobotContainer {
                 endEffector = new EndEffector(new EndEffectorIOReal());
                 climber = new Climber(new ClimberIOReal());
 
-                gIntake = new GIntake(new GIntakeIOReal());
                 break;
 
                 // Sim robot, instantiate physics sim IO implementations
@@ -180,7 +174,6 @@ public class RobotContainer {
                 // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 climber = new Climber(new ClimberIOSim());
 
-                gIntake = new GIntake(new GIntakeIOSim());
                 break;
 
                 // Replayed robot, disable IO implementations
@@ -246,17 +239,8 @@ public class RobotContainer {
         // slowMode_A.onTrue(new InstantCommand(() -> drive.changeSpeedMultiplier()));
         // zeroClimber_back.onTrue(new InstantCommand(() -> climber.zeroClimber()));
 
-        GIntake_A.onTrue(new InstantCommand(() -> gIntake.setIntake()))
-                .onFalse(new InstantCommand(() -> gIntake.setStowed()));
-        GOuttake_B.onTrue(new InstantCommand(() -> gIntake.setOuttake()))
-                .onFalse(new InstantCommand(() -> gIntake.setStowed()));
-
         // GIntake_A.onTrue(new InstantCommand(() -> gIntake.incrementAppliedVoltage(0.05)));
         // GOuttake_B.onTrue(new InstantCommand(() -> gIntake.incrementAppliedVoltage(-0.05)));
-
-        GIntakeAdjust_Triggers.whileTrue(new InstantCommand(() -> gIntake.adjustSetpoint(
-                0.1 * (driverController.getRightTriggerAxis() - driverController.getLeftTriggerAxis()))));
-        GIntakeResetAdjust_Start.onTrue(new InstantCommand(() -> gIntake.resetAdjust()));
 
         // ------------------------------- Operator Bindings ------------------------------- //
 
@@ -290,12 +274,10 @@ public class RobotContainer {
         coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
                 .andThen(new InstantCommand(() -> arm.setCoral()))
                 .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
-                .andThen(new InstantCommand(() -> endEffector.stopEE()))
-                .andThen(new InstantCommand(() -> gIntake.setCoral())));
+                .andThen(new InstantCommand(() -> endEffector.stopEE())));
         algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
                 .andThen(new InstantCommand(() -> arm.setAlgae()))
-                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode()))
-                .andThen(new InstantCommand(() -> gIntake.setAlgae())));
+                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
 
         climberAdjustUp_PovUp
                 .whileTrue(new RunCommand(() -> climber.climberUp()))
