@@ -86,6 +86,12 @@ public class Module {
         io.setTurnPosition(new Rotation2d());
     }
 
+    /** Runs the module with the specified output while controlling to zero degrees. */
+    public void runSteerCharacterization(double output) {
+        io.setDriveOpenLoop(0);
+        io.setTurnOpenLoop(output);
+    }
+
     /** Disables all outputs to motors. */
     public void stop() {
         io.setDriveOpenLoop(0.0);
@@ -135,5 +141,10 @@ public class Module {
     /** Returns the module velocity in rotations/sec (Phoenix native units). */
     public double getFFCharacterizationVelocity() {
         return Units.radiansToRotations(inputs.driveVelocityRadPerSec);
+    }
+
+    /** Returns the module velocity in rotations/sec (Phoenix native units). */
+    public double getFFSteerCharacterizationVelocity() {
+        return Units.radiansToRotations(inputs.turnVelocityRadPerSec);
     }
 }

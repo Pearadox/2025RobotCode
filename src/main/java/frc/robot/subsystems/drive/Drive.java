@@ -270,6 +270,12 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         }
     }
 
+    public void runSteerCharacterization(double output) {
+        for (int i = 0; i < 4; i++) {
+            modules[i].runSteerCharacterization(output);
+        }
+    }
+
     /** Stops the drive. */
     public void stop() {
         runVelocity(new ChassisSpeeds());
@@ -337,6 +343,15 @@ public class Drive extends SubsystemBase implements Vision.VisionConsumer {
         double output = 0.0;
         for (int i = 0; i < 4; i++) {
             output += modules[i].getFFCharacterizationVelocity() / 4.0;
+        }
+        return output;
+    }
+
+    /** Returns the average velocity of the modules in rotations/sec (Phoenix native units). */
+    public double getSteerFFCharacterizationVelocity() {
+        double output = 0.0;
+        for (int i = 0; i < 4; i++) {
+            output += modules[i].getFFSteerCharacterizationVelocity() / 4.0;
         }
         return output;
     }
