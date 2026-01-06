@@ -44,8 +44,8 @@ public class Eve2TunerConstants extends TunerConstants {
     private static final Angle BL_ENCODER_OFFSET = Rotations.of(-0.3603515625);
     private static final Angle BR_ENCODER_OFFSET = Rotations.of(-0.113525390625);
 
-    private static final Distance FL_X_POS = Inches.of(11.5);
-    private static final Distance FL_Y_POS = Inches.of(11.5);
+    private static final Distance FL_X_POS = Inches.of(11.375); // 28/2 - 2.625
+    private static final Distance FL_Y_POS = Inches.of(11.375); // 28/2 - 2.625
 
     public Eve2TunerConstants() {
         super(
