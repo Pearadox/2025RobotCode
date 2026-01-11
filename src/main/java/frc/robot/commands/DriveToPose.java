@@ -12,7 +12,8 @@ import edu.wpi.first.math.kinematics.ChassisSpeeds;
 import edu.wpi.first.math.trajectory.TrapezoidProfile;
 import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants.AlignConstants;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.RobotContainer;
+import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.util.LoggedTunableNumber;
 import java.util.function.Supplier;
 import org.littletonrobotics.junction.Logger;
@@ -37,12 +38,12 @@ public class DriveToPose extends Command {
     private ProfiledPIDController translationController;
     private ProfiledPIDController rotationController;
 
-    private Drive drive;
+    private CommandSwerveDrivetrain drive;
     private Supplier<Pose2d> targetSupplier;
     private Supplier<Pose2d> robotSupplier;
 
     /** Creates a new DriveToPose. */
-    public DriveToPose(Drive drive, Supplier<Pose2d> target, Supplier<Pose2d> robot) {
+    public DriveToPose(CommandSwerveDrivetrain drive, Supplier<Pose2d> target, Supplier<Pose2d> robot) {
         this.drive = drive;
         this.targetSupplier = target;
         this.robotSupplier = robot;
@@ -70,7 +71,7 @@ public class DriveToPose extends Command {
     public void initialize() {
         Pose2d targetPose = targetSupplier.get();
         Pose2d currentPose = robotSupplier.get();
-        ChassisSpeeds currentSpeeds = drive.getChassisSpeeds();
+        ChassisSpeeds currentSpeeds = drive.getState().Speeds;
 
         Translation2d translationError = targetPose.minus(currentPose).getTranslation();
         Rotation2d directionToTarget = translationError.getAngle();
@@ -98,7 +99,12 @@ public class DriveToPose extends Command {
 
         Translation2d translationVelocity = new Translation2d(-translationOutput, directionToTarget);
 
-        drive.runVelocity(new ChassisSpeeds(translationVelocity.getX(), translationVelocity.getY(), rotationOutput));
+        drive.applyRequest(
+                () -> RobotContainer.driveRequest
+                        .withVelocityX(translationVelocity.getY()) // Drive forward with negative Y (forward)
+                        .withVelocityY(translationVelocity.getX()) // Drive left with negative X (left)
+                        .withRotationalRate(rotationOutput) // Drive counterclockwise with negative X (left)
+                );
 
         Logger.recordOutput("DriveToPose/Target", targetPose);
         Logger.recordOutput("DriveToPose/Translation Output", translationOutput);
@@ -114,7 +120,7 @@ public class DriveToPose extends Command {
     // Called once the command ends or is interrupted.
     @Override
     public void end(boolean interrupted) {
-        drive.stop();
+        drive.applyRequest(() -> RobotContainer.brake);
     }
 
     // Returns true when the command should end.

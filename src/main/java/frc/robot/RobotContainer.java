@@ -1,9 +1,11 @@
 package frc.robot;
 
+import static edu.wpi.first.units.Units.*;
 import static frc.robot.subsystems.vision.VisionConstants.*;
 
+import com.ctre.phoenix6.swerve.SwerveModule.DriveRequestType;
+import com.ctre.phoenix6.swerve.SwerveRequest;
 import com.pathplanner.lib.auto.AutoBuilder;
-import com.pathplanner.lib.auto.NamedCommands;
 import edu.wpi.first.math.geometry.Pose2d;
 import edu.wpi.first.math.geometry.Pose3d;
 import edu.wpi.first.math.geometry.Rotation2d;
@@ -12,17 +14,29 @@ import edu.wpi.first.wpilibj.XboxController;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
 import edu.wpi.first.wpilibj2.command.Command;
+import edu.wpi.first.wpilibj2.command.Commands;
+import edu.wpi.first.wpilibj2.command.ConditionalCommand;
 import edu.wpi.first.wpilibj2.command.InstantCommand;
+import edu.wpi.first.wpilibj2.command.RunCommand;
+import edu.wpi.first.wpilibj2.command.WaitCommand;
 import edu.wpi.first.wpilibj2.command.button.JoystickButton;
 import edu.wpi.first.wpilibj2.command.button.POVButton;
 import edu.wpi.first.wpilibj2.command.button.Trigger;
 import frc.robot.commands.AutoAlign;
-import frc.robot.commands.DriveCommands;
-import frc.robot.subsystems.drive.Drive;
-import frc.robot.subsystems.drive.GyroIOPigeon2;
-import frc.robot.subsystems.drive.GyroIOSim;
-import frc.robot.subsystems.drive.ModuleIOSim;
-import frc.robot.subsystems.drive.ModuleIOTalonFX;
+import frc.robot.subsystems.arm.Arm;
+import frc.robot.subsystems.arm.Arm.ArmMode;
+import frc.robot.subsystems.arm.ArmIO;
+import frc.robot.subsystems.arm.ArmIOReal;
+import frc.robot.subsystems.arm.ArmIOSim;
+import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
+import frc.robot.subsystems.drive.generated.TunerConstants;
+import frc.robot.subsystems.elevator.Elevator;
+import frc.robot.subsystems.elevator.ElevatorIO;
+import frc.robot.subsystems.elevator.ElevatorIOReal;
+import frc.robot.subsystems.elevator.ElevatorIOSim;
+import frc.robot.subsystems.endeffector.EndEffector;
+import frc.robot.subsystems.endeffector.EndEffectorIO;
+import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
@@ -33,10 +47,25 @@ import org.ironmaple.simulation.drivesims.SwerveDriveSimulation;
 import org.littletonrobotics.junction.Logger;
 
 public class RobotContainer {
-    private Drive drive;
-    // private Elevator elevator;
-    // public static Arm arm;
-    // private EndEffector endEffector;
+    private static final double MaxSpeed =
+            TunerConstants.kSpeedAt12Volts.in(MetersPerSecond); // kSpeedAt12Volts desired top speed
+    private static final double MaxAngularRate =
+            RotationsPerSecond.of(0.75).in(RadiansPerSecond); // 3/4 of a rotation per second max angular velocity
+
+    /* Setting up bindings for necessary control of the swerve drive platform */
+    public static final SwerveRequest.FieldCentric driveRequest = new SwerveRequest.FieldCentric()
+            .withDeadband(MaxSpeed * 0.1)
+            .withRotationalDeadband(MaxAngularRate * 0.1) // Add a 10% deadband
+            .withDriveRequestType(DriveRequestType.OpenLoopVoltage); // Use open-loop control for drive motors
+    public static final SwerveRequest.SwerveDriveBrake brake = new SwerveRequest.SwerveDriveBrake();
+    public static final SwerveRequest.PointWheelsAt point = new SwerveRequest.PointWheelsAt();
+
+    private final Telemetry logger = new Telemetry(MaxSpeed);
+    public final CommandSwerveDrivetrain drive = TunerConstants.createDrivetrain();
+
+    private Elevator elevator;
+    public static Arm arm;
+    private EndEffector endEffector;
     private Vision vision;
     // private Climber climber;
     public static AutoAlign align;
@@ -56,14 +85,10 @@ public class RobotContainer {
     // private final JoystickButton resetHeading_Start =
     // new JoystickButton(driverController, XboxController.Button.kStart.value);
 
-    // private final POVButton reefAlignLeft_PovLeft = new
-    // POVButton(driverController, 270);
-    // private final POVButton reefAlignCenter_PovDown = new
-    // POVButton(driverController, 180);
-    // private final POVButton reefAlignRight_PovRight = new
-    // POVButton(driverController, 90);
-    // private final POVButton stationAlign_PovUp = new POVButton(driverController,
-    // 0);
+    private final POVButton reefAlignLeft_PovLeft = new POVButton(driverController, 270);
+    private final POVButton reefAlignCenter_PovDown = new POVButton(driverController, 180);
+    private final POVButton reefAlignRight_PovRight = new POVButton(driverController, 90);
+    private final POVButton stationAlign_PovUp = new POVButton(driverController, 0);
 
     // private final JoystickButton slowMode_A = new
     // JoystickButton(driverController,
@@ -119,18 +144,12 @@ public class RobotContainer {
                 // Real robot, instantiate hardware IO implementations
 
             case REAL:
-                drive = new Drive(
-                        new GyroIOPigeon2(),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontLeft),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.FrontRight),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackLeft),
-                        new ModuleIOTalonFX(Constants.TUNER_CONSTANTS.BackRight),
-                        (robotPose) -> {});
-                vision = new Vision(drive::accept, new VisionIOLimelight(camera0Name, drive::getRotation));
+                vision =
+                        new Vision(drive::addVisionMeasurement, new VisionIOLimelight(camera0Name, drive::getRotation));
                 // new VisionIOLimelight(camera1Name, drive::getRotation));
-                // elevator = new Elevator(new ElevatorIOReal());
-                // arm = new Arm(new ArmIOReal());
-                // endEffector = new EndEffector(new EndEffectorIOReal());
+                elevator = new Elevator(new ElevatorIOReal());
+                arm = new Arm(new ArmIOReal());
+                endEffector = new EndEffector(new EndEffectorIOReal());
                 // climber = new Climber(new ClimberIOReal());
 
                 break;
@@ -138,26 +157,19 @@ public class RobotContainer {
                 // Sim robot, instantiate physics sim IO implementations
 
             case SIM:
-                driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new Rotation2d()));
-                SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
+                // driveSimulation = new SwerveDriveSimulation(Drive.mapleSimConfig, new Pose2d(12, 2, new
+                // Rotation2d()));
+                // SimulatedArena.getInstance().addDriveTrainSimulation(driveSimulation);
 
-                drive = new Drive(
-                        new GyroIOSim(driveSimulation.getGyroSimulation()),
-                        new ModuleIOSim(driveSimulation.getModules()[0]),
-                        new ModuleIOSim(driveSimulation.getModules()[1]),
-                        new ModuleIOSim(driveSimulation.getModules()[2]),
-                        new ModuleIOSim(driveSimulation.getModules()[3]),
-                        driveSimulation::setSimulationWorldPose);
-
-                // elevator = new Elevator(new ElevatorIOSim());
-                // arm = new Arm(new ArmIOSim());
+                elevator = new Elevator(new ElevatorIOSim());
+                arm = new Arm(new ArmIOSim());
                 // endEffector = new EndEffector(new EndEffectorIOSim(
                 // () -> driveSimulation.getSimulatedDriveTrainPose(), //
                 // drivetrain.getState().Pose,
                 // () -> driveSimulation.getDriveTrainSimulatedChassisSpeedsFieldRelative(),
                 // () -> elevator.getElevatorPositionMeters(),
                 // () -> arm.getArmAngleRadsToHorizontal()));
-                vision = new Vision(drive::accept); // , new
+                vision = new Vision(drive::addVisionMeasurement); // , new
                 // VisionIOQuestNavSim(driveSimulation::getSimulatedDriveTrainPose));
                 // climber = new Climber(new ClimberIOSim());
 
@@ -166,9 +178,9 @@ public class RobotContainer {
                 // Replayed robot, disable IO implementations
 
             default:
-                // elevator = new Elevator(new ElevatorIO() {});
-                // arm = new Arm(new ArmIO() {});
-                // endEffector = new EndEffector(new EndEffectorIO() {});
+                elevator = new Elevator(new ElevatorIO() {});
+                arm = new Arm(new ArmIO() {});
+                endEffector = new EndEffector(new EndEffectorIO() {});
                 // climber = new Climber(new ClimberIO() {});
                 break;
         }
@@ -181,9 +193,9 @@ public class RobotContainer {
         setDefaultCommands();
         registerNamedCommands();
         autoChooser = AutoBuilder.buildAutoChooser("Right");
-        autoChooser.addOption("Drive FF Char", DriveCommands.feedforwardCharacterization(drive));
-        autoChooser.addOption("Drive Steer FF Char", DriveCommands.steerFeedforwardCharacterization(drive));
-        autoChooser.addOption("Drive Wheel Radius Char", DriveCommands.wheelRadiusCharacterization(drive));
+        // autoChooser.addOption("Drive FF Char", DriveCommands.feedforwardCharacterization(drive));
+        // autoChooser.addOption("Drive Steer FF Char", DriveCommands.steerFeedforwardCharacterization(drive));
+        // autoChooser.addOption("Drive Wheel Radius Char", DriveCommands.wheelRadiusCharacterization(drive));
         // autoChooser.addOption("Drive FF Ch",
         // DriveCommands.feedforwardCharacterization(drive));
         // autoChooser.addOption("red barge 2 algae", new PathPlannerAuto("untested
@@ -213,15 +225,17 @@ public class RobotContainer {
         // ------------------------------- //
 
         // Reset gyro / odometry
-        final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
-                ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
-                : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
+        // final Runnable resetOdometry = Constants.currentMode == Constants.Mode.SIM
+        //         ? () -> drive.resetOdometry(driveSimulation.getSimulatedDriveTrainPose())
+        //         : () -> drive.resetOdometry(new Pose2d(drive.getPose().getTranslation(), new Rotation2d()));
         // resetHeading_Start.onTrue(Commands.runOnce(resetOdometry).ignoringDisable(true));
 
-        // reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
-        // reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
-        // reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
-        // stationAlign_PovUp.whileTrue(align.stationAlign(drive));
+        // driverController.getStartButton().onTrue(new InstantCommand(() -> drive.seedFieldCentric()));
+
+        reefAlignLeft_PovLeft.whileTrue(align.reefAlignLeft(drive));
+        reefAlignRight_PovRight.whileTrue(align.reefAlignRight(drive));
+        reefAlignCenter_PovDown.whileTrue(align.reefAlignMid(drive));
+        stationAlign_PovUp.whileTrue(align.stationAlign(drive));
 
         // strafe_Triggers.whileTrue(DriveCommands.joystickDrive(
         // drive,
@@ -242,48 +256,40 @@ public class RobotContainer {
         // ------------------------------- Operator Bindings
         // ------------------------------- //
 
-        // homeElevator_Start
-        // .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
-        // .onFalse(new InstantCommand(() -> elevator.stopElevator())
-        // .withTimeout(0.2)
-        // .andThen(new InstantCommand(() -> elevator.zeroElevator())
-        // .andThen(new InstantCommand(() -> elevator.setZeroing(false)))));
+        homeElevator_Start
+                .whileTrue(new InstantCommand(() -> elevator.setZeroing(true)))
+                .onFalse(new InstantCommand(() -> elevator.stopElevator())
+                        .withTimeout(0.2)
+                        .andThen(new InstantCommand(() -> elevator.zeroElevator())
+                                .andThen(new InstantCommand(() -> elevator.setZeroing(false)))));
 
-        // station_Back.onTrue(new InstantCommand(() ->
-        // elevator.setElevatorStationMode())
-        // .andThen(new ConditionalCommand(
-        // new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() ==
-        // ArmMode.Stowed))
-        // .andThen(new InstantCommand(() -> arm.setArmIntake())));
-        // stow_A.onTrue(new InstantCommand(() -> arm.setStowed())
-        // .andThen(new WaitCommand(1))
-        // .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
-        // levelTwo_X.onTrue(new InstantCommand(() ->
-        // elevator.setElevatorLevelTwoMode())
-        // .andThen(new ConditionalCommand(
-        // new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() ==
-        // ArmMode.Stowed))
-        // .andThen(new InstantCommand(() -> arm.setArmL2())));
-        // levelThree_B.onTrue(new InstantCommand(() ->
-        // elevator.setElevatorLevelThreeMode())
-        // .andThen(new ConditionalCommand(
-        // new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() ==
-        // ArmMode.Stowed))
-        // .andThen(new InstantCommand(() -> arm.setArmL3())));
-        // levelFour_Y.onTrue(new InstantCommand(() ->
-        // elevator.setElevatorLevelFourMode())
-        // .andThen(new ConditionalCommand(
-        // new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() ==
-        // ArmMode.Stowed))
-        // .andThen(new InstantCommand(() -> arm.setArmL4())));
+        station_Back.onTrue(new InstantCommand(() -> elevator.setElevatorStationMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> Arm.getArmMode() == ArmMode.Stowed))
+                .andThen(new InstantCommand(() -> arm.setArmIntake())));
+        stow_A.onTrue(new InstantCommand(() -> arm.setStowed())
+                .andThen(new WaitCommand(1))
+                .andThen(new InstantCommand(() -> elevator.setElevatorStowedMode())));
+        levelTwo_X.onTrue(new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> Arm.getArmMode() == ArmMode.Stowed))
+                .andThen(new InstantCommand(() -> arm.setArmL2())));
+        levelThree_B.onTrue(new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> Arm.getArmMode() == ArmMode.Stowed))
+                .andThen(new InstantCommand(() -> arm.setArmL3())));
+        levelFour_Y.onTrue(new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+                .andThen(new ConditionalCommand(
+                        new WaitCommand(0.2), Commands.none(), () -> Arm.getArmMode() == ArmMode.Stowed))
+                .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        // coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
-        // .andThen(new InstantCommand(() -> arm.setCoral()))
-        // .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
-        // .andThen(new InstantCommand(() -> endEffector.stopEE())));
-        // algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
-        // .andThen(new InstantCommand(() -> arm.setAlgae()))
-        // .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
+        coralMode_LB.onTrue(new InstantCommand(() -> elevator.setCoral())
+                .andThen(new InstantCommand(() -> arm.setCoral()))
+                .andThen(new InstantCommand(() -> endEffector.setCoralMode()))
+                .andThen(new InstantCommand(() -> endEffector.stopEE())));
+        algaeMode_RB.onTrue(new InstantCommand(() -> elevator.setAlgae())
+                .andThen(new InstantCommand(() -> arm.setAlgae()))
+                .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
 
         // climberAdjustUp_PovUp
         // .whileTrue(new RunCommand(() -> climber.climberUp()))
@@ -301,16 +307,14 @@ public class RobotContainer {
         // .andThen(new WaitCommand(0.2))
         // .andThen(new InstantCommand(() -> climber.incrementClimbState())));
 
-        // elevatorAdjust.whileTrue(
-        // new RunCommand(() -> elevator.changeElevatorOffset(.01 *
-        // Math.signum(-opController.getLeftY()))));
-        // armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 *
-        // Math.signum(opController.getRightX()))));
-        // alignAdjust
-        // .onTrue(new InstantCommand(() -> arm.setAligning(true))
-        // .andThen(new InstantCommand(() -> elevator.setAligning(true))))
-        // .onFalse(new InstantCommand(() -> arm.setAligning(false))
-        // .andThen(new InstantCommand(() -> elevator.setAligning(false))));
+        elevatorAdjust.whileTrue(
+                new RunCommand(() -> elevator.changeElevatorOffset(.01 * Math.signum(-opController.getLeftY()))));
+        armAdjust.whileTrue(new RunCommand(() -> arm.armAdjust(.01 * Math.signum(opController.getRightX()))));
+        alignAdjust
+                .onTrue(new InstantCommand(() -> arm.setAligning(true))
+                        .andThen(new InstantCommand(() -> elevator.setAligning(true))))
+                .onFalse(new InstantCommand(() -> arm.setAligning(false))
+                        .andThen(new InstantCommand(() -> elevator.setAligning(false))));
 
         // if (Constants.currentMode == Constants.Mode.SIM) {
         // csDropLB.onTrue(new InstantCommand(() ->
@@ -337,90 +341,90 @@ public class RobotContainer {
 
     public void registerNamedCommands() {
         // NamedCommands.registerCommand(
-        // "LevelStation",
-        // new InstantCommand(() -> elevator.setElevatorStationMode())
-        // .andThen(new InstantCommand(() -> arm.setArmIntake())));
+        //         "LevelStation",
+        //         new InstantCommand(() -> elevator.setElevatorStationMode())
+        //                 .andThen(new InstantCommand(() -> arm.setArmIntake())));
         // NamedCommands.registerCommand("ElevatorStowedMode", new InstantCommand(() ->
         // elevator.setElevatorStowedMode()));
         // NamedCommands.registerCommand(
-        // "LevelTwo",
-        // new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
-        // .andThen(new InstantCommand(() -> arm.setArmL2())));
+        //         "LevelTwo",
+        //         new InstantCommand(() -> elevator.setElevatorLevelTwoMode())
+        //                 .andThen(new InstantCommand(() -> arm.setArmL2())));
         // NamedCommands.registerCommand(
-        // "LevelThree",
-        // new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
-        // .andThen(new InstantCommand(() -> arm.setArmL3())));
+        //         "LevelThree",
+        //         new InstantCommand(() -> elevator.setElevatorLevelThreeMode())
+        //                 .andThen(new InstantCommand(() -> arm.setArmL3())));
         // NamedCommands.registerCommand(
-        // "LevelFour",
-        // new InstantCommand(() -> elevator.setElevatorLevelFourMode())
-        // .andThen(new ConditionalCommand(
-        // new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() ==
-        // ArmMode.Stowed))
-        // .andThen(new InstantCommand(() -> arm.setArmL4())));
+        //         "LevelFour",
+        //         new InstantCommand(() -> elevator.setElevatorLevelFourMode())
+        //                 .andThen(new ConditionalCommand(
+        //                         new WaitCommand(0.2), Commands.none(), () -> arm.getArmMode() == ArmMode.Stowed))
+        //                 .andThen(new InstantCommand(() -> arm.setArmL4())));
 
-        // NamedCommands.registerCommand("Outtake", new InstantCommand(() ->
-        // endEffector.outtakeCoral()));
+        // NamedCommands.registerCommand("Outtake", new InstantCommand(() -> endEffector.outtakeCoral()));
         // NamedCommands.registerCommand(
-        // "Intake", new RunCommand(() -> endEffector.intakeCoral()).until(() ->
-        // endEffector.hasCoral()));
-        // NamedCommands.registerCommand("Stop EE", new InstantCommand(() ->
-        // endEffector.stopCoral()));
-        // NamedCommands.registerCommand("Hold Coral", new InstantCommand(() ->
-        // endEffector.holdCoral()));
+        //         "Intake", new RunCommand(() -> endEffector.intakeCoral()).until(() -> endEffector.hasCoral()));
+        // NamedCommands.registerCommand("Stop EE", new InstantCommand(() -> endEffector.stopCoral()));
+        // NamedCommands.registerCommand("Hold Coral", new InstantCommand(() -> endEffector.holdCoral()));
         // NamedCommands.registerCommand(
-        // "Home Elevator",
-        // new InstantCommand(() -> elevator.setZeroing(true))
-        // .withTimeout(2.5)
-        // .andThen(new InstantCommand(() -> elevator.stopElevator()))
-        // .withTimeout(0.2)
-        // .andThen(new InstantCommand(() -> elevator.zeroElevator()))
-        // .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
+        //         "Home Elevator",
+        //         new InstantCommand(() -> elevator.setZeroing(true))
+        //                 .withTimeout(2.5)
+        //                 .andThen(new InstantCommand(() -> elevator.stopElevator()))
+        //                 .withTimeout(0.2)
+        //                 .andThen(new InstantCommand(() -> elevator.zeroElevator()))
+        //                 .andThen(new InstantCommand(() -> elevator.setZeroing(false))));
 
-        NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.stopWithX()));
-
-        NamedCommands.registerCommand(
-                "Auto Align Left",
-                align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
-
-        NamedCommands.registerCommand(
-                "Auto Align Mid", align.reefAlignMid(drive).withTimeout(2));
-
-        NamedCommands.registerCommand(
-                "Auto Align Right",
-                align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(2));
-
-        NamedCommands.registerCommand(
-                "Auto Align Station",
-                align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(2));
+        // NamedCommands.registerCommand("Stop", new InstantCommand(() -> drive.applyRequest(() -> brake)));
 
         // NamedCommands.registerCommand(
-        // "Set Algae",
-        // new InstantCommand(() -> elevator.setAlgae())
-        // .andThen(new InstantCommand(() -> arm.setAlgae()))
-        // .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
-        // NamedCommands.registerCommand(
-        // "Set Coral",
-        // new InstantCommand(() -> elevator.setAlgae())
-        // .andThen(new InstantCommand(() -> arm.setCoral()))
-        // .andThen(new InstantCommand(() -> endEffector.setCoralMode())));
+        //         "Auto Align Left",
+        //         align.reefAlignLeft(drive).until(align::isAlignedDebounced).withTimeout(2));
 
         // NamedCommands.registerCommand(
-        // "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() ->
-        // endEffector.hasCoral()));
-        // NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() ->
-        // endEffector.outtakeAlgae()));
+        //         "Auto Align Mid", align.reefAlignMid(drive).withTimeout(2));
+
+        // NamedCommands.registerCommand(
+        //         "Auto Align Right",
+        //         align.reefAlignRight(drive).until(align::isAlignedDebounced).withTimeout(2));
+
+        // NamedCommands.registerCommand(
+        //         "Auto Align Station",
+        //         align.stationAlign(drive).until(align::isAlignedDebounced).withTimeout(2));
+
+        // NamedCommands.registerCommand(
+        //         "Set Algae",
+        //         new InstantCommand(() -> elevator.setAlgae())
+        //                 .andThen(new InstantCommand(() -> arm.setAlgae()))
+        //                 .andThen(new InstantCommand(() -> endEffector.setAlgaeMode())));
+        // NamedCommands.registerCommand(
+        //         "Set Coral",
+        //         new InstantCommand(() -> elevator.setAlgae())
+        //                 .andThen(new InstantCommand(() -> arm.setCoral()))
+        //                 .andThen(new InstantCommand(() -> endEffector.setCoralMode())));
+
+        // NamedCommands.registerCommand(
+        //         "Algae Intake", new RunCommand(() -> endEffector.intakeAlgae()).until(() -> endEffector.hasCoral()));
+        // NamedCommands.registerCommand("Algae Outtake", new InstantCommand(() -> endEffector.outtakeAlgae()));
     }
 
     // ----------------------------------- Default Commands
     // -------------------------------- //
 
     public void setDefaultCommands() {
-        drive.setDefaultCommand(DriveCommands.joystickDrive(
-                drive,
-                () -> -driverController.getLeftY() * drive.getDriveMultiplier(),
-                () -> -driverController.getLeftX() * drive.getDriveMultiplier(),
-                () -> -driverController.getRightX() * drive.getTurnMultiplier(),
-                true));
+        // Note that X is defined as forward according to WPILib convention,
+        // and Y is defined as to the left according to WPILib convention.
+        drive.setDefaultCommand(
+                // Drivetrain will execute this command periodically
+                drive.applyRequest(
+                        () -> driveRequest
+                                .withVelocityX(-driverController.getLeftY()
+                                        * MaxSpeed) // Drive forward with negative Y (forward)
+                                .withVelocityY(
+                                        -driverController.getLeftX() * MaxSpeed) // Drive left with negative X (left)
+                                .withRotationalRate(-driverController.getRightX()
+                                        * MaxAngularRate) // Drive counterclockwise with negative X (left)
+                        ));
 
         // elevator.setDefaultCommand(new ElevatorHold(elevator));
         // arm.setDefaultCommand(new ArmHold(arm));
@@ -432,7 +436,7 @@ public class RobotContainer {
     public void resetSimulation() {
         if (Constants.currentMode != Constants.Mode.SIM) return;
 
-        drive.resetOdometry(new Pose2d(12, 2, new Rotation2d()));
+        drive.resetPose(new Pose2d(12, 2, new Rotation2d()));
         SimulatedArena.getInstance().resetFieldForAuto();
         AlgaeHandler.getInstance().reset();
     }

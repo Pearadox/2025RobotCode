@@ -9,7 +9,7 @@ import edu.wpi.first.wpilibj2.command.Command;
 import frc.robot.Constants;
 import frc.robot.Constants.AlignConstants;
 import frc.robot.Constants.FieldConstants;
-import frc.robot.subsystems.drive.Drive;
+import frc.robot.subsystems.drive.CommandSwerveDrivetrain;
 import frc.robot.util.RobotIdentity;
 import java.util.function.Supplier;
 import lombok.Setter;
@@ -31,19 +31,19 @@ public class AutoAlign {
         }
     }
 
-    public Command reefAlignLeft(Drive drive) {
+    public Command reefAlignLeft(CommandSwerveDrivetrain drive) {
         return reefAlign(drive, AlignConstants.LEFT_BRANCH_OFFSET);
     }
 
-    public Command reefAlignMid(Drive drive) {
+    public Command reefAlignMid(CommandSwerveDrivetrain drive) {
         return reefAlign(drive, AlignConstants.MID_OFFSET);
     }
 
-    public Command reefAlignRight(Drive drive) {
+    public Command reefAlignRight(CommandSwerveDrivetrain drive) {
         return reefAlign(drive, AlignConstants.RIGHT_BRANCH_OFFSET);
     }
 
-    private Command reefAlign(Drive drive, Translation2d offset) {
+    private Command reefAlign(CommandSwerveDrivetrain drive, Translation2d offset) {
         return new DriveToPose(drive, () -> findReefTargetPose(robotSupplier.get(), offset), robotSupplier);
     }
 
@@ -56,7 +56,7 @@ public class AutoAlign {
                 tagPose.transformBy(new Transform2d(offset, isForwards ? Rotation2d.k180deg : Rotation2d.kZero));
     }
 
-    public Command stationAlign(Drive drive) {
+    public Command stationAlign(CommandSwerveDrivetrain drive) {
         return new DriveToPose(drive, this::findStationTargetPose, robotSupplier);
     }
 

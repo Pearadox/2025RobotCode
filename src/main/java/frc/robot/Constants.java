@@ -19,7 +19,6 @@ import edu.wpi.first.units.measure.Frequency;
 import edu.wpi.first.units.measure.Time;
 import edu.wpi.first.wpilibj.RobotBase;
 import edu.wpi.first.wpilibj.simulation.SingleJointedArmSim;
-import frc.robot.generated.TunerConstants;
 import frc.robot.util.RobotIdentity;
 import java.util.ArrayList;
 import java.util.List;
@@ -40,7 +39,6 @@ public class Constants {
 
     public static final RobotIdentity IDENTITY = RobotIdentity.getRobotIdentity();
     public static final String IDENTITY_STRING = RobotIdentity.getRobotIdentityString();
-    public static final TunerConstants TUNER_CONSTANTS = IDENTITY.tunerConstants;
 
     public static class VisionConstants {
         public static final String LL_NAME = "limelight-back";
