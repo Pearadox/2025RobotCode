@@ -47,6 +47,7 @@ import frc.robot.subsystems.endeffector.EndEffector;
 import frc.robot.subsystems.endeffector.EndEffectorIO;
 import frc.robot.subsystems.endeffector.EndEffectorIOReal;
 import frc.robot.subsystems.endeffector.EndEffectorIOSim;
+import frc.robot.subsystems.led.LEDStrip;
 import frc.robot.subsystems.vision.Vision;
 import frc.robot.subsystems.vision.VisionIOLimelight;
 import frc.robot.util.RobotIdentity;
@@ -67,7 +68,7 @@ public class RobotContainer {
 
     private SwerveDriveSimulation driveSimulation = null;
 
-    //     public static final LEDStrip ledstrip = LEDStrip.getInstance();
+    public static final LEDStrip ledstrip = LEDStrip.getInstance();
 
     // Controller
     public static final XboxController driverController = new XboxController(0);
@@ -388,7 +389,7 @@ public class RobotContainer {
         elevator.setDefaultCommand(new ElevatorHold(elevator));
         arm.setDefaultCommand(new ArmHold(arm));
         // climber.setDefaultCommand(new ClimbCommand());
-        // ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.isCoral()));
+        ledstrip.setDefaultCommand(ledstrip.defaultCommand(() -> endEffector.hasCoral()));
     }
 
     public void resetSimulation() {
